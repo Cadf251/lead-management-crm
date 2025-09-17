@@ -22,7 +22,7 @@ Verifica se há alterações no github
 
 Adiciona um arquivo específico
 ### git add <file>
-### git add README.md
+### git add
 
 Adiciona todos os arquivos modificados
 ### git add .
