@@ -33,8 +33,6 @@ class PageController
       // Recebe o valor
       $this->url = $url;
 
-      echo "Acessar o endereço: {$this->url}<br>";
-
       // Chama o helper para limpar a URL
       $this->url = ClearUrl::clearUrl($this->url);
 
@@ -56,9 +54,15 @@ class PageController
     } else {
       $this->urlController = SlugController::slugController("Login");
     }
+  }
 
-    var_dump($this->urlArray);
-    var_dump($this->urlController);
-    var_dump($this->urlParameter);
+  /**
+   * Chama a função de loadPage
+   */
+  public function loadPage() :void
+  {
+    $loadPage = new LoadPage();
+    
+    $loadPage->loadPage($this->urlController, $this->urlParameter);
   }
 }

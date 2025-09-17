@@ -9,4 +9,6 @@ require_once "../vendor/autoload.php";
 // Instanciara a classe PageController, para tratar a URL
 $url = new PageController();
 
+$url->loadPage();
+
 ?>
