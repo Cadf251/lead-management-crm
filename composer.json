@@ -1,0 +1,16 @@
+{
+    "name": "cadud/versao_nova",
+    "description": "Nova versão do meu CRM",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Cadf251",
+            "email": "cadu.diasprado07@gmail.com"
+        }
+    ],
+    "require": {}
+}
