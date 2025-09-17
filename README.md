@@ -14,5 +14,25 @@ composer init
 
 Instalar as dependências do composer "vendor"
 ```
-composer install
+composer installgit 
 ```
+
+Verifica se há alterações no github
+### git pull
+
+Adiciona um arquivo específico
+### git add <file>
+### git add README.md
+
+Adiciona todos os arquivos modificados
+### git add .
+
+Verifica as alterações atuais e se foram adicionadas
+### git status
+
+Registra um conjunto de alterações na história do projeto com uma mensagem
+### git commit -m "Mensagem"
+
+Empurra os arquivos para o github
+### git push <remote> <branch>
+### git push origin 1.0.0
