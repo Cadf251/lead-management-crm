@@ -12,5 +12,7 @@
             "email": "cadu.diasprado07@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "monolog/monolog": "^3.9"
+    }
 }

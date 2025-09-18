@@ -1,12 +1,6 @@
 # new_crm
 New version of and old CRM project.
 
-Criar uma vez
-### git init
-
-Baixar os arquivos do Git
-## git clone --branch 1.0.0 https://github.com/Cadf251/new_crm.git
-
 Cria o composer.json
 ```
 composer init
@@ -14,8 +8,20 @@ composer init
 
 Instalar as dependências do composer "vendor"
 ```
-composer installgit 
+composer install 
 ```
+
+Instalar a biblioteca PHP para criar logs
+```
+composer require monolog/monolog
+```
+
+### Como usar o Github
+Criar uma vez
+### git init
+
+Baixar os arquivos do Git
+## git clone --branch 1.0.0 https://github.com/Cadf251/new_crm.git
 
 Verifica se há alterações no github
 ### git pull

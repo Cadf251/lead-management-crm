@@ -2,6 +2,8 @@
 
 namespace App\Controllers\Services;
 
+use App\Helpers\GenerateLog;
+
 class LoadPage
 {
   /** @var string $urlController Recebe da URL o nome da controller */
@@ -28,12 +30,16 @@ class LoadPage
     $this->urlParameter = $urlParameter;
 
     // Verificar se a página existe
-    if (!$this->pageExists())
+    if (!$this->pageExists()){
+      GenerateLog::generateLog("error", "Página não encontrada.", ["pagina" => $this->urlController, "parametro" => $this->urlParameter]);
       die("Página não encontrada!");
+    }
 
     // Verifica se a class existe
-    if (!$this->controllerExists())
+    if (!$this->controllerExists()){
+      GenerateLog::generateLog("error", "Classe não encontrada.", ["pagina" => $this->urlController, "parametro" => $this->urlParameter]);
       die("Classe não encontrada!");
+    }
 
     // Chama o método
     $this->loadMetodo();
@@ -83,7 +89,9 @@ class LoadPage
 
     if (method_exists($classLoad, "index"))
       $classLoad->{"index"}($this->urlParameter);
-    else 
+    else {
+      GenerateLog::generateLog("error", "Método não encontrado.", ["pagina" => $this->urlController, "parametro" => $this->urlParameter]);
       die("Método não encontrado");
+    }
   }
 }
