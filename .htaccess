@@ -21,6 +21,37 @@ RewriteCond %{REQUEST_FILENAME} !-l
 # QSA significa que se houver uma string de consulta passada com a URL original, ela será anexada à reescrita
 # Exemplo: "usuarios?situacao=3" será reescrita como index.php?url=usuarios&p=situacao
 # O sinalizador [L] faz mod_rewrite com que o processamento do conjunto de regras seja interrompido
-RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]
+RewriteRule ^(.+)$ public/index.php?url=$1 [QSA,L]
 
 # deseja capturar apenas URLs que contenham pelo menos um caractere, use "+" (^(.+)$). Se você deseja capturar todas as URLs, incluindo as que estejam vazias, use "" (^(.*)$).
+
+ErrorDocument 403 login
+
+Options -Indexes
+
+# Bloquear acesso direto a um diretório
+
+RewriteRule ^app - [F]
+RewriteRule ^files/ - [F]
+RewriteRule ^vendor/ - [F]
+
+# Bloquear acesso ao arquivo
+<FilesMatch "^\.gitignore$">
+  Require all denied
+</FilesMatch>
+
+<FilesMatch "^\.htaccess$">
+  Require all denied
+</FilesMatch>
+
+<FilesMatch "^README.md$">
+  Require all denied
+</FilesMatch>
+
+<FilesMatch "^composer.json$">
+  Require all denied
+</FilesMatch>
+
+<FilesMatch "^composer.lock$">
+  Require all denied
+</FilesMatch>
