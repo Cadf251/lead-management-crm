@@ -1,0 +1,3 @@
+Inserido um sistema de clientes, com as tabelas:
+
+- clientes, propostas, carteiras, carteiras_clientes, carteiras_usuarios

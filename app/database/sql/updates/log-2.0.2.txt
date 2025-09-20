@@ -1,0 +1,7 @@
+- Inclusão de campos tipo e contexto nas tabelas lead_perfil e tokens, para que a flexibilidade dessas tabelas não cause confusão.
+
+- Criação de uma tabela para status genéricos `status_genericos` para facilitar a gestão das tabelas de status e evitar uma "supertabelação".
+
+- Adaptação da tabela equipe_status à status_genericos, pois é compátivel com a nova tabela.
+
+- Adição de status na tabela de tokens

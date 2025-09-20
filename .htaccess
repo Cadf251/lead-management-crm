@@ -15,13 +15,13 @@ RewriteCond %{REQUEST_FILENAME} !-l
 
 # RewriteRule: Faz a reescrita do URL
 # Circunflexo indica inicio e Cifrão indica o fim
-# (.+) pege todo o conteúdo da url
+# (.+) pega todo o conteúdo da url
 # index.php?params=$1 Indica para substituir a requisição, redirecionando o fluxo para index.php e colocando-a inteiramente como um parametro.
 # Exemplo: index.php?url=blog/index
 # QSA significa que se houver uma string de consulta passada com a URL original, ela será anexada à reescrita
 # Exemplo: "usuarios?situacao=3" será reescrita como index.php?url=usuarios&p=situacao
 # O sinalizador [L] faz mod_rewrite com que o processamento do conjunto de regras seja interrompido
-RewriteRule ^(.+)$ public/index.php?url=$1 [QSA,L]
+RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]
 
 # deseja capturar apenas URLs que contenham pelo menos um caractere, use "+" (^(.+)$). Se você deseja capturar todas as URLs, incluindo as que estejam vazias, use "" (^(.*)$).
 

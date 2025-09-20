@@ -1,19 +1,43 @@
 # new_crm
 New version of and old CRM project.
 
-Cria o composer.json
+## Requisitos
+
+* PHP 8.3 ou superior;
+* Apache;
+* rewrite_module ativo no Apache;
+* MySQL 8.0 ou superior;
+* Composer;
+
+## Como rodar o projeto baixado
+
+Duplicar o arquivo ".env.example" e renomear para ".env".<br>
+Alterar no arquivo .env as credenciais do banco de dados.<br>
+
+# Sequência para instalar o projeto
+Criar o composer
 ```
 composer init
 ```
 
 Instalar as dependências do composer "vendor"
 ```
-composer install 
+composer install
 ```
 
 Instalar a biblioteca PHP para criar logs
 ```
 composer require monolog/monolog
+```
+
+Instala as dependências para usar variáveis de ambiente
+```
+composer require vlucas/phpdotenv
+```
+
+Instala o PHP Mailer
+```
+composer require phpmailer/phpmailer
 ```
 
 ### Como usar o Github

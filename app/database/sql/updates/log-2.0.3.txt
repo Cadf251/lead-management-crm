@@ -1,0 +1,7 @@
+Trocar LEAD_PERFIL para atendimento_perfil
+É uma operação muito grande. Vai ser necessário:
+
+Criar uma nova tabela `atendimento_perfil`
+Passar todos os dados de `lead_perfil` para ela, trocando o lead_id por atendimento_id
+
+Trocar todas as funções referentes a atualizar o lead_perfil.
