@@ -1,0 +1,41 @@
+.equipes-container {
+  position: relative;
+}
+
+.equipe-box {
+  display:inline-flex;
+  position: absolute;
+  margin: 16px 0; 
+  flex-direction:column;
+  opacity: 0;
+  transform: translateX(-100%);
+  z-index:-999;
+  width: 100%;
+  transition:
+    opacity 1s ease,
+    transform 0.5s ease;
+}
+
+.equipe-box--ativo {
+  opacity: 1;
+  transform: translateX(0);
+  position: static;
+  z-index:1;
+}
+
+.equipes-control {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 15px auto;
+  width: 100%;
+}
+
+@media (max-width: 947px){
+.equipes-container{
+  box-sizing: border-box;
+  width: 100%;
+  padding: 30px 0;
+}
+
+}

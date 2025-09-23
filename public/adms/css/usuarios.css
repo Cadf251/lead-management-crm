@@ -1,0 +1,48 @@
+.usr-foto{
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: var(--mid-gray-color);
+  margin-bottom: 30px;
+}
+
+.usr-foto.alt{
+  margin:0;
+}
+
+.usr-foto img {
+  border-radius:50%;
+}
+
+.usr-content {
+  margin: 0 auto 15px 15px;
+}
+
+.usr-content p{
+  margin: 8px;
+}
+
+.foto-input {
+  display:flex;
+  flex-direction:column;
+  margin-left:30px;
+  gap:15px 0; 
+  width:calc(100% - 130px)
+}
+
+.foto-input__input-file {
+  opacity: 0;
+  transform: scale(0.1);
+  margin-top: 15px;
+
+  transition: transform 0.5s ease;
+  position: absolute;
+  width:0;
+}
+
+.foto-input__container input.trigger:checked ~ .foto-input__input-file {
+  opacity: 1;
+  transform: scale(1);
+  width:calc(100% - 20px);
+  position: sticky;
+}

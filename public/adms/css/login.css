@@ -1,0 +1,58 @@
+.main--gray-main {
+  background-color: var(--dark-gray-color);
+  box-sizing: border-box;
+  width: 100%;
+  height: 100vh;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.login-logo {
+  width: 50%;
+  height: auto;
+}
+
+.form--login {
+  background-color: var(--white-color);
+  border-radius: 15px;
+  padding: 3% 5%;
+  max-height: 95vh;
+  width: 45%;
+  margin-right: 5%;
+  box-sizing: border-box;
+}
+ 
+.input--login {
+  background-color: var(--off-white-color);
+  color: var(--dark-gray-color);
+}
+
+.pass-icon { 
+  display: block;
+  top: -150%;
+  position: relative;
+  left: calc(100% - 35px);
+  width:min-content;
+}
+
+.show-password {
+  position: relative;
+  cursor: pointer;
+  display:grid
+}
+
+.tooltip{
+  display: none;
+}
+
+@media (max-width: 947px){
+  .main {
+    padding-top: 30px;
+  }
+
+  .form--login{
+    width:90%;
+    margin: 30px 5%;
+    padding: 5%;
+  }
+}

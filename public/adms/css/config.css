@@ -1,0 +1,21 @@
+:root {
+  --black-color: #282828;
+  --white-color: #fff;
+  --second-white-color: #f0f0f0;
+  --off-white-color: #e4e4e4;
+  --gray-color: #b3b3b3;
+  --box-shadow-color: #aaa;
+  --mid-gray-color: #777;
+  --dark-gray-color: #404040;
+    
+  --main-color: #0ebcc9;
+  --dark-main-color: #14919a;
+  --contra-color: #ff7317;
+  --contra-second-color: #ff0d0d;
+  /* --nav-color: #1c505c; */
+  --nav-color: var(--dark-gray-color);
+
+  --background-color: var(--off-white-color);
+
+  --main-font: 'helvetica';
+}
