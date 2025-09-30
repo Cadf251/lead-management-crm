@@ -33,7 +33,7 @@ class PageController
     if (!empty($url)){
       // Recebe o valor
       $this->url = $url;
-
+      
       // Chama o helper para limpar a URL
       $this->url = ClearUrl::clearUrl($this->url);
 

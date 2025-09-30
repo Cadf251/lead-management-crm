@@ -2,12 +2,12 @@
 
 namespace App\adms\Models\Repositories;
 
-use App\adms\Models\Services\DbConnection;
+use App\adms\Models\Services\DbOperations;
 
 /**
  * Recupera os dados de usuários
  */
-class UsuariosRepository extends DbConnection
+class UsuariosRepository extends DbOperations
 {
   /** @var string $tabela é o nome da tabela no banco de dados */
   public string $tabela = "usuarios";
@@ -15,7 +15,7 @@ class UsuariosRepository extends DbConnection
   /**
    * Retorna a base de SQL para consulta de usuários
    * 
-   * Retorn um array no padrão:
+   * Retorna um array no padrão:
    * 
    * tabela_campo;
    * u_id (usuario.id)
@@ -28,7 +28,7 @@ class UsuariosRepository extends DbConnection
   {
     return <<<SQL
       SELECT 
-        u.id u_id, u.nome u_nome, email u_email, u.celular u_celular, u.foto_perfil u_foto_perfil, u.senha u_senha,
+        u.id u_id, u.nome u_nome, email u_email, u.celular u_celular, u.foto_perfil u_foto_perfil,
         niv.nome niv_nome, niv.descricao niv_descricao,
         us.id us_id, us.nome us_nome, us.descricao us_descricao
       FROM {$this->tabela} u
@@ -54,5 +54,24 @@ class UsuariosRepository extends DbConnection
     $array = $this->executeSQL($query);
 
     return $array;
+  }
+
+  /**
+   * Seleciona um único usuário com base no ID
+   */
+  public function selecionar(int $id) :array
+  {
+    $query = $this->queryBase();
+    $query .= <<<SQL
+      WHERE 
+        u.id = :usuario_id
+      LIMIT 1
+    SQL;
+
+    $params = [
+      ":usuario_id" => $id
+    ];
+
+    return $this->executeSQL($query, $params);
   }
 }

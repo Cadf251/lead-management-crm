@@ -24,7 +24,7 @@ class GenerateLog
 
   /**
    * Método static que pode ser chamado sem criar a instância
-   * 
+   * Códigos de erro personalizados:
    * Cria um LOG
    * 
    * @return void
@@ -51,6 +51,14 @@ class GenerateLog
 
     $log->pushHandler(new StreamHandler($filePath), Level::Debug);
 
+    // Aprimora o $content se existir a $_SESSION
+    if (isset($_SESSION["logado"]) && $_SESSION["logado"] === true){
+      $content["sessao"] =[
+        "usuario_id" => $_SESSION["usuario_id"] ?? null,
+        "servidor_id" => $_SESSION["servidor_id"] ?? null
+      ];
+    }
+    
     // Salvar o log no arquivo
     $log->$level($message, $content);
   }

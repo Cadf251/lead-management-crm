@@ -3,6 +3,7 @@
 namespace App\adms\Controllers\Services;
 
 use App\adms\Helpers\GenerateLog;
+use App\adms\Services\AuthUser;
 
 class LoadPage
 {
@@ -18,16 +19,16 @@ class LoadPage
   /** @var array $listDirectory Recebe a lista de diretórios com as controllers */
   private array $listPackages = ["adms"];
 
-  /** @var array $listPgPublic Lista de páginas públicas */
-  private array $listPgPublic = ["Login"];
-
   /** @var array $listDirectory Lista de diretório das classes */
-  private array $listDirectory = ["login", "dashboard", "usuarios", "editar-usuario"];
+  private array $listDirectory = ["login", "dashboard", "usuarios", "erro"];
+
+  /** @var array $listPgPublic Lista de páginas públicas */
+  private array $listPgPublic = ["Login", "Erro"];
 
   /** @var array $listPgPrivate Lista de páginas privadas */
-  private array $listPgPrivate = ["Dashboard", "Usuarios", "EditarUsuario"];
+  private array $listPgPrivate = ["Dashboard", "Usuarios", "CriarUsuario", "EditarUsuario"];
 
-    /**
+  /**
    * Verificar se existe a página com o método checkPageExists
    * Verificar se e existe a classe com o método checkControllersExists
    * @param string $urlController Recebe da URL o nome da controller
@@ -35,43 +36,50 @@ class LoadPage
    * 
    * @return void
    */
-  public function loadPage(string|null $urlController, string|null $urlParameter) :void
+  public function loadPage(string|null $urlController, string|null $urlParameter): void
   {
     $this->urlController = $urlController;
     $this->urlParameter = $urlParameter;
 
     // Verificar se a página existe
-    if (!$this->pageExists()){
-      GenerateLog::generateLog("error", "Página não encontrada.", ["pagina" => $this->urlController, "parametro" => $this->urlParameter]);
-      die("Página não encontrada!");
+    $pageExists = $this->pageExists();
+
+    if (!$pageExists[0])
+      // GenerateLog::generateLog("error", "002. Página não encontrada.", ["pagina" => $this->urlController, "parametro" => $this->urlParameter]);
+      $this->falha("002. Página não encontrada.");
+    else if ($pageExists[1] === "private"){
+      // Requer login
+      $logado = AuthUser::logado();
+      if ($logado === false){
+        header("Location: {$_ENV['HOST_BASE']}login");
+        exit;
+      }
     }
 
     // Verifica se a class existe
-    if (!$this->controllerExists()){
-      GenerateLog::generateLog("error", "Classe não encontrada.", ["pagina" => $this->urlController, "parametro" => $this->urlParameter]);
-      die("Classe não encontrada!");
-    }
+    if (!$this->controllerExists())
+      $this->falha("002. Classe não encontrada.");
 
     // Chama o método
     $this->loadMetodo();
   }
 
   /**
-   * Verificar se a página se existe em um array de páginas públicas
+   * Verificar se a página se existe e se a página é pública ou privada
    * 
-   * @return bool
+   * @return array 0 => true ou false (se existe ou não); 1 => public ou private
    */
-  private function pageExists() :bool
+  private function pageExists(): array
   {
     // Verifica se a página está no array de páginas públicas
     if (in_array($this->urlController, $this->listPgPublic))
-      return true;
-    
+      return [true, "public"];
+
     // Verifica se a página está no array de páginas privadas
     if (in_array($this->urlController, $this->listPgPrivate))
-      return true;
-    
-    return false;
+      return [true, "private"];
+
+    return [false];
   }
 
   /**
@@ -79,14 +87,14 @@ class LoadPage
    * 
    * @return bool
    */
-  private function controllerExists() :bool
+  private function controllerExists(): bool
   {
 
-    foreach ($this->listPackages as $pacote){
+    foreach ($this->listPackages as $pacote) {
 
-      foreach ($this->listDirectory as $directory){
+      foreach ($this->listDirectory as $directory) {
         $this->classLoad = "\\App\\$pacote\\Controllers\\$directory\\" . $this->urlController;
-        
+
         if (class_exists($this->classLoad))
           return true;
       }
@@ -98,7 +106,7 @@ class LoadPage
   /**
    * Chama o método index se existir
    */
-  private function loadMetodo() :void
+  private function loadMetodo(): void
   {
     $classLoad = new $this->classLoad();
 
@@ -108,5 +116,22 @@ class LoadPage
       GenerateLog::generateLog("error", "Método não encontrado.", ["pagina" => $this->urlController, "parametro" => $this->urlParameter]);
       die("Método não encontrado");
     }
+  }
+
+  /**
+   * Direciona o cabra para a tela de falha e interrompe o código
+   * @param string $mensagem A mensagem do log de erro
+   * @param string $location O local o usuário será enviado, pode ser login ou erro 404.
+  */
+  private function falha(string $mensagem): void
+  {
+    GenerateLog::generateLog(
+      "error",
+      $mensagem,
+      ["pagina" => $this->urlController, "parametro" => $this->urlParameter]
+    );
+
+    header("Location: {$_ENV['HOST_BASE']}erro/404");
+    exit;
   }
 }

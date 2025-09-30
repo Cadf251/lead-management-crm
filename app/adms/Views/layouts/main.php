@@ -3,11 +3,16 @@
 <?php
 
 use App\adms\Helpers\SafeEcho;
-include_once "app/adms/Views/partials/head.php";
+
+include_once "./app/adms/Views/partials/head.php";
 ?>
-<body>
+<body class="js--body">
   <div class="warning"></div>
-  <main class="main main--login js-main">
+  <?php
+  include_once "./app/adms/Views/partials/nav.php";
+  ?>
+  <main class="main js--main">
+    <script src="<?php echo SafeEcho::safeEcho($_ENV["HOST_BASE"]) ?>public/adms/js/nav.js"></script>
     <?php
     include_once $this->view;
     ?>
@@ -15,7 +20,7 @@ include_once "app/adms/Views/partials/head.php";
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="<?php echo SafeEcho::safeEcho($_ENV["HOST_BASE"]) ?>public/adms/js/scripts.js"></script>
   <?php
-  include_once "app/adms/Views/partials/alertas.php";
+  include_once "./app/adms/Views/partials/alertas.php";
   ?>
 </body>
 </html>

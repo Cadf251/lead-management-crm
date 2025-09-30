@@ -66,3 +66,6 @@ Registra um conjunto de alterações na história do projeto com uma mensagem
 Empurra os arquivos para o github
 ### git push <remote> <branch>
 ### git push origin 1.0.0
+
+Mensagens de erro personalizadas:
+001: Conxeão com o banco de dados

@@ -6,39 +6,29 @@ use App\adms\Helpers\GenerateLog;
 use PDO;
 use PDOException;
 
-abstract class DbConnection
+/**
+ * Faz operações no banco de dados usando a conxão recebida
+ * Classe abstrata, serve apenas para ser herdada.
+ * 
+ * @param $conexao Recebe uma coneão com o banco de dados
+ */
+abstract class DbOperations
 {
-  private $conexao = null;
+  /**
+   * Recebe uma conexão com o PDO
+   */
+  public function __construct(private $conexao){}
 
   /**
-   * Constrói as credenciais da conexão PDO para evitar o trabalho de repassa-los eternamente, e já conecta ao MySQL
+   * Única função responsável por executar o SQL.
+   * Nunca executar o SQL em outro ambiente, sempre use está função para centralização.
    * 
-   * Além disso, contém helpes para executar SQL com efetividade
+   * @param string $query A query SQL
+   * @param array $params Os parametros a serem injetados na query por bindParam
+   * @param bool $toArray Se true, retorna um array com os fetchAll
    * 
-   * @param string $conexao Conexão com o PDO
-   * 
-   * @return void Não há necessidade de retornar nada
+   * @return array|bool Os dados do fetchAll, ou se falhou ou obteve sucesso.
    */
-  public function __construct()
-  {
-    $this->getConnection();
-  }
-
-  private function getConnection() :void
-  {
-    try {
-      $this->conexao = new PDO(
-        "mysql:host={$_ENV['DB_HOST']};port={$_ENV['DB_PORT']};charset=utf8mb4;dbname={$_ENV['DB_NAME']}",
-        $_ENV["DB_USER"],
-        $_ENV["DB_PASS"]
-      );
-      echo "Conexão realizada com sucesso";
-    } catch (PDOException $e) {
-      GenerateLog::generateLog("critical", "Erro ao conectar com o banco de dados", ["PDOException" => $e->getMessage()]);
-      die("Não foi possível conectar ao servidor");
-    }
-  }
-
   public function executeSQL(string $query, array $params = [], bool $toArray = true) : array|bool
   {
     $prepare = $this->conexao->prepare($query);
@@ -51,11 +41,12 @@ abstract class DbConnection
       }
     }
 
-    $execute = $prepare->execute();
-
-    // SE FALHOU
-    if (!$execute)
+    try {
+      $prepare->execute();
+    } catch (PDOException $e){
+      GenerateLog::generateLog("error", "A execução do SQL falhou", ["query" => $query, "params" => $params, "erro" => $e->getMessage()]);
       return false;
+    }
 
     if ($toArray)
       return $prepare->fetchAll(PDO::FETCH_ASSOC);

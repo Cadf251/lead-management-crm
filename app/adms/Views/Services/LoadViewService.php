@@ -2,6 +2,8 @@
 
 namespace App\adms\Views\Services;
 
+use App\adms\Helpers\GenerateLog;
+
 /** 
  * Carrega as páginas da View
  */
@@ -30,9 +32,12 @@ class LoadViewService
    */
   public function loadView(): void
   {
+    $this->view = "./app/{$this->nameView}.php";
     if (file_exists('./app/' . $this->nameView . '.php')) {
-      include './app/' . $this->nameView . '.php';
+      // Inclui o layout principal
+      include './app/adms/Views/layouts/main.php';
     } else {
+      GenerateLog::generateLog("erro", "O arquivo não existe", ["arquivo" => './app/' . $this->nameView . '.php']);
       die("O arquivo não existe");
     }
   }
@@ -47,6 +52,23 @@ class LoadViewService
       // Inclui o layout principal
       include './app/adms/Views/layouts/login.php';
     } else {
+      GenerateLog::generateLog("erro", "O arquivo não existe", ["arquivo" => './app/' . $this->nameView . '.php']);
+      die("O arquivo não existe");
+    }
+  }
+
+  /**
+   * Carrega o layout de erro, que é igual ao main, porém sem o nav e com um link de volta para o dashboard
+   * Não usar essa função para erros internos, apenas para quando o usuário não estiver logado
+   */
+  public function loadExternalError(): void
+  {
+    $this->view = "./app/{$this->nameView}.php";
+    if (file_exists('./app/' . $this->nameView . '.php')) {
+      // Inclui o layout principal
+      include './app/adms/Views/layouts/external-error.php';
+    } else {
+      GenerateLog::generateLog("erro", "O arquivo não existe", ["arquivo" => './app/' . $this->nameView . '.php']);
       die("O arquivo não existe");
     }
   }

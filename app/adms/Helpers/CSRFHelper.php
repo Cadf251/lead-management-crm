@@ -24,12 +24,12 @@ class CSRFHelper
    */
   public static function validateCSRFToken(string $formId, string $token)
   {
-    if ((isset($_SESSION["csrf_tokens"][$formId]))
-      && (hash_equals($_SESSION["csrd_tokens"][$formId], $token))){
-      
-        unset($_SESSION["csrf_tokens"][$formId]);
-        return true;
-    } else 
+    if ((isset($_SESSION["csrf_tokens"][$formId])) && (hash_equals($_SESSION["csrf_tokens"][$formId], $token))){
+      unset($_SESSION["csrf_tokens"][$formId]);
+      return true;
+    } else {
+      GenerateLog::generateLog("info", "Um CSRF falhou.", ["form" => $formId, "token" => $token]);
       return false;
+    }
   }
 }
