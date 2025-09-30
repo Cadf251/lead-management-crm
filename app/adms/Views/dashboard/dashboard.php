@@ -16,27 +16,33 @@ include_once "app/adms/Views/partials/calendar.php";
 </form>
 
 <?php
-if(isset($this->data["por_qualificacao"])){
+if (isset($this->data["por_qualificacao"])) {
   echo <<<HTML
     <p class="descricao">Selecionado: {$this->data["form"]["periodo"]}</p>
   HTML;
 }
 ?>
 
-<?php 
-if(isset($this->data["por_qualificacao"])){
+<?php
+if (isset($this->data["por_qualificacao"])){
   echo <<<HTML
     <div class="grafico-card">
-      <div class="grafico__container">
+      <div class="w5">
+        <div class="grafico__titulo">{$this->data["por_qualificacao"]["total"]} Leads</div>
         <div id="chart--pie"></div>
       </div>
-      <div class="grafico__container">
+      <div class="w7">
+        <div class="grafico__titulo">{$this->data["por_qualificacao"]["vendas"]} Vendas</div>
         <div id="chart--line"></div>
       </div>
-      <div class="grafico__container">Vendas Total</div>
-      <div class="grafico__container">Vendas linechart</div>
-      <div class="grafico__container">Por equipe ranking</div>
-      <div class="grafico__container">Vendedores ranking</div>
+      <div class="w6">
+        <div class="grafico__titulo">Ranking Equipes</div>
+        <div id="chart--ranking-equipes"></div>
+      </div>
+      <div class="w6">
+        <div class="grafico__titulo">Ranking Usuários</div>
+        <div id="chart--ranking-vendedores"></div>
+      </div>
     </div>
   HTML;
 }
@@ -54,7 +60,7 @@ if(isset($this->data["por_qualificacao"])){
   });
 
   // Criar gráfico do total de leads
-  function graficoPie(){
+  function graficoPie() {
     var options = {
       series: [<?php echo $this->data["por_qualificacao"]["series"] ?>],
       chart: {
@@ -62,10 +68,6 @@ if(isset($this->data["por_qualificacao"])){
         type: 'pie',
       },
       labels: [<?php echo $this->data["por_qualificacao"]["labels"] ?>],
-      title: {
-        text: "Total de leads: <?php echo $this->data["por_qualificacao"]["total"] ?>",
-        align: 'left'
-      },
       responsive: [{
         breakpoint: 480,
         options: {
@@ -84,15 +86,19 @@ if(isset($this->data["por_qualificacao"])){
   }
 
   // Criar gráfico do total de leads por periodo
-  function graficoLine(){
+  function graficoLine() {
     var options = {
       series: [{
         name: "Leads",
+        type: 'line',
         data: [<?php echo $this->data["por_periodo"]["series"] ?>]
+      }, {
+        name: "Vendas",
+        type: 'line',
+        data: [<?php echo $this->data["por_periodo"]["series_vendas"] ?>]
       }],
       chart: {
         height: 350,
-        type: 'line',
         zoom: {
           enabled: false
         }
@@ -101,10 +107,10 @@ if(isset($this->data["por_qualificacao"])){
         enabled: false
       },
       stroke: {
-        curve: 'straight'
+        curve: 'straight',
       },
       title: {
-        text: 'Leads por <?php echo $this->data["por_periodo"]["metodo"] ?>',
+        text: 'Leads/vendas por <?php echo $this->data["por_periodo"]["metodo"] ?>',
         align: 'left'
       },
       grid: {
@@ -113,6 +119,18 @@ if(isset($this->data["por_qualificacao"])){
           opacity: 0.5
         },
       },
+      yaxis: [{
+          title: {
+            text: 'Leads'
+          }
+        },
+        {
+          opposite: true,
+          title: {
+            text: 'Vendas (R$)'
+          }
+        }
+      ],
       xaxis: {
         categories: [<?php echo $this->data["por_periodo"]["labels"] ?>],
       }
@@ -121,11 +139,141 @@ if(isset($this->data["por_qualificacao"])){
     var chart = new ApexCharts(document.querySelector("#chart--line"), options);
     chart.render();
   }
+
+  function graficoBar() {
+    var options = {
+      series: [{
+        data: [<?php echo $this->data["equipes"]["comissoes"] ?>]
+      }],
+      chart: {
+        type: 'bar',
+        height: 350
+      },
+      plotOptions: {
+        bar: {
+          borderRadius: 4,
+          borderRadiusApplication: 'end',
+          barHeight: 30,
+          horizontal: true,
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      xaxis: {
+        categories: [<?php echo $this->data["equipes"]["nomes"] ?>],
+      },
+      tooltip: {
+        custom: function({
+          series,
+          seriesIndex,
+          dataPointIndex,
+          w
+        }) {
+          const equipesInfo = [
+            <?php
+            foreach ($this->data["equipes"]["info"] as $info) {
+              echo <<<JS
+                  { desc: "{$info['descricao']}", produto: "{$info['produto']}"},
+                JS;
+            }
+            ?>
+          ];
+          const equipe = equipesInfo[dataPointIndex];
+          return `
+            <div style="padding:8px">
+              <b>${w.globals.labels[dataPointIndex]}</b><br/>
+              Comissão: ${series[seriesIndex][dataPointIndex]}<br/>
+              ${equipe.desc}<br/>
+              Produto: <i>${equipe.produto}</i>
+            </div>
+          `;
+        }
+      }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#chart--ranking-equipes"), options);
+    chart.render();
+  }
+
+  function graficoVendedores() {
+    var options = {
+      series: [
+        <?php
+          foreach ($this->data["usuarios"]["dados"] as $dado) {
+            echo "
+                {
+                  name: \"{$dado['nome']}\",
+                  data: [{$dado['data']}]
+                },
+              ";
+          }
+        ?>
+      ],
+      chart: {
+        type: 'bar',
+        height: 350,
+        stacked: true,
+      },
+      plotOptions: {
+        bar: {
+          horizontal: true,
+          dataLabels: {
+            total: {
+              enabled: true,
+              offsetX: 0,
+              style: {
+                fontSize: '13px',
+                fontWeight: 900
+              }
+            }
+          }
+        },
+      },
+      stroke: {
+        width: 1,
+        colors: ['#fff']
+      },
+      xaxis: {
+        categories: [<?php echo $this->data["usuarios"]["linhas"] ?>],
+        labels: {
+          formatter: function(val) {
+            return val + "K"
+          }
+        }
+      },
+      yaxis: {
+        title: {
+          text: undefined
+        },
+      },
+      tooltip: {
+        y: {
+          formatter: function(val) {
+            return val + "K"
+          }
+        }
+      },
+      fill: {
+        opacity: 1
+      },
+      legend: {
+        position: 'top',
+        horizontalAlign: 'left',
+        offsetX: 40
+      }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#chart--ranking-vendedores"), options);
+    chart.render();
+  }
   <?php
-  if(isset($this->data["por_qualificacao"])){
+  if (isset($this->data["por_qualificacao"])) {
     echo <<<JS
       graficoLine();
       graficoPie();
+      graficoBar();
+      graficoVendedores();
     JS;
   }
   ?>

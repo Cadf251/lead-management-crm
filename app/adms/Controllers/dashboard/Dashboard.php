@@ -73,7 +73,7 @@ class Dashboard
   }
 
   /**
-   * Iniciar o repositório
+   * Iniciar o repositório e passa os valores para o data
    * 
    */
   public function repository()
@@ -90,11 +90,15 @@ class Dashboard
 
     $repository = new DashboardRepository($data, $this->conexao);
 
-    // Cria o grafico total
+    // Adiciona no data os valores do repositório
     $arrayTotal = $repository->leadsTotal();
     $this->data["por_qualificacao"] = $this->arrangeLeadsArray($arrayTotal);
     $arrayPeriodo = $repository->leadPeriodo();
     $this->data["por_periodo"] = $this->arrangeLeadsPorPeriodo($arrayPeriodo);
+    $arrayEquipes = $repository->equipes();
+    $this->data["equipes"] = $this->arrangeEquipes($arrayEquipes);
+    $arrayUsuarios = $repository->usuarios();
+    $this->data["usuarios"] = $this->arrangeUsuarios($arrayUsuarios);
   }
 
   /**
@@ -112,6 +116,7 @@ class Dashboard
     ];
 
     $total = 0;
+    $vendas = 0.0;
 
     foreach ($leads as $lead) {
       if ($lead["lead_status_id"] === 5) {
@@ -134,101 +139,166 @@ class Dashboard
       }
 
       $total += $lead["total_leads"];
+      $vendas += (float)$lead["comissao"];
     }
 
     $keys = array_keys($leadsCount);
     $labels = implode(", ", $keys);
     $series = implode(", ", $leadsCount);
+    $vendas = "R$ " . number_format($vendas, 2, ",", ".");
 
     return [
       "total" => $total,
       "labels" => $labels,
-      "series" => $series
+      "series" => $series,
+      "vendas" => $vendas
     ];
   }
 
   /**
    * Converte um array de leads por periodo
    */
-  public function arrangeLeadsPorPeriodo(array $leads):array
+  public function arrangeLeadsPorPeriodo(array $leads): array
   {
     $resumido = $leads[0];
     $array = [];
+    $vendas = [];
 
     if ($leads["metodo"] === "mês")
       $dataFormat = "m/Y";
-    else 
+    else
       $dataFormat = "d/m/Y";
 
-    foreach ($resumido as $linha){
+    foreach ($resumido as $linha) {
       $data = date($dataFormat, strtotime($linha["periodos"]));
       $array["'{$data}'"] = $linha["total_leads"];
+
+      $linha["comissao"] = $linha["comissao"] === null ? 0 : (float)$linha["comissao"];
+      $vendas["'{$data}'"] = $linha["comissao"];
     }
 
     $keys = array_keys($array);
     $labels = implode(", ", $keys);
     $series = implode(", ", $array);
+    $seriesVendas = implode(", ", $vendas);
 
     return [
       "metodo" => $leads["metodo"],
       "labels" => $labels,
-      "series" => $series
+      "series" => $series,
+      "series_vendas" => $seriesVendas
     ];
   }
 
-  /** DESABILITAR
-   * 
-   * Está função deveria estar na VIEW.
-   * 
-   * Mesmo assim, os gráficos serão subtituidos por uma API ou biblioteca de gráficos.
-   * 
-   */
-  public function graficoFinal(array $leadsCount, string $graficoTitle = "Total")
+  /** Formata o array de equipes */
+  public function arrangeEquipes(array $equipes)
   {
-    // Define a ordem ortodoxa das colunas
-    $ordem = [
-      "Total",
-      "Não respondem",
-      "Desqualificado(s)",
-      "Qualificado(s)",
-      "Oportunidade(s)",
-      "Contratado(s)"
-    ];
-
-    foreach ($ordem as $o) {
-      if (!isset($leadsCount[$o]))
-        $leadsCount[$o] = 0;
-    }
-
-    $qualificados = ($leadsCount["Contratado(s)"] + $leadsCount["Oportunidade(s)"] + $leadsCount["Qualificado(s)"]);
-
-    $qualificacao = $this->calcularPercentual($qualificados, $leadsCount["Total"]);
-    $contratacao = $this->calcularPercentual($leadsCount["Contratado(s)"], $leadsCount["Total"]);
-
-    $label = <<<HTML
-      <div class="porcentagem-container">
-        <div><p class="porcentagem">$qualificacao</p><span>De qualificação</span></div>
-        <div><p class="porcentagem">$contratacao</p><span>De contratação</span></div>
-      </div>
-    HTML;
-
-    $leadsRows = [];
-
-    foreach ($ordem as $o) {
-      $leadsRows[] = [
-        "valor" => $leadsCount[$o],
-        "label" => $o
+    $nomes = [];
+    $descricoes = [];
+    $produtos = [];
+    $propostas = [];
+    $comissoes = [];
+    $info = [];
+    for ($i = 0; $i < count($equipes); $i++) {
+      switch ($i) {
+        case 0:
+          $medalha = "🥇 ";
+          break;
+        case 1:
+          $medalha = "🥈 ";
+          break;
+        case 2:
+          $medalha = "🥉 ";
+          break;
+        default:
+          $medalha = "";
+          break;
+      }
+      $nomes[] = "'$medalha{$equipes[$i]["e_nome"]}'";
+      $comissoes[] = (float)$equipes[$i]["comissao"] ?? 0;
+      $info[] = [
+        'descricao' => $equipes[$i]["e_descricao"],
+        'produto' => $equipes[$i]["prod_nome"],
+        'proposta' => (int)$equipes[$i]["propostas"]
       ];
     }
 
-    return HTMLHelper::renderGraficoCompleto($graficoTitle, $leadsRows, $label);
+    $nomes = implode(", ", $nomes);
+    $comissoes = implode(", ", $comissoes);
+
+    return [
+      "nomes" => $nomes,
+      "comissoes" => $comissoes,
+      "info" => $info
+    ];
+  }
+
+  /** Organiza o array de usuários de forma clara e eficiente */
+  public function arrangeUsuarios(array $usuarios)
+  {
+    $index = [];
+    $totalComissao = [];
+    $produtos = [];
+    $nomes = [];
+
+    // Monta índice principal e acumula totais por usuário
+    foreach ($usuarios as $usuario) {
+      $produto = $usuario["prod_nome"];
+      $nome = $usuario["u_nome"];
+      $produtos[$produto] = true; // usamos como set
+      $nomes[$nome] = true;
+
+      $index[$produto][$nome] = [
+        "propostas" => (int) $usuario["propostas"],
+        "comissao" => (float) $usuario["comissao"]
+      ];
+
+      $totalComissao[$nome] = ($totalComissao[$nome] ?? 0) + (float) $usuario["comissao"];
+    }
+
+    // Preenche usuários faltantes em cada produto
+    foreach ($produtos as $produto => $_) {
+      foreach ($nomes as $nome => $_) {
+        if (!isset($index[$produto][$nome])) {
+          $index[$produto][$nome] = [
+            "propostas" => 0,
+            "comissao" => 0
+          ];
+        }
+      }
+    }
+
+    // Ordena nomes pelo total de comissão
+    arsort($totalComissao);
+    $nomesOrdenado = array_map(fn($n) => "'$n'", array_keys($totalComissao));
+
+    // Prepara dados finais por produto
+    $final = [];
+    foreach (array_keys($produtos) as $produto) {
+      $seq = [];
+      foreach ($nomesOrdenado as $nome) {
+        $nomeSemAspas = trim($nome, "'");
+        $seq[] = $index[$produto][$nomeSemAspas]["comissao"];
+      }
+
+      $final[] = [
+        "nome" => $produto,
+        "data" => implode(", ", $seq)
+      ];
+    }
+
+    return [
+      "dados" => $final,
+      "linhas" => implode(", ", $nomesOrdenado)
+    ];
   }
 
   /** Calcula a porcentagem e retorna o número formatado em string */
-  public function calcularPercentual($parte, $total) {
+  public function calcularPercentual($parte, $total)
+  {
     if ($total == 0 || $parte == 0)
       return "0,00%";
     $int = ($parte / $total) * 100;
-    return number_format($int, 2, ",")."%";
+    return number_format($int, 2, ",") . "%";
   }
 }

@@ -1,0 +1,15 @@
+Ideias de dashboards:
+
+dashboard/
+  index/ -- Visão geral sobre as equipes e usuários.
+  metas/ -- Comparando as metas mensais.
+  pessoal/ -- Apenas os leads pessoais
+  pessoal-metas/ -- As metas pessoais
+
+dashboard-equipes/
+  index/ -- Visão sobre os usuários
+  equipe/id -- Visao sobre uma equipe, requer um id
+
+dashboard-usuarios/
+  index/ -- Visão sobre os usuários
+  usuario/id -- Visao sobre um usuário, requer um id

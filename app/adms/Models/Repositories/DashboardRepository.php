@@ -2,7 +2,9 @@
 
 namespace App\adms\Models\Repositories;
 
+use App\adms\Helpers\GenerateLog;
 use App\adms\Models\Services\DbOperations;
+use Generator;
 
 /**
  * Repositório para criar o dashboard
@@ -63,8 +65,8 @@ class DashboardRepository extends DbOperations
         break;
       case 2:
         $select = <<<SQL
-          YEARWEEK(a.created, 1) AS ano_semana, -- 1 força a semana começar na segunda
-          STR_TO_DATE(CONCAT(YEARWEEK(a.created, 1), ' Monday'), '%X%V %W') AS periodos
+          YEARWEEK(a.created, 0) AS ano_semana, -- 1 força a semana começar na segunda
+          STR_TO_DATE(CONCAT(YEARWEEK(a.created, 0), ' Sunday'), '%X%V %W') AS periodos
         SQL;
         $group = <<<SQL
           GROUP BY YEARWEEK(a.created, 1)
@@ -105,12 +107,14 @@ class DashboardRepository extends DbOperations
     return <<<SQL
       SELECT
         COUNT(DISTINCT a.lead_id) AS total_leads,
+        SUM(p.comissao) comissao,
         $select
       FROM atendimentos a
       INNER JOIN leads l ON a.lead_id = l.id
       INNER JOIN lead_status ls ON l.lead_status_id = ls.id
       INNER JOIN equipes e ON a.equipe_id = e.id
-      WHERE 
+      LEFT JOIN propostas p ON a.id = p.atendimento_id
+      WHERE
         $where
       $group
       $order
@@ -169,9 +173,96 @@ class DashboardRepository extends DbOperations
     ];
   }
 
-  /** Retorna todas as equipes ativas */
+  /** Retorna todas as equipes ativas e os dados de leads de cada */
   public function equipes()
   {
+    $where = <<<SQL
+      (a.created {$this->data["tempo_query"]})
+    SQL;
 
+    // Verifica as permissões
+    if (!in_array(3, $_SESSION["permissoes"])){
+      if (in_array(4, $_SESSION["permissoes"])){
+        $where .= <<<SQL
+          AND (e.id IN (:acesso_equipes))
+        SQL;
+      } else {
+        GenerateLog::generateLog("info", "Um usuário sem permissão 3 e 4 tentou acessar o relatório de equipes, o que é um erro de desenvolvimento, porque ele não deve ter acesso a esse tipo de relatório.", []);
+      }
+    }
+
+    $queryBase = <<<SQL
+      SELECT
+        e.id e_id, e.nome e_nome, e.descricao e_descricao,
+        prod.nome prod_nome,
+        COUNT(DISTINCT prop.id) propostas,
+        SUM(prop.comissao) comissao
+      FROM equipes e
+      LEFT JOIN produtos prod ON prod.id = e.produto_id
+      INNER JOIN atendimentos a ON a.equipe_id = e.id
+      LEFT JOIN propostas prop ON prop.atendimento_id = a.id
+      WHERE
+        $where
+      GROUP BY e.id, e.nome, e.descricao
+      ORDER BY comissao DESC
+    SQL;
+
+    $params = [
+      "acesso_equipes" => $_SESSION["acesso_equipes"] ?? ""
+    ];
+
+    return $this->executeSQL($queryBase, $params);
+  }
+
+  /** Retorna os usuários */
+  public function usuarios()
+  {
+    $where = <<<SQL
+      (a.created {$this->data["tempo_query"]})
+    SQL;
+
+    // Verifica as permissões
+    if (!in_array(3, $_SESSION["permissoes"])){
+      if (in_array(4, $_SESSION["permissoes"])){
+        $where .= <<<SQL
+          AND (e.id IN (:acesso_equipes))
+        SQL;
+      } else {
+        GenerateLog::generateLog("info", "Um usuário sem permissão 3 e 4 tentou acessar o relatório de equipes, o que é um erro de desenvolvimento, porque ele não deve ter acesso a esse tipo de relatório.", []);
+      }
+    }
+
+    // usuarios
+    // id, nome
+    // que tenham atendimentos
+    // propostas
+    // comissao por produto
+    // agrupas e ordenar por usuários e produtos
+    $queryBase = <<<SQL
+      SELECT
+        u.id u_id, u.nome u_nome,
+        COUNT(DISTINCT prop.id) propostas,
+        SUM(prop.comissao) comissao,
+        prod.nome prod_nome
+      FROM usuarios u
+      INNER JOIN atendimentos a ON a.usuario_id = u.id
+      LEFT JOIN propostas prop ON prop.atendimento_id = a.id
+      INNER JOIN equipes e ON a.equipe_id = e.id
+      INNER JOIN produtos prod ON e.produto_id = prod.id
+      WHERE
+        $where
+      GROUP BY
+        u.nome,
+        prod.nome
+      ORDER BY
+        u.nome,
+        prod.nome;
+    SQL;
+
+    $params = [
+      "acesso_equipes" => $_SESSION["acesso_equipes"] ?? ""
+    ];
+
+    return $this->executeSQL($queryBase, $params);
   }
 }
