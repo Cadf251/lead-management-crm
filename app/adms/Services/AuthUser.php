@@ -15,4 +15,11 @@ class AuthUser
       return false;
     }
   }
+
+  public static function deslogar()
+  {
+    $_SESSION = [];
+    header("Location: {$_ENV['HOST_BASE']}login");
+    exit;
+  }
 }

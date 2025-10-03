@@ -23,10 +23,11 @@ class LoadPage
   private array $listDirectory = ["login", "dashboard", "usuarios", "erro"];
 
   /** @var array $listPgPublic Lista de páginas públicas */
-  private array $listPgPublic = ["Login", "Erro"];
+  private array $listPgPublic = ["Login", "NovaSenha", "Erro"];
 
   /** @var array $listPgPrivate Lista de páginas privadas */
   private array $listPgPrivate = [
+    "Deslogar",
     "Dashboard",
     "DashboardUsuarios",
     "DashboardEquipes",

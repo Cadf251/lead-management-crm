@@ -39,13 +39,7 @@ use App\adms\Helpers\HTMLHelper;
     echo HTMLHelper::renderNavLink("publicos", "chart-simple", "Públicos");
     echo HTMLHelper::renderNavLink("holerites", "file-invoice-dollar", "Holerites");
     echo HTMLHelper::renderNavLink("configuracao", "gear", "Configurações");
+    echo HTMLHelper::renderNavLink("deslogar", "power-off", "Sair");
     ?>
-    <form action="login" method="post">
-      <input type="hidden" name="task" value="deslogar">
-      <button class="nav__link nav__link--button" type="submit">
-        <i class="fa-solid fa-power-off"></i>
-        <span class="nav__texto"> Sair</span>
-      </button>
-    </form>
   </div>
 </nav>

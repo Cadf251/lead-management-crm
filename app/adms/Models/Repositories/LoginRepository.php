@@ -139,4 +139,25 @@ class LoginRepository extends DbOperations
         );
     }
   }
+
+  /**
+   * Insere uma nova senha no banco de dados e seta o status do usuário como ativo.
+   * 
+   * @param string $senhaHash A senha com hash
+   * @param int $id O ID do usuário
+   * 
+   * @return bool
+   */
+  public function registrarSenha(string $senhaHash, int $id):bool
+  {
+    $params = [
+      ":senha" => $senhaHash,
+      ":usuario_status_id" => 3,
+      ":modified" => date($_ENV['DATE_FORMAT'])
+    ];
+
+    GenerateLog::generateLog("info", "Data teste", ["modified" => $params[":modified"]]);
+
+    return $this->updateSQL("usuarios", $params, $id);
+  }
 }

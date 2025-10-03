@@ -207,7 +207,7 @@ abstract class UsuariosAbstract
             </tr>
             <tr>
               <td style="width:30px;height:30px"></td>
-              <td style="text-align: center;"><a style="padding: 15px 20px;font-size: 20px; color: #f0f0f0;font-weight: bold; background-color: #0ebcc9;" href="{$_ENV['HOST_BASE']}/resetar-senha/[SERVIDOR_ID]-[TOKEN]">Acessar</a></td>
+              <td style="text-align: center;"><a style="padding: 15px 20px;font-size: 20px; color: #f0f0f0;font-weight: bold; background-color: #0ebcc9;" href="{$_ENV['HOST_BASE']}nova-senha/[SERVIDOR_ID]-[TOKEN]">Acessar</a></td>
               <td style="width:30px;height:30px"></td>
             </tr>
             <tr>

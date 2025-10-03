@@ -41,6 +41,42 @@ class TokenRepository extends DbOperations
   }
 
   /**
+   * Valida um TOKEN levando em conta o contexto e tipo
+   * 
+   * @param string $token O token
+   * @param string $tipo O tipo do tokne
+   * @param string $contexto O contexto do token
+   * 
+   * @return array|false
+   */
+  public function tokenValido(string $token, string $tipo, string $contexto):array|false
+  {
+    $query = <<<SQL
+      SELECT id, usuario_id, atendimento_id
+      FROM tokens
+      WHERE
+        (token = :token)
+        AND (tipo LIKE :tipo) AND (contexto LIKE :contexto)
+        AND (token_status_id = 3)
+        AND ((prazo >= :agora) OR (prazo IS NULL))
+      LIMIT 1
+    SQL;
+
+    $params = [
+      ":token" => $token,
+      ":tipo" => $tipo,
+      ":contexto" => $contexto,
+      ":agora" => date($_ENV["DATE_FORMAT"])
+    ];
+
+    $result = $this->executeSQL($query, $params);
+    if (empty($result))
+      return false;
+    else 
+      return $result[0];
+  }
+
+  /**
    * Desativa um TOKEN
    * 
    * Ele muda o token_status_id para 1 (desativado)
@@ -49,7 +85,7 @@ class TokenRepository extends DbOperations
    * 
    * @return void
    */
-  public function desativarToken(string $token): void
+  public function desativarToken(string $token): bool
   {
     $tokenQ = <<<SQL
     UPDATE tokens
@@ -59,10 +95,10 @@ class TokenRepository extends DbOperations
     SQL;
 
     $params = [
-      [":token" => $token]
+      ":token" => $token
     ];
 
-    $this->executeSQL($tokenQ, $params, false);
+    return $this->executeSQL($tokenQ, $params, false);
   }
 
   /**

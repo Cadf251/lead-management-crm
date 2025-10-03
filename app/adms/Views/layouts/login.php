@@ -8,6 +8,9 @@ include_once "app/adms/Views/partials/head.php";
 <body>
   <div class="warning"></div>
   <main class="main main--login js-main">
+    <header class="centered">
+      <img src="<?php echo $_ENV['HOST_BASE'] ?>public/adms/img/logo.png" class="login-logo" alt="Logo">
+    </header>
     <?php
     include_once $this->view;
     ?>
