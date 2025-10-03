@@ -383,6 +383,10 @@ input:-webkit-autofill {
   transition: background 0.5s ease;
 }
 
+.small-btn:hover {
+  color:var(--white-color);
+}
+
 .switch--ativado {
   background-color: var(--dark-main-color);
   border-left: solid 35px var(--gray-color);
@@ -483,7 +487,7 @@ input:-webkit-autofill {
 
 .form-padrao__input, .input {
   border: none;
-  background-color: var(--white-color);
+  background-color: var(--off-white-color);
   width: 100%;
   box-sizing: border-box;
   padding: 10px;
@@ -636,12 +640,22 @@ input:-webkit-autofill {
   font-weight: bold;
 }
 
+.grafico__header {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .grafico__titulo{
   color: var(--black-color);
   font-size: 1.4em;
   text-align: center;
   margin: 16px 0;
   font-weight: bold;
+  display: inline;
 }
 
 /* WARNING */

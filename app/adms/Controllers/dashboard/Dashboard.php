@@ -21,18 +21,21 @@ class Dashboard
   {
     // Recebe o período
     $this->data["form"] = filter_input_array(INPUT_POST, FILTER_DEFAULT);
+    $this->data["valido"] = false;
 
     // Verifica se o POST corresponde ao formulário
     if (isset($this->data["form"]["csrf_token"]) && CSRFHelper::validateCSRFToken("form_dashboard", $this->data["form"]["csrf_token"])) {
       // Se tiver OK, inicia o respositório e passa os dados para o data
+      $this->data["valido"] = true;
       $tempo = $this->tratarTempo();
+
       if ($tempo !== false)
         $this->repository($tempo);
     }
     $this->data["title"] = "Dashboard";
 
     // Carrega a VIEW
-    $loadView = new LoadViewService("adms/Views/dashboard/dashboard", $this->data);
+    $loadView = new LoadViewService("adms/Views/dashboard/index", $this->data);
     $loadView->loadView();
   }
 
@@ -96,9 +99,13 @@ class Dashboard
     $arrayPeriodo = $repository->leadPeriodo();
     $this->data["por_periodo"] = $this->arrangeLeadsPorPeriodo($arrayPeriodo);
     $arrayEquipes = $repository->equipes();
-    $this->data["equipes"] = $this->arrangeEquipes($arrayEquipes);
-    $arrayUsuarios = $repository->usuarios();
-    $this->data["usuarios"] = $this->arrangeUsuarios($arrayUsuarios);
+
+    // Visível apenas para adms
+    if (in_array(3, $_SESSION["permissoes"]) || (in_array(4, $_SESSION["permissoes"]))){
+      $this->data["equipes"] = $this->arrangeEquipes($arrayEquipes);
+      $arrayUsuarios = $repository->usuarios();
+      $this->data["usuarios"] = $this->arrangeUsuarios($arrayUsuarios);
+    }
   }
 
   /**
@@ -194,9 +201,6 @@ class Dashboard
   public function arrangeEquipes(array $equipes)
   {
     $nomes = [];
-    $descricoes = [];
-    $produtos = [];
-    $propostas = [];
     $comissoes = [];
     $info = [];
     for ($i = 0; $i < count($equipes); $i++) {
@@ -291,14 +295,5 @@ class Dashboard
       "dados" => $final,
       "linhas" => implode(", ", $nomesOrdenado)
     ];
-  }
-
-  /** Calcula a porcentagem e retorna o número formatado em string */
-  public function calcularPercentual($parte, $total)
-  {
-    if ($total == 0 || $parte == 0)
-      return "0,00%";
-    $int = ($parte / $total) * 100;
-    return number_format($int, 2, ",") . "%";
   }
 }

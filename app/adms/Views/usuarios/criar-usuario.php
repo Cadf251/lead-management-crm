@@ -10,6 +10,6 @@ $foto = <<<HTML
 HTML;
 
 // Forma um $content com o formulário
-include_once "form-modelo.php";
+include_once "partials/form-modelo.php";
 
-echo HTMLHelper::thinnerForm("Insira os dados", $content, "Criar");
+echo HTMLHelper::thinnerForm("Insira os dados", $content, "Criar", true);

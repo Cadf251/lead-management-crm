@@ -2,6 +2,7 @@
 
 namespace App\adms\Helpers;
 
+use Exception;
 use Monolog\Level;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
@@ -36,8 +37,19 @@ class GenerateLog
 
     $nameFileLog = date("dmY") . ".log";
 
+    $pasta = $_SESSION["servidor_id"] ?? "limbo";
+
+    // Cria o diretório
+    $path = "files/logs/$pasta";
+
+    // Cria a pasta se não existir
+    if (!is_dir($path)){
+      $novaPasta = mkdir($path, 0777, true);
+      if (!$novaPasta) $path = "files/logs/limbo";
+    }
+
     // Criar o caminho do log
-    $filePath = "files/logs/$nameFileLog";
+    $filePath = "$path/$nameFileLog";
 
     // Verifica se o arquivo existe
     if (!file_exists($filePath)){

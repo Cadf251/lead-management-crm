@@ -4,9 +4,12 @@ use App\adms\Helpers\CSRFHelper;
 use App\adms\Helpers\HTMLHelper;
 
 include_once "app/adms/Views/partials/calendar.php";
+
 ?>
+
 <h1 class="titulo-1 w12">Olá, <?php echo $_SESSION["usuario_nome"] ?></h1>
 <h2 class="titulo-3">Selecione um período</h2>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <form method="post" class="inline-icons">
   <input type="hidden" name="csrf_token" value="<?php echo CSRFHelper::generateCSRFToken("form_dashboard"); ?>">
@@ -16,49 +19,56 @@ include_once "app/adms/Views/partials/calendar.php";
 </form>
 
 <?php
-if (isset($this->data["por_qualificacao"])) {
+if ($this->data["valido"]) {
   echo <<<HTML
     <p class="descricao">Selecionado: {$this->data["form"]["periodo"]}</p>
-  HTML;
-}
-?>
-
-<?php
-if (isset($this->data["por_qualificacao"])){
-  echo <<<HTML
     <div class="grafico-card">
-      <div class="w5">
-        <div class="grafico__titulo">{$this->data["por_qualificacao"]["total"]} Leads</div>
-        <div id="chart--pie"></div>
-      </div>
-      <div class="w7">
-        <div class="grafico__titulo">{$this->data["por_qualificacao"]["vendas"]} Vendas</div>
-        <div id="chart--line"></div>
-      </div>
-      <div class="w6">
-        <div class="grafico__titulo">Ranking Equipes</div>
-        <div id="chart--ranking-equipes"></div>
-      </div>
-      <div class="w6">
-        <div class="grafico__titulo">Ranking Usuários</div>
-        <div id="chart--ranking-vendedores"></div>
-      </div>
+  HTML;
+
+  
+  if(isset($this->data["por_qualificacao"]))
+  echo <<<HTML
+  <div class="w5">
+    <div class="grafico__header"><h2 class="grafico__titulo">{$this->data["por_qualificacao"]["total"]} Leads</h2></div>
+    <div id="chart--pie"></div>
+  </div>
+  HTML;
+
+  if(isset($this->data["por_periodo"]))
+  echo <<<HTML
+  <div class="w7">
+    <div class="grafico__header"><h2 class="grafico__titulo">{$this->data["por_qualificacao"]["vendas"]} Vendas</h2></div>
+    <div id="chart--line"></div>
+  </div>
+  HTML;
+
+  if(isset($this->data["equipes"])){
+    $botaoEquipes = HTMLHelper::renderButtonLink("dashboard-equipes/", "arrow-up-right-from-square", "Dashboard de Equipes");
+    echo <<<HTML
+    <div class="w6">
+      <div class="grafico__header"><h2 class="grafico__titulo">Ranking Equipes</h2> $botaoEquipes</div>
+      <div id="chart--ranking-equipes"></div>
     </div>
+    HTML;
+  }
+
+  if(isset($this->data["usuarios"])){
+    $botaoUsuarios = HTMLHelper::renderButtonLink("dashboard-usuarios/", "arrow-up-right-from-square", "Dashboard de Usuários");
+    echo <<<HTML
+    <div class="w6">
+      <div class="grafico__header"><h2 class="grafico__titulo">Ranking Usuários</h2> $botaoUsuarios</div>
+      <div id="chart--ranking-vendedores"></div>
+    </div>
+    HTML;
+  }
+
+  echo <<<HTML
+  </div>
   HTML;
 }
 ?>
 
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
-  // Cria o calendário
-  flatpickr("#myDate", {
-    dateFormat: "d/m/Y",
-    maxDate: "today",
-    mode: "range",
-    theme: "default",
-    locale: "pt"
-  });
-
   // Criar gráfico do total de leads
   function graficoPie() {
     var options = {
@@ -200,14 +210,14 @@ if (isset($this->data["por_qualificacao"])){
     var options = {
       series: [
         <?php
-          foreach ($this->data["usuarios"]["dados"] as $dado) {
-            echo "
-                {
-                  name: \"{$dado['nome']}\",
-                  data: [{$dado['data']}]
-                },
-              ";
-          }
+        foreach ($this->data["usuarios"]["dados"] as $dado) {
+          echo "
+              {
+                name: \"{$dado['nome']}\",
+                data: [{$dado['data']}]
+              },
+            ";
+        }
         ?>
       ],
       chart: {
@@ -217,6 +227,7 @@ if (isset($this->data["por_qualificacao"])){
       },
       plotOptions: {
         bar: {
+          barHeight: 30,
           horizontal: true,
           dataLabels: {
             total: {
@@ -238,7 +249,7 @@ if (isset($this->data["por_qualificacao"])){
         categories: [<?php echo $this->data["usuarios"]["linhas"] ?>],
         labels: {
           formatter: function(val) {
-            return val + "K"
+            return "R$"+val
           }
         }
       },
@@ -250,7 +261,7 @@ if (isset($this->data["por_qualificacao"])){
       tooltip: {
         y: {
           formatter: function(val) {
-            return val + "K"
+            return "R$"+val
           }
         }
       },
@@ -268,13 +279,27 @@ if (isset($this->data["por_qualificacao"])){
     chart.render();
   }
   <?php
-  if (isset($this->data["por_qualificacao"])) {
-    echo <<<JS
-      graficoLine();
-      graficoPie();
-      graficoBar();
-      graficoVendedores();
-    JS;
-  }
+  if(!$this->data["valido"])
+    exit;
+  
+  if(isset($this->data["por_qualificacao"]))
+  echo <<<JS
+  graficoLine();
+  JS;
+
+  if(isset($this->data["por_periodo"]))
+  echo <<<JS
+  graficoPie();
+  JS;
+
+  if(isset($this->data["equipes"]))
+  echo <<<JS
+  graficoBar();
+  JS;
+
+  if(isset($this->data["usuarios"]))
+  echo <<<JS
+  graficoVendedores();
+  JS;
   ?>
 </script>

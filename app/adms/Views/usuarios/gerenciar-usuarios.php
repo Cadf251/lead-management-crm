@@ -23,7 +23,7 @@ foreach ($this->data["usuarios"] as $usuario) {
 
   // Normalizar local das fotos de perfil
   $foto = (isset($usuario["u_foto_perfil"]) || !empty($usuario["u_foto_perfil"]) || $usuario["u_foto_perfil"] !== null)
-    ? '<img src="'.$usuario["u_foto_perfil"].'" height="100%" width="100%">'
+    ? "<img src='{$_ENV['HOST_BASE']}files/uploads/{$_SESSION['servidor_id']}/fotos-perfil/{$usuario['u_id']}.{$usuario['u_foto_perfil']}' height='100%' width='100%'>"
     : "";
 
   $btns = "";
@@ -49,7 +49,7 @@ foreach ($this->data["usuarios"] as $usuario) {
       "O usuário será desativado. A ação é reversível.",
       true,
       () => {
-        postRequest("apagar_usuario", "{$usuario['u_id']}", "{$usuario['u_nome']}")
+        window.location.href = "{$_ENV['HOST_BASE']}desativar-usuario/{$usuario['u_id']}";
       }
     )
   JS;
@@ -75,7 +75,7 @@ foreach ($this->data["usuarios"] as $usuario) {
       "Esta ação não pode ser desfeita. Os leads e atendimentos que eram deste usuário ficarão sem dono.",
       true,
       () => {
-        postRequest("deletar_usuario", "{$usuario['u_id']}", "{$usuario['u_nome']}")
+        window.location.href = "{$_ENV['HOST_BASE']}excluir-usuario/{$usuario['u_id']}";
       }
     )
   JS;
@@ -88,7 +88,7 @@ foreach ($this->data["usuarios"] as $usuario) {
       "Ao apagar a senha, será enviado o email para o usuário criar uma nova.", 
       true,
       () => {
-        postRequest("apagar_senha", "{$usuario['u_id']}", "{$usuario['u_nome']}")
+        window.location.href = "{$_ENV['HOST_BASE']}recuperar-senha/{$usuario['u_id']}";
       }
     )
   JS;

@@ -1,3 +1,6 @@
+<?php
+use App\adms\Helpers\HTMLHelper;
+?>
 <nav class="nav nav--preload js--nav">
   <button type="button" class="nav__button" onclick="resizeNav()">
     <i class="fa-solid fa-bars"></i>
@@ -5,13 +8,10 @@
   <div class="nav__userdata">
     <div class="foto">
       <?php
-      // if (!empty($_SESSION['foto_perfil']) || $_SESSION["foto_perfil"] !== null)
-      //   echo <<<HTML
-      //     <img height="100%" width="100%" src="{$dominio}{$_SESSION['foto_perfil']}">
-      //   HTML;
-
-      use App\adms\Helpers\HTMLHelper;
-
+      if (!empty($_SESSION['foto_perfil']) || $_SESSION["foto_perfil"] !== null)
+        echo <<<HTML
+          <img src="{$_ENV['HOST_BASE']}files/uploads/{$_SESSION['servidor_id']}/fotos-perfil/{$_SESSION['usuario_id']}.{$_SESSION['foto_perfil']}" height="100%" width="100%">
+        HTML;
       ?>
     </div>
     <div class="nav__texto">

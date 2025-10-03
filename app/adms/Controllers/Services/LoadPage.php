@@ -26,7 +26,18 @@ class LoadPage
   private array $listPgPublic = ["Login", "Erro"];
 
   /** @var array $listPgPrivate Lista de páginas privadas */
-  private array $listPgPrivate = ["Dashboard", "Usuarios", "CriarUsuario", "EditarUsuario"];
+  private array $listPgPrivate = [
+    "Dashboard",
+    "DashboardUsuarios",
+    "DashboardEquipes",
+    "Usuarios",
+    "CriarUsuario",
+    "EditarUsuario",
+    "DesativarUsuario",
+    "AtivarUsuario",
+    "RecuperarSenha",
+    "ExcluirUsuario"
+  ];
 
   /**
    * Verificar se existe a página com o método checkPageExists
@@ -47,10 +58,10 @@ class LoadPage
     if (!$pageExists[0])
       // GenerateLog::generateLog("error", "002. Página não encontrada.", ["pagina" => $this->urlController, "parametro" => $this->urlParameter]);
       $this->falha("002. Página não encontrada.");
-    else if ($pageExists[1] === "private"){
+    else if ($pageExists[1] === "private") {
       // Requer login
       $logado = AuthUser::logado();
-      if ($logado === false){
+      if ($logado === false) {
         header("Location: {$_ENV['HOST_BASE']}login");
         exit;
       }
@@ -122,7 +133,7 @@ class LoadPage
    * Direciona o cabra para a tela de falha e interrompe o código
    * @param string $mensagem A mensagem do log de erro
    * @param string $location O local o usuário será enviado, pode ser login ou erro 404.
-  */
+   */
   private function falha(string $mensagem): void
   {
     GenerateLog::generateLog(

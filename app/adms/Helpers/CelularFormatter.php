@@ -14,9 +14,9 @@ class CelularFormatter
    * @var string $celular Ex: "55119XXXXXXXX"
    * @return string Ex: "(11)9XXXX-XXXX"
    */
-  public static function paraPlaceholder(string $celular) :string|null
+  public static function paraPlaceholder(string $celular) :string
   {
-    if (empty($celular) || ($celular === null)) return null;
+    if (empty($celular) || ($celular === null)) return "";
     // Remove DDI 55 se estiver presente
     if (strpos($celular, '55') === 0)
       $celular = substr($celular, 2);
@@ -47,9 +47,9 @@ class CelularFormatter
    * @var string $celular Ex: "(11)9XXXX-XXXX"
    * @return string Ex: "55119XXXXXXXX"
    */
-  public static function paraInternaciona(string $celular):string|null
+  public static function paraInternaciona(string $celular):string
   {
-    if (empty($celular) || $celular === null) return null;
+    if (empty($celular) || $celular === null) return "";
 
     // Remove todos os caracteres não numéricos
     $celular = preg_replace('/\D/', '', $celular);
@@ -60,7 +60,7 @@ class CelularFormatter
     }
 
     // Se não tiver pelo menos 12 dígitos com o DDI, consideramos inválido
-    if (strlen($celular) < 12) return null;
+    if (strlen($celular) < 12) return "";
 
     return $celular;
   }

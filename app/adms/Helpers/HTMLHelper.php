@@ -188,18 +188,24 @@ class HTMLHelper
    * 
    * @param string $content O conteúdo com os labels e inputs
    * @param string $action O placeholder do botão submit
+   * @param bool $allowFiles Se permite o envio de arquivos
    * @param array $formClasses As classes adicionais do formulário
    * @param array $cardClasses As classes adicionais do card
    */
-  public static function renderForm(string $content, string $action, array $formClasses = [], array $cardClasses = []):string
+  public static function renderForm(string $content, string $action, bool $allowFiles = false, array $formClasses = [], array $cardClasses = []):string
   {
     if (!empty($formClasses))
       $formClasses = implode(" ", $formClasses);
     else 
       $formClasses = "";
 
+    if ($allowFiles)
+      $files = " enctype='multipart/form-data' ";
+    else 
+      $files = " ";
+    
     $form = <<<HTML
-      <form class="form-padrao {$formClasses}" method="post">
+      <form class="form-padrao {$formClasses}"{$files}method="post">
         $content
         <button type="submit" class="small-btn small-btn--normal">$action</button>
       </form>
@@ -213,16 +219,17 @@ class HTMLHelper
    * @param string $title O título do formulário
    * @param string $content O conteúdo com os labels e inputs
    * @param string $action O placeholder do botão submit
+   * @param bool $allowFiles Se permite o envio de arquivos
    * @param array $formClasses As classes adicionais do formulário
    * @param array $cardClasses As classes adicionais do card
    */
-  public static function renderFormWTitle(string $title, string $content, string $action, array $formClasses = [], array $cardClasses = []):string
+  public static function renderFormWTitle(string $title, string $content, string $action, bool $allowFiles = false, array $formClasses = [], array $cardClasses = []):string
   {
     $contentFinal = <<<HTML
       <h2 class="titulo-2">$title</h2>
       $content
     HTML;
-    return HTMLHelper::renderForm($contentFinal, $action, $formClasses, $cardClasses);
+    return HTMLHelper::renderForm($contentFinal, $action, $allowFiles, $formClasses, $cardClasses);
   }
 
   /**
@@ -234,9 +241,9 @@ class HTMLHelper
    * 
    * @return string HTML renderFormWTitle com classes adicionais
    */
-  public static function thinnerForm($title, $content, $action)
+  public static function thinnerForm(string $title, string $content, string $action, bool $allowFiles = false)
   {
-    return HTMLHelper::renderFormWTitle($title, $content, $action, ['form-padrao--thinner'], ['card-padrao--thinner']);
+    return HTMLHelper::renderFormWTitle($title, $content, $action, $allowFiles, ['form-padrao--thinner'], ['card-padrao--thinner']);
   }
 
   /**

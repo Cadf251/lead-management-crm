@@ -2,24 +2,21 @@
 
 namespace App\adms\Controllers\usuarios;
 
-use App\adms\Models\Repositories\UsuariosRepository;
-use App\adms\Models\Services\DbConnectionClient;
 use App\adms\Views\Services\LoadViewService;
 
-class Usuarios
+/** Carrega a VIEW gerenciar-usuarios */
+class Usuarios extends UsuariosAbstract
 {
-
   /** @var array|string|null $dados Recebe os dados que devem ser enviados para VIEW */
   private array|string|null $data = null;
+
+  /** Recupera os dados dos usuários do repositório [listar()], depois carrega a view passando os dados */
   public function index()
   {
-    // Intancia o Repository para recuperar os registros de usuários
-    $conn = new DbConnectionClient(null);
-    $usuarios = new UsuariosRepository($conn->conexao);
     $this->data = [
       "title" => "Usuários",
       "css" => ["public/adms/css/usuarios.css"],
-      "usuarios" => $usuarios->listar()
+      "usuarios" => $this->repo->listar()
     ];
 
     // Carregar a VIEW

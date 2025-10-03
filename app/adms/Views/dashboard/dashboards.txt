@@ -3,8 +3,6 @@ Ideias de dashboards:
 dashboard/
   index/ -- Visão geral sobre as equipes e usuários.
   metas/ -- Comparando as metas mensais.
-  pessoal/ -- Apenas os leads pessoais
-  pessoal-metas/ -- As metas pessoais
 
 dashboard-equipes/
   index/ -- Visão sobre os usuários

@@ -37,7 +37,7 @@ class LoadViewService
       // Inclui o layout principal
       include './app/adms/Views/layouts/main.php';
     } else {
-      GenerateLog::generateLog("erro", "O arquivo não existe", ["arquivo" => './app/' . $this->nameView . '.php']);
+      GenerateLog::generateLog("error", "O arquivo não existe", ["arquivo" => './app/' . $this->nameView . '.php']);
       die("O arquivo não existe");
     }
   }
@@ -52,7 +52,7 @@ class LoadViewService
       // Inclui o layout principal
       include './app/adms/Views/layouts/login.php';
     } else {
-      GenerateLog::generateLog("erro", "O arquivo não existe", ["arquivo" => './app/' . $this->nameView . '.php']);
+      GenerateLog::generateLog("error", "O arquivo não existe", ["arquivo" => './app/' . $this->nameView . '.php']);
       die("O arquivo não existe");
     }
   }
@@ -68,7 +68,7 @@ class LoadViewService
       // Inclui o layout principal
       include './app/adms/Views/layouts/external-error.php';
     } else {
-      GenerateLog::generateLog("erro", "O arquivo não existe", ["arquivo" => './app/' . $this->nameView . '.php']);
+      GenerateLog::generateLog("error", "O arquivo não existe", ["arquivo" => './app/' . $this->nameView . '.php']);
       die("O arquivo não existe");
     }
   }

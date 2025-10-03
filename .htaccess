@@ -32,6 +32,7 @@ Options -Indexes
 # Bloquear acesso direto a um diretório
 
 RewriteRule ^app - [F]
+RewriteCond %{REQUEST_URI} ^/files/uploads/
 RewriteRule ^files/ - [F]
 RewriteRule ^vendor/ - [F]
 
