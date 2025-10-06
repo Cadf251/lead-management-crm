@@ -1,3 +1,41 @@
+-- USUÁRIOS
+INSERT INTO usuarios (
+    nome,
+    email,
+    celular,
+    senha,
+    usuario_status_id,
+    nivel_acesso_id,
+    created
+  )
+VALUES (
+    "Carlos Eduardo",
+    "contato@agenciardmind.com.br",
+    "5511965828725",
+    "$2y$10$jD0vDCsXc3/W324EtRsy3uwKLa3tFMeLCVgRVrgPIBdB0emXc17S.",
+    3,
+    4,
+    NOW()
+  ),
+  (
+    "John Doe",
+    "cadu.diasprado07@gmail.com",
+    "5511965828725",
+    "$2y$10$jD0vDCsXc3/W324EtRsy3uwKLa3tFMeLCVgRVrgPIBdB0emXc17S.",
+    3,
+    1,
+    NOW()
+  ),
+  (
+    "Johana Doe",
+    "cadu.devmarketing@gmail.com",
+    "5511965828725",
+    "$2y$10$jD0vDCsXc3/W324EtRsy3uwKLa3tFMeLCVgRVrgPIBdB0emXc17S.",
+    1,
+    1,
+    NOW()
+  );
 
--- HASH para a senha 123:
--- a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3
+-- LEADS
+
+-- ATENDIMENTOS

@@ -2,6 +2,7 @@
 
 namespace App\adms\Controllers\login;
 
+use App\adms\Controllers\usuarios\RecuperarSenha;
 use App\adms\Helpers\CSRFHelper;
 use App\adms\Helpers\GenerateLog;
 use App\adms\Models\Repositories\LoginRepository;
@@ -99,7 +100,50 @@ class NovaSenha
     }
 
     // Se tiver POST do form NOVA-SENHA, verifique:
-    // Se o E-MAIL é válido, então faz o processo de recuperação de senha.
+    if (isset($this->data["form"]["csrf_token"]) && CSRFHelper::validateCSRFToken("form_nova_senha", $this->data["form"]["csrf_token"])) {
+      // Conectar com o servidor GLOBAL
+      $globalConn = new DbConnectionGlobal();
+      $globalConn = $globalConn->conexao;
+
+      // Encontrar o servidor do cliente
+      $login = new LoginRepository($globalConn);
+      $servidor = $login->verificarServidor((int)$this->data["form"]["servidor_id"]);
+
+      if ($servidor !== false){
+        // Tenta conectar com esse servidor
+        $clienteConn = new DbConnectionClient($servidor);
+        $clienteConn = $clienteConn->conexao;
+
+        // Verifica o usuário
+        $loginNew = new LoginRepository($clienteConn);
+        $usuario = $loginNew->verificarUsuario($this->data["form"]["usuario_email"]);
+
+        if ($usuario !== false){
+          // Faz o processo de recuperação de senha no usuário
+          $recuperar = new RecuperarSenha($servidor);
+          
+          // Seta por um segundo o ID do servidor
+          $_SESSION["servidor_id"] = (int)$this->data["form"]["servidor_id"];
+
+          // Preenche os dados do usuário
+          $recuperar->resetarSenha(
+            $usuario["id"],
+            $usuario["nome"],
+            $usuario["email"]
+          );
+
+          unset($_SESSION["servidor_id"]);
+
+          $_SESSION["alerta"] = [
+            "Verifique seu e-mail!",
+            "Abra seu e-mail para criar uma nova senha."
+          ];
+
+          header("Location: {$_ENV['HOST_BASE']}login");
+          exit;
+        }
+      }
+    }
 
     // Se o parâmetro for NULL, apenas carregue a VIEW perguntando qual é o E-MAIL do usuário.
     $loadView = new LoadViewService("adms/Views/login/nova-senha", [

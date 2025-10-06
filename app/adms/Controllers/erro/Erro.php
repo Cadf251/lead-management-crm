@@ -13,6 +13,9 @@ class Erro
       case "404":
         $this->erro404();
         break;
+      case "500":
+        $this->erro500();
+        break;
       case "fatal":
         $this->fatal();
         break;
@@ -23,6 +26,13 @@ class Erro
   {
     // Carregar a VIEW
     $loadView = new LoadViewService("adms/Views/erro/erro404", null);
+    $loadView->loadExternalError();
+  }
+
+  public function erro500()
+  {
+    // Carregar a VIEW
+    $loadView = new LoadViewService("adms/Views/erro/erro500", null);
     $loadView->loadExternalError();
   }
 

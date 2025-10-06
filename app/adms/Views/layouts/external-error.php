@@ -3,11 +3,18 @@
 <?php
 
 use App\adms\Helpers\SafeEcho;
+use App\adms\Services\AuthUser;
 
 include_once "./app/adms/Views/partials/head.php";
 ?>
 <body class="js--body">
-  <main class="main main--external-error js--main">
+  <?php
+  if (AuthUser::logado())
+    include_once "./app/adms/Views/partials/nav.php";
+  else
+    $class = "main--external-error";
+  ?>
+  <main class="main <?php echo $class ?? "" ?> js--main">
     <script src="<?php echo SafeEcho::safeEcho($_ENV["HOST_BASE"]) ?>public/adms/js/nav.js"></script>
     <?php
     include_once $this->view;

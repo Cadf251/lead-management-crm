@@ -72,4 +72,19 @@ class LoadViewService
       die("O arquivo não existe");
     }
   }
+
+  /**
+   * Carrega o layout do MASTER
+   */
+  public function loadViewMaster(): void
+  {
+    $this->view = "./app/{$this->nameView}.php";
+    if (file_exists('./app/' . $this->nameView . '.php')) {
+      // Inclui o layout principal
+      include './app/database/Views/layouts/main.php';
+    } else {
+      GenerateLog::generateLog("error", "O arquivo não existe", ["arquivo" => './app/' . $this->nameView . '.php']);
+      die("O arquivo não existe");
+    }
+  }
 }

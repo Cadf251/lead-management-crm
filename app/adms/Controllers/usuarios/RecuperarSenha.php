@@ -19,22 +19,26 @@ class RecuperarSenha extends UsuariosAbstract
     $this->data["usuario_nome"] = $usuario["u_nome"];
     $this->data["usuario_email"] = $usuario["u_email"];
 
-    $this->resetarSenha();
+    $this->resetarSenha(
+      $this->data["usuario_id"],
+      $this->data["usuario_nome"],
+      $this->data["usuario_email"]
+    );
   }
 
   /**
    * Envia o email de confirmação, apaga a senha do e retorna ao status de aguardando confirmação
    */
-  public function resetarSenha():void
+  public function resetarSenha($usuarioId, $usuarioNome, $usuarioEmail):void
   {
-    $reset = $this->repo->resetarSenha($this->data["usuario_id"]);
+    $reset = $this->repo->resetarSenha($usuarioId);
 
     if ($reset){
       // Tenta enviar o email de confirmação para criar nova senha
       $result = $this->emailConfirmacao(
-        $this->data["usuario_id"],
-        $this->data["usuario_nome"],
-        $this->data["usuario_email"]
+        $usuarioId,
+        $usuarioNome,
+        $usuarioEmail
       );
       if ($result){
         $_SESSION["alerta"] = [

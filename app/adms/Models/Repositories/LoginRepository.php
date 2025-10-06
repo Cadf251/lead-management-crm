@@ -28,7 +28,7 @@ class LoginRepository extends DbOperations
     FROM servidores 
     WHERE 
       id = :servidor_id
-      AND `status` = "Ativo"
+      AND `status` = 1
     LIMIT 1
     SQL;
 

@@ -26,6 +26,7 @@ RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]
 # deseja capturar apenas URLs que contenham pelo menos um caractere, use "+" (^(.+)$). Se você deseja capturar todas as URLs, incluindo as que estejam vazias, use "" (^(.*)$).
 
 ErrorDocument 403 login
+ErrorDocument 500 erro/500
 
 Options -Indexes
 

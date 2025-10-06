@@ -17,10 +17,10 @@ class LoadPage
   private string $classLoad;
 
   /** @var array $listDirectory Recebe a lista de diretórios com as controllers */
-  private array $listPackages = ["adms"];
+  private array $listPackages = ["adms", "database"];
 
   /** @var array $listDirectory Lista de diretório das classes */
-  private array $listDirectory = ["login", "dashboard", "usuarios", "erro"];
+  private array $listDirectory = ["login", "dashboard", "usuarios", "erro", "master"];
 
   /** @var array $listPgPublic Lista de páginas públicas */
   private array $listPgPublic = ["Login", "NovaSenha", "Erro"];
@@ -38,6 +38,13 @@ class LoadPage
     "AtivarUsuario",
     "RecuperarSenha",
     "ExcluirUsuario"
+  ];
+
+  /** @var array $listPgDev Páginas que só podem ser acessadas por DEVs */
+  private array $listPgDev = [
+    "ListarServidores",
+    "InstalarServidor",
+    "AtivarServidor"
   ];
 
   /**
@@ -66,6 +73,9 @@ class LoadPage
         header("Location: {$_ENV['HOST_BASE']}login");
         exit;
       }
+    } else if (($pageExists[1] === "dev") && ($_SERVER['HTTP_HOST'] !== "localhost")){
+      header("Location: {$_ENV['HOST_BASE']}login");
+      exit;
     }
 
     // Verifica se a class existe
@@ -90,6 +100,10 @@ class LoadPage
     // Verifica se a página está no array de páginas privadas
     if (in_array($this->urlController, $this->listPgPrivate))
       return [true, "private"];
+
+    // Verifica se a página está no array de devs
+    if (in_array($this->urlController, $this->listPgDev))
+      return [true, "dev"];
 
     return [false];
   }

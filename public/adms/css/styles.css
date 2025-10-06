@@ -292,8 +292,9 @@ input:-webkit-autofill {
 }
 
 .main--external-error{
-  padding-inline: 2.5%;
-  width: calc(80% - 60px);
+  padding-inline: 5%;
+  width: 90%;
+  margin: 0
 }
 
 /* RESTANTE */
