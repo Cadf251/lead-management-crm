@@ -81,8 +81,8 @@ abstract class UsuariosAbstract
 
       // Prepara o setWarning
       $_SESSION["alerta"] = [
-        "O usuário não existe!",
-        "O usuário não existe ou foi excluído."
+        "Erro!",
+        "❌ O usuário não existe ou foi excluído."
       ];
 
       $this->redirect();

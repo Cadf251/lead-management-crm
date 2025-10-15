@@ -13,8 +13,8 @@ abstract class UsuariosReciclagem extends UsuariosAbstract
     // Verifica o ID
     if (empty($usuarioId)) {
       $_SESSION["alerta"] = [
-        "Erro: ID do usuário não informado.",
-        "Tente novamente ou selecione um usuário válido."
+        "Erro!",
+        "❌ Este usuário não existe ou é inválido."
       ];
       $this->redirect();
     }
@@ -40,7 +40,7 @@ abstract class UsuariosReciclagem extends UsuariosAbstract
         $_SESSION["alerta"][1][] = "❌ O e-mail de confirmação de senha não foi enviado.";
       }
     }
-    
+
     // Redireciona
     $this->redirect();
   }
