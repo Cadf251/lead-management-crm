@@ -111,7 +111,7 @@ class DashboardRepository extends DbOperations
         $select
       FROM atendimentos a
       INNER JOIN leads l ON a.lead_id = l.id
-      INNER JOIN lead_status ls ON l.lead_status_id = ls.id
+      LEFT JOIN lead_status ls ON l.lead_status_id = ls.id
       INNER JOIN equipes e ON a.equipe_id = e.id
       LEFT JOIN propostas p ON a.id = p.atendimento_id
       WHERE

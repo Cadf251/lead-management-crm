@@ -2,64 +2,40 @@
 
 namespace App\adms\Controllers\usuarios;
 
-use App\adms\Models\Repositories\UsuariosRepository;
-use App\adms\Models\Services\DbConnectionClient;
-
-class AtivarUsuario extends UsuariosAbstract
+class AtivarUsuario extends UsuariosReciclagem
 {
-  /** @var array|string|null $dados Recebe os dados que devem ser enviados para VIEW */
-  private array|string|null $data = null;
-
   public function index(string|null $usuarioId)
   {
-    // Seta o ID
-    $this->data["usuario_id"] = (int)$usuarioId;
-
-    // Recupera as informações do usuário
-    $usuarios = $this->repo->selecionar($this->data["usuario_id"]);
-    $usuario = $usuarios[0];
-    $this->data["usuario_nome"] = $usuario["u_nome"];
-    $this->data["usuario_email"] = $usuario["u_email"];
-    $this->data["usuario_status_id"] = $usuario["us_id"];
-
-    // Verifica se o usuário está desativado
-    if ($this->data["usuario_status_id"] === 2)
-      $this->ativarUsuario();
-    else{
-      $_SESSION["alerta"] = [
-        "O usuário não está desativado.",
-        ""
-      ];
-
-      header("Location: {$_ENV['HOST_BASE']}usuarios");
-      exit;
-    }
+    $this->enviarEmail = true;
+    $this->fluxoPrincipal($usuarioId);
   }
 
-  /** Ativa o usuário e manda um email de confirmação para criar uma nova senha. */
-  public function ativarUsuario():void
+  /** Ativa o usuário */
+  public function executar():bool
   {
-    $ativar = $this->repo->ativar($this->data["usuario_id"]);
+    // Verifica se o usuário não está desativado
+    if ($this->statusId !== 2){
+      $_SESSION["alerta"] = [
+        "Este usuário não está desativado.",
+        "Você não pode ativar um usuário que não esteja desativado."
+      ];
+      return false;
+    }
+
+    $ativar = $this->repo->ativar($this->id);
 
     if ($ativar){
       $_SESSION["alerta"] = [
         "Usuário ativado com sucesso!",
         "Ele deverá criar uma nova senha."
       ];
-
-      // Tenta enviar o email de confirmação para criar nova senha
-      $this->emailConfirmacao(
-        $this->data["usuario_id"],
-        $this->data["usuario_nome"],
-        $this->data["usuario_email"]
-      );
+      return true;
     } else {
       $_SESSION["alerta"] = [
         "O usuário não foi ativado.",
         "Tente novamente mais tarde."
       ];
+      return false;
     }
-    header("Location: {$_ENV['HOST_BASE']}usuarios");
-    exit;
   }
 }

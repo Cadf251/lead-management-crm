@@ -2,35 +2,39 @@
 
 namespace App\adms\Controllers\usuarios;
 
-class ExcluirUsuario extends UsuariosAbstract
+class ExcluirUsuario extends UsuariosReciclagem
 {
-  /** @var array|string|null $dados Recebe os dados que devem ser enviados para VIEW */
-  private array|string|null $data = null;
-
   public function index(string|null $usuarioId)
   {
-    // Seta o ID
-    $this->data["usuario_id"] = (int)$usuarioId;
-    $this->excluirUsuario();
+    $this->fluxoPrincipal($usuarioId);
   }
 
   /** Apaga permanentemente o usuário. */
-  public function excluirUsuario():void
+  protected function executar(): bool
   {
-    $excluir = $this->repo->excluir($this->data["usuario_id"]);
+    // Verifica se ele não está desativado
+    if ($this->statusId !== 2) {
+      $_SESSION["alerta"] = [
+        "O usuário não está desativado.",
+        "Você não pode excluir um usuário ativo."
+      ];
+      return false;
+    }
 
-    if ($excluir === true){
+    $excluir = $this->repo->excluir($this->id);
+
+    if ($excluir === true) {
       $_SESSION["alerta"] = [
         "Usuário excluído com sucesso!",
         "Seus dados agora são irrecuperáveis."
       ];
+      return true;
     } else {
       $_SESSION["alerta"] = [
         "O usuário não foi excluído.",
         "Tente novamente mais tarde."
       ];
+      return false;
     }
-    header("Location: {$_ENV['HOST_BASE']}usuarios");
-    exit;
   }
 }

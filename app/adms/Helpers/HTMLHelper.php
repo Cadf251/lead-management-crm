@@ -355,7 +355,10 @@ class HTMLHelper
     HTML;
   }
 
-  function renderStatusCard($emoji, $status, $color = "gray")
+  /**
+   * Rende um CARD com um status na frente do status
+   */
+  public static function renderStatusCard($emoji, $status, $color = "gray")
   {
     return <<<HTML
       <div class="status-card status-card--$color">

@@ -12,36 +12,6 @@ function showPassword(a, b){
   }
 }
 
-// function resizeNav(){
-//   const body = document.querySelector("body");
-//   body.classList.add("preload");
-//   const nav = document.querySelector(".js--nav");
-//   const main = document.querySelector(".js--main");
-
-//   if (!nav || !main) return;
-
-//   var navClass = nav.classList;
-//   var mainClass = main.classList;
-  
-//   const estaExpandido = localStorage.getItem('navExpandida') === 'true';
-
-//   if (estaExpandido) {
-//     navClass.remove("nav--recolhido");
-//     navClass.add("nav--extendido");
-//     mainClass.remove("main--recolhido");
-//     mainClass.add("main--extendido");
-//   } else {
-//     navClass.remove("nav--extendido");
-//     navClass.add("nav--recolhido");
-//     mainClass.remove("main--extendido");
-//     mainClass.add("main--recolhido");
-//   }
-
-//   body.classList.remove("preload");
-// }
-
-// document.addEventListener('DOMContentLoaded', () => {resizeNav()});
-
 function submitForm(){
   document.getElementById("form").submit()
 }

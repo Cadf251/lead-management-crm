@@ -115,6 +115,7 @@ class Dashboard
   public function arrangeLeadsArray(array $leads): array
   {
     $leadsCount = [
+      "'Status indefinido'" => 0,
       "'Não responde(m)'" => 0,
       "'Desqualificado(s)'" => 0,
       "'Qualificado(s)'" => 0,
@@ -141,8 +142,13 @@ class Dashboard
       if ($lead["lead_status_id"] === 2) {
         $leadsCount["'Desqualificado(s)'"] += $lead["total_leads"];
       }
+
       if ($lead["lead_status_id"] === 1) {
         $leadsCount["'Não responde(m)'"] += $lead["total_leads"];
+      }
+
+      if ($lead["lead_status_id"] === null) {
+        $leadsCount["'Status indefinido'"] += $lead["total_leads"];
       }
 
       $total += $lead["total_leads"];

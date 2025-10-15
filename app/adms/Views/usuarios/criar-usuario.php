@@ -2,7 +2,7 @@
 
 use App\adms\Helpers\HTMLHelper;
 
-echo HTMLHelper::renderHeader("Criar Usuário", "{$_ENV['HOST_BASE']}usuarios/", "Voltar", "left-long");
+echo HTMLHelper::renderHeader("Criar Usuário", "{$_ENV['HOST_BASE']}listar-usuarios/", "Voltar", "left-long");
 
 $foto = <<<HTML
   <label>Faça o upload da foto do usuário</label>

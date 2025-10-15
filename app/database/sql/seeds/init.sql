@@ -36,6 +36,18 @@ VALUES (
     NOW()
   );
 
+-- PRODUTOS
+INSERT INTO produtos (nome)
+VALUES
+("Sites"),
+("Emails");
+
+-- EQUIPES
+INSERT INTO equipes (nome, produto_id, equipe_status_id, created)
+VALUES 
+("Vendas", 1, 3, NOW()),
+("Orgânico", 1, 3, NOW());
+
 -- LEADS
 
 -- ATENDIMENTOS

@@ -2,22 +2,30 @@
 
 namespace App\adms\Controllers\usuarios;
 
-class DesativarUsuario extends UsuariosAbstract
+class DesativarUsuario extends UsuariosReciclagem
 {
-  /** @var array|string|null $dados Recebe os dados que devem ser enviados para VIEW */
-  private array|string|null $data = null;
-
   public function index(string|null $usuarioId)
   {
-    // Seta o ID
-    $this->data["usuario_id"] = (int)$usuarioId;
-    $this->desativarUsuario();
+    // Carrega o fluxo
+    $this->fluxoPrincipal($usuarioId);
   }
 
-  /** Desativa o usuário, seus tokens e retira-o de todas as equipes */
-  public function desativarUsuario():void
+  /** Desativa o usuário, seus tokens e retira-o de todas as equipes
+   * 
+   * @return bool Se retornar false, não deve continuar.
+   */
+  protected function executar(): bool
   {
-    $desativar = $this->repo->desativar($this->data["usuario_id"]);
+    // Verifica se já está desativado
+    if ($this->statusId === 2){
+      $_SESSION["alerta"] = [
+        "O usuário já está desativado.",
+        "Você não pode desativar um usuário já desativado."
+      ];
+      return false;
+    }
+    
+    $desativar = $this->repo->desativar($this->id);
 
     if ($desativar){
       $_SESSION["alerta"] = [
@@ -26,14 +34,14 @@ class DesativarUsuario extends UsuariosAbstract
       ];
 
       // Excluir a foto dele
-      $this->apagarFoto($this->data["usuario_id"]);
+      $this->apagarFoto();
+      return true;
     } else {
       $_SESSION["alerta"] = [
         "O usuário não foi desativado.",
         "Tente novamente mais tarde."
       ];
+      return false;
     }
-    header("Location: {$_ENV['HOST_BASE']}usuarios");
-    exit;
   }
 }

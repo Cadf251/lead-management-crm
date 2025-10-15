@@ -23,7 +23,6 @@ register_shutdown_function(function () {
   }
 });
 
-
 // Instancia as variáveis de ambiente
 $dotenv = Dotenv\Dotenv::createUnsafeImmutable(__DIR__);
 $dotenv->load();

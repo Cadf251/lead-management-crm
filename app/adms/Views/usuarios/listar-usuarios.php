@@ -8,13 +8,11 @@ if (!isset($this->data["usuarios"])) {
   die();
 }
 
-$inputs = <<<HTML
-  <input type="hidden" name="task" value="criar_usuario">
-HTML;
-
+// Cria o botão do header
 $href = "{$_ENV['HOST_BASE']}criar-usuario";
 echo HTMLHelper::renderHeader("Editar Usuários", $href, "Criar um novo usuário", "plus");
 
+// Lê o array de usuários e imprime cada um
 foreach ($this->data["usuarios"] as $usuario) {
   // Formata o celular do usuário
   $usuario["u_celular"] = $usuario["u_celular"] === null
@@ -36,7 +34,7 @@ foreach ($this->data["usuarios"] as $usuario) {
       "Será reenviado o email de confirmação de senha.",
       true,
       () => {
-        postRequest("reenviar_email", "{$usuario['u_id']}", "{$usuario['u_nome']}")
+        window.location.href = "{$_ENV['HOST_BASE']}reenviar-email/{$usuario['u_id']}";
       }
     )
   JS;
@@ -62,7 +60,7 @@ foreach ($this->data["usuarios"] as $usuario) {
       "Ele terá acesso a praticamente tudo que tinha antes.",
       true,
       () => {
-        postRequest("reativar_usuario", "{$usuario['u_id']}", "{$usuario['u_nome']}")
+        window.location.href = "{$_ENV['HOST_BASE']}ativar-usuario/{$usuario['u_id']}";
       }
     )
   JS;

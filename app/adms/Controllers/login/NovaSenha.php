@@ -126,11 +126,7 @@ class NovaSenha
           $_SESSION["servidor_id"] = (int)$this->data["form"]["servidor_id"];
 
           // Preenche os dados do usuário
-          $recuperar->resetarSenha(
-            $usuario["id"],
-            $usuario["nome"],
-            $usuario["email"]
-          );
+          $recuperar->index($usuario["id"]);
 
           unset($_SESSION["servidor_id"]);
 

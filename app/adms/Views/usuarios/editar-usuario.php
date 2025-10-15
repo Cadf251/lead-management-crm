@@ -2,7 +2,7 @@
 
 use App\adms\Helpers\HTMLHelper;
 
-echo HTMLHelper::renderHeader("Editar Usuário", "{$_ENV['HOST_BASE']}usuarios/", "Voltar", "left-long");
+echo HTMLHelper::renderHeader("Editar Usuário", "{$_ENV['HOST_BASE']}listar-usuarios/", "Voltar", "left-long");
 
 if (empty($this->data['usuario']["u_foto_perfil"]) || $this->data['usuario']["u_foto_perfil"] === null)
   $foto = <<<HTML
@@ -18,15 +18,15 @@ else
       </div>
       <div class="foto-input">
         <div class="foto-input__container">
-          <input type="radio" name="editar_foto" id="foto-a" value="trocar" class="trigger">
-          <label for="foto-a">Trocar foto de perfil atual</label>
+          <input type="radio" name="editar_foto" id="foto-trocar" value="trocar" class="trigger">
+          <label for="foto-trocar">Trocar foto de perfil atual</label>
           <input class="form-padrao__input foto-input__input-file form-padrao__input--thinner" type="file" name="foto">
         </div>
         <div>
-          <input type="radio" name="editar_foto" value="apagar" id="foto-b">
-          <label for="foto-b">Apagar foto de perfil atual</label>
+          <input type="radio" name="editar_foto" id="foto-apagar" value="apagar">
+          <label for="foto-apagar">Apagar foto de perfil atual</label>
         </div>
-        <button class="normal-link" onclick="limparInput(['#foto-a', '#foto-b'])" type="button">Limpar</button>
+        <button class="normal-link" onclick="limparInput()" type="button">Limpar</button>
         <input type="hidden" name="foto_existe" value="1">
       </div>
     </div>

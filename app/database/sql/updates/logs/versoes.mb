@@ -1,0 +1,8 @@
+* 2.0.6
+
+Adicionado a campo "termo" para utm_term no lead_utm
+
+* 2.0.7
+
+Inclui o campo de ícone em produtos para maior personalização.
+Este campo recebe emogis ou classes de ícones do font-awesome.
