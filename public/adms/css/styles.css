@@ -679,6 +679,19 @@ input:-webkit-autofill {
   display: block;
 }
 
+.warning__titulo{
+  text-align: center;
+  display: block;
+  font-size: 1.1em;
+}
+
+.warning__buttons {
+    display: inline-flex;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+}
+
 .descricao {
   color: var(--mid-gray-color);
   font-weight: normal;

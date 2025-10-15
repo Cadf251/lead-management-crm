@@ -99,17 +99,20 @@ function setWarning(mensagem, desc, ask, func) {
   const warning = document.querySelector('.warning');
 
   if (ask){
-    var input = `<button class="small-btn small-btn--normal" onclick="confirmarAviso(true)">Sim</button>
+    var input = 
+    `<button class="small-btn small-btn--normal" onclick="confirmarAviso(true)">Sim</button>
     <button class="small-btn small-btn--alerta" onclick="confirmarAviso(false)">Cancelar</button>`;
   } else {
     var input = `<button class="small-btn small-btn--normal" onclick="confirmarAviso(true)">Ok</button>`;
   }
 
+  console.log(desc);
+
   warning.innerHTML = `
-    <div class="text-center">
-      <b>${mensagem}</b>
-      <p>${desc}</p>
-      ${input}
+    <div>
+      <b class='warning__titulo'>${mensagem}</b>
+      <p class='warning__descricao'>${desc}</p>
+      <div class='warning__buttons'>${input}</div>
     </div>
   `;
   warning.classList.add('warning--show');

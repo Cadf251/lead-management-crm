@@ -19,8 +19,8 @@ class DesativarUsuario extends UsuariosReciclagem
     // Verifica se já está desativado
     if ($this->statusId === 2){
       $_SESSION["alerta"] = [
-        "O usuário já está desativado.",
-        "Você não pode desativar um usuário já desativado."
+        "Aviso!",
+        ["❌ Você não pode desativar um usuário já desativado."]
       ];
       return false;
     }
@@ -29,8 +29,9 @@ class DesativarUsuario extends UsuariosReciclagem
 
     if ($desativar){
       $_SESSION["alerta"] = [
-        "Usuário desativado com sucesso!",
-        "Você ainda pode excluir permanentemente os seus dados."
+        "Sucesso!",
+        ["✅ O usuário foi desativado com sucesso.",
+        "ℹ️ Você ainda pode deletar os dados restantes do usuário se preferir."]
       ];
 
       // Excluir a foto dele
@@ -38,8 +39,8 @@ class DesativarUsuario extends UsuariosReciclagem
       return true;
     } else {
       $_SESSION["alerta"] = [
-        "O usuário não foi desativado.",
-        "Tente novamente mais tarde."
+        "Erro!",
+        "❌ Algo deu errado."
       ];
       return false;
     }

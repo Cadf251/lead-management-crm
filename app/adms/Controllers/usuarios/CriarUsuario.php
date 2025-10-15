@@ -31,42 +31,36 @@ class CriarUsuario extends UsuariosAbstract
       if ($result[0] === false){
         // Prepara o setWarning
         $_SESSION["alerta"] = [
-          "Não foi possível criar o usuário!",
+          "Erro!",
           $result[1]
         ];
-
         $this->redirect();
       }
+
+      $info[] = "✅ Usuário criado com sucesso.";
 
       // Tenta enviar o email
       $mail = $this->emailConfirmacao();
 
-      if ($mail[0] === false){
-        $_SESSION["alerta"] = [
-          "Usuário criado, com um porém!",
-          "Não foi possível enviar o email de confirmação de senha!"
-        ];
-        $this->redirect();
-      }
+      if ($mail === true)
+        $info[] = "✅ E-mail de confirmação de senha enviado.";
+      else 
+        $info[] = "❌ E-mail de confirmação não foi enviado.";
 
       // Verifica se deve enviar a foto
       if($_FILES["foto"]["tmp_name"] != ''){
         $resultado = $this->armazenarFoto();
 
-        if ($resultado === false) {
-          $_SESSION["alerta"] = [
-            "Usuário criado, com um porém!",
-            "A foto de perfil não foi armazenada."
-          ];
-        
-          $this->redirect();
-        }
+        if ($resultado === true)
+          $info[] = "✅ A foto de perfil foi guardada.";
+        else 
+          $info[] = "❌ A foto de perfil não foi armazenada.";
       }
 
       // Mostrar mensagem de sucesso
       $_SESSION["alerta"] = [
-        "Usuário criado com sucesso!",
-        "Peça que ele verifique a caixa de e-mail para fazer o primeiro acesso."
+        "Sucesso!",
+        $info
       ];
       $this->redirect();
     }

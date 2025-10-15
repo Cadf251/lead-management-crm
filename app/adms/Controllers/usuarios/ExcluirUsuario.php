@@ -15,8 +15,8 @@ class ExcluirUsuario extends UsuariosReciclagem
     // Verifica se ele não está desativado
     if ($this->statusId !== 2) {
       $_SESSION["alerta"] = [
-        "O usuário não está desativado.",
-        "Você não pode excluir um usuário ativo."
+        "Aviso!",
+        ["❌ Você não pode excluir um usuário ativo."]
       ];
       return false;
     }
@@ -25,14 +25,14 @@ class ExcluirUsuario extends UsuariosReciclagem
 
     if ($excluir === true) {
       $_SESSION["alerta"] = [
-        "Usuário excluído com sucesso!",
-        "Seus dados agora são irrecuperáveis."
+        "Sucesso!",
+        ["✅ Usuário excluído com sucesso."]
       ];
       return true;
     } else {
       $_SESSION["alerta"] = [
-        "O usuário não foi excluído.",
-        "Tente novamente mais tarde."
+        "Erro!",
+        ["❌ Algo deu errado."]
       ];
       return false;
     }

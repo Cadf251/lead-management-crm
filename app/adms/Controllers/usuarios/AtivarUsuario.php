@@ -16,8 +16,8 @@ class AtivarUsuario extends UsuariosReciclagem
     // Verifica se o usuário não está desativado
     if ($this->statusId !== 2){
       $_SESSION["alerta"] = [
-        "Este usuário não está desativado.",
-        "Você não pode ativar um usuário que não esteja desativado."
+        "Aviso!",
+        ["❌ Você não pode ativar um usuário que não esteja desativado."]
       ];
       return false;
     }
@@ -26,14 +26,14 @@ class AtivarUsuario extends UsuariosReciclagem
 
     if ($ativar){
       $_SESSION["alerta"] = [
-        "Usuário ativado com sucesso!",
-        "Ele deverá criar uma nova senha."
+        "Sucesso!",
+        ["✅ O usuário foi ativado com sucesso."]
       ];
       return true;
     } else {
       $_SESSION["alerta"] = [
-        "O usuário não foi ativado.",
-        "Tente novamente mais tarde."
+        "Erro!",
+        ["❌ Algo deu errado."]
       ];
       return false;
     }

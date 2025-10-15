@@ -85,11 +85,10 @@ class UsuariosRepository extends DbOperations
    */
   public function updateUsuario(array $params, int $id)
   {
-    $modified = date("Y-m-d H:i:s");
+    $modified = date($_ENV["DATE_FORMAT"]);
     $params[":modified"] = $modified;
     return $this->updateSQL($this->tabela, $params, $id);
   }
-
   
   /**
    * Seta o status do usuário como aguardando confirmação
@@ -143,7 +142,7 @@ class UsuariosRepository extends DbOperations
     SQL;
 
     $params = [
-      ":data_now" => date("Y-m-d H:i:s"),
+      ":data_now" => date($_ENV["DATE_FORMAT"]),
       ":usuario_id" => $usuarioId
     ];
 

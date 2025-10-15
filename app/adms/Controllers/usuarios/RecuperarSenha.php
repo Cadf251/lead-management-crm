@@ -19,8 +19,8 @@ class RecuperarSenha extends UsuariosReciclagem
     // Verifica se não está ativo
     if ($this->statusId !== 3){
       $_SESSION["alerta"] = [
-        "O usuário não está ativado.",
-        "Você não pode recuperar a senha de um usuário inativo."
+        "Aviso!",
+        ["❌ Você não pode recuperar a senha de um usuário inativo."]
       ];
       return false;
     }
@@ -29,14 +29,14 @@ class RecuperarSenha extends UsuariosReciclagem
 
     if ($reset === true){
       $_SESSION["alerta"] = [
-        "A senha atual foi apagada para redefinição",
-        ""
+        "Sucesso!",
+        ["✅ A senha atual foi apagada para redefinição."]
       ];
       return true;
     } else {
       $_SESSION["alerta"] = [
-        "Ocorreu algum erro inesperado.",
-        ""
+        "Erro!",
+        ["❌ Ocorreu algum erro inesperado."]
       ];
       return false;
     }

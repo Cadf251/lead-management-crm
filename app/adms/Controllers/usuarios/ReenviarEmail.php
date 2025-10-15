@@ -17,8 +17,8 @@ class ReenviarEmail extends UsuariosReciclagem
     // Verifica se o usuário está desativado
     if (!$this->statusId === 2){
       $_SESSION["alerta"] = [
-        "O usuário não tem um TOKEN para criar senha",
-        ""
+        "Aviso!",
+        ["❌ Você não pode reenviar o e-mail de confirmação para um usuário que esteja desativado."]
       ];
       return false;
     } else {

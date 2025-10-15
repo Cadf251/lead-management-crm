@@ -28,9 +28,19 @@ abstract class UsuariosReciclagem extends UsuariosAbstract
       $this->redirect();
 
     // Se precisar envia o e-mail de confirmação
-    if ($this->enviarEmail === true)
-      $this->emailConfirmacao();
+    if ($this->enviarEmail === true){
+      $mail = $this->emailConfirmacao();
 
+      if ($mail === true){
+        if (!isset($_SESSION["alerta"][0])) $_SESSION["alerta"][0] = "Sucesso!";
+        $_SESSION["alerta"][1][] = "✅ O e-mail de confirmação de senha foi enviado com sucesso.";
+      }
+      else {
+        if (!isset($_SESSION["alerta"][0])) $_SESSION["alerta"][0] = "Erro!";
+        $_SESSION["alerta"][1][] = "❌ O e-mail de confirmação de senha não foi enviado.";
+      }
+    }
+    
     // Redireciona
     $this->redirect();
   }
