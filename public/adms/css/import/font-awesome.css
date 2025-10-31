@@ -96,9 +96,9 @@
   .fa-info {
     --fa: "\f129"; }
 
-    .fa-solid::before {
-      content: var(--fa);
-    }
+  .fa-solid::before {
+    content: var(--fa);
+  }
   
   .fa-x::before {
     content: "\58"; }

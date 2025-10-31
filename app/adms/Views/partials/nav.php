@@ -31,7 +31,7 @@ use App\adms\Helpers\HTMLHelper;
       echo HTMLHelper::renderNavLink("listar-usuarios", "user", "Editar Usuários");
 
     if (in_array(2, $_SESSION["permissoes"]) || in_array(4, $_SESSION["permissoes"]))
-      echo HTMLHelper::renderNavLink("equipes", "user-group", "Editar Equipes");
+      echo HTMLHelper::renderNavLink("listar-equipes", "user-group", "Editar Equipes");
 
     echo HTMLHelper::renderNavLink("leads", "list", "Gerenciar Leads");
     echo HTMLHelper::renderNavLink("recursos", "toolbox", "Meus Recursos");

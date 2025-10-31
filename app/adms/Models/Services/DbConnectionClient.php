@@ -3,6 +3,7 @@
 namespace App\adms\Models\Services;
 
 use App\adms\Helpers\ErrorHandler;
+use App\adms\Helpers\GenerateLog;
 use PDO;
 use PDOException;
 
@@ -25,7 +26,7 @@ class DbConnectionClient
   private string $user;
   private string $pass;
 
-  public function __construct(?array $credenciais)
+  public function __construct(array|null $credenciais)
   {
     $array = $credenciais ?? $_SESSION["db_credenciais"];
 

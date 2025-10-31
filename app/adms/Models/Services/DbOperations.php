@@ -120,7 +120,6 @@ abstract class DbOperations
     SQL;
 
     $result = $this->executeSQL($query, $params, false);
-
     if ($result)
       return $this->conexao->lastInsertId();
     else
@@ -165,13 +164,14 @@ abstract class DbOperations
    * Deleta registros de SQL com um WHERE flexível
    * 
    * @param string $tabela A tabela alvo
-   * @param string $where A condição WHERE
+   * @param array $where As condições WHERE
    * @param array $params Os parâmetros do WHERE
    * 
    * @return bool
    */
-  public function deleteSQL(string $tabela, string $where, array $params):bool
+  public function deleteSQL(string $tabela, array $where, array $params):bool
   {
+    $whereSQL = implode("\n  AND", $where);
     $query = <<<SQL
     DELETE FROM {$tabela}
     WHERE {$where}

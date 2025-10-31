@@ -297,7 +297,7 @@ input:-webkit-autofill {
   margin: 0
 }
 
-/* RESTANTE */
+/* HEADER */
 .page-header {
   gap: 15px;
   display:flex;
@@ -305,7 +305,6 @@ input:-webkit-autofill {
   justify-content:left
 }
 
-/* TOP SELECTION */
 .top-selection {
   color: var(--dark-gray-color);
   margin: 16px 0 0 0;
@@ -374,18 +373,20 @@ input:-webkit-autofill {
 .small-btn, .switch {
   border:none;
   font-size: 1em;
-  display: block;
   color: var(--white-color);
   padding: 8px 12px;
   border-radius: 5px;
   cursor: pointer !important;
   transition: border 0.7s ease;
-  width:auto;
   transition: background 0.5s ease;
 }
 
 .small-btn:hover {
   color:var(--white-color);
+}
+
+.switch {
+  font-size: 0.8em;
 }
 
 .switch--ativado {
@@ -415,7 +416,7 @@ input:-webkit-autofill {
 }
 
 .small-btn:disabled{
-  cursor: not-allowed;
+  cursor: not-allowed !important;
 }
 
 /* CARDS */
@@ -532,7 +533,7 @@ input:-webkit-autofill {
 }
 
 .table-container::-webkit-scrollbar, .grafico::-webkit-scrollbar {
-  height: 12px; /* Altura da barra horizontal */
+  height: 12px;
 }
 
 .table-container::-webkit-scrollbar-track, .grafico::-webkit-scrollbar-track {
@@ -556,69 +557,6 @@ input:-webkit-autofill {
   padding: 10px;
   min-width: 150px;
 }
-
-/* GRÁFICO */
-/* .grafico {
-  max-width: 800px;
-  margin: 16px auto;
-  padding: 20px;
-}
-
-.grafico__box {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-around;
-  width: 100%;
-  height: 250px;
-}
-
-.grafico__title {
-  text-align: center;
-  display: block;
-  font-size: 1.1em;
-}
-
-.grafico__coluna {
-  height: 100%;
-  text-align: center;
-  font-family: sans-serif;
-  display: flex;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  flex-direction: column;
-  margin: 0 8px;
-}
-
-.grafico__barra {
-  width: 60px;
-  min-height: 2px;
-  background-color: var(--main-color);
-  border-radius: 4px 4px 0 0;
-  margin-bottom: 8px;
-  transition: height 0.3s ease;
-  margin-inline: auto;
-  text-align: center;
-}
-
-.grafico__label {
-  text-wrap-mode: nowrap;
-  margin: 0 10px;
-}
-
-.porcentagem-container {
-  gap: 20px;
-  display: flex;
-  flex-direction: column;
-  text-wrap-mode: nowrap;
-  margin: 0 10px;
-  padding-right: 20px;
-}
-
-.porcentagem {
-  font-weight: bold;
-  font-size: 2em;
-  margin: 0;
-} */
 
 /* NOVO GRÁFICO */
 .grafico-card {

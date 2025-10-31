@@ -16,7 +16,7 @@ use App\adms\Views\Services\LoadViewService;
  */
 abstract class UsuariosAbstract
 {
-  /** @var array $data Contém as informações da VIEW */
+  /** @var array $data Contém as informações da VIEW, evite usar no back-end. */
   protected array $data = [
     "title" => "Usuários",
     "css" => ["public/adms/css/usuarios.css"],
@@ -52,26 +52,51 @@ abstract class UsuariosAbstract
     $this->tokenRepo = new TokenRepository($conn->conexao);
   }
 
+  /** 
+   * Inclui no array $this->data valores adicionais que serão passados para o VIEW.
+   */
   protected function setData(array $data): void
   {
     $this->data = array_merge($this->data, $data);
   }
 
+  /** 
+   * Retorna o $this->data.
+   * 
+   * @return array
+   */
   protected function getData(): array
   {
     return $this->data;
   }
 
+  /**
+   * Instancia e carrega a view.
+   * 
+   * @param string $viewPath O caminho completo para a view
+   */
   protected function render(string $viewPath): void
   {
     $loadView = new LoadViewService($viewPath, $this->getData());
     $loadView->loadView();
   }
 
-  /** Recupera os dados do usuário e já trata os erros e faz o direcionamento caso falhe. */
+  /**
+   * Redireciona de volta para "listar usuário".
+   */
+  public function redirect(): void
+  {
+    header("Location: {$_ENV['HOST_BASE']}listar-usuarios");
+    exit;
+  }
+
+  /** 
+   * Recupera os dados do usuário e seta na classe. Também trata os erros e faz o direcionamento caso falhe.
+   * 
+   * @param int $usuarioId O ID do usuário.
+   */
   public function setInfoById(int $usuarioId):void
   {
-    // Recupera os dados do usuário
     $this->id = (int)$usuarioId;
     $usuarioArray = $this->repo->selecionar($this->id);
 
@@ -266,7 +291,10 @@ abstract class UsuariosAbstract
     }
 
     // Cria devidamente o TOKEN
-    $token = $this->tokenRepo->armazenarToken("sistema", "confirmar_email_senha", $this->id);
+
+    // Prazo de 7 dias
+    $prazo = date($_ENV['DATE_FORMAT'], strtotime('+7 days'));
+    $token = $this->tokenRepo->armazenarToken("sistema", "confirmar_email_senha", $prazo, $this->id);
 
     // Cria o email de envio
     $mail = new PHPMailerHelper;
@@ -354,14 +382,5 @@ abstract class UsuariosAbstract
     $title = "RD Mind | Confirme seu E-mail e Crie sua Senha";
     $mail->setarConteudo($title, $body);
     return $mail->enviar();
-  }
-
-  /**
-   * Redireciona de volta para listar usuário.
-   */
-  public function redirect(): void
-  {
-    header("Location: {$_ENV['HOST_BASE']}listar-usuarios");
-    exit;
   }
 }

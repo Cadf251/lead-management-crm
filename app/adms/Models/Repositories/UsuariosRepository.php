@@ -132,37 +132,18 @@ class UsuariosRepository extends DbOperations
    */
   public function desativar(int $usuarioId) :bool
   {
-    $queries[] = <<<SQL
-    UPDATE {$this->tabela} SET
-      usuario_status_id = 2,
-      senha = null,
-      modified = :data_now
-    WHERE
-      id = :usuario_id
-    SQL;
-
     $params = [
-      ":data_now" => date($_ENV["DATE_FORMAT"]),
-      ":usuario_id" => $usuarioId
+      ":usuario_status_id" => 2,
+      ":senha" => null
     ];
 
-    $queries[] =
-    "DELETE FROM equipes_usuarios WHERE equipes_usuarios.usuario_id = :usuario_id";
-
-    $queries[] =
-    "DELETE FROM tokens WHERE tokens.usuario_id = :usuario_id";
-
-    $sucesso = false;
-    foreach ($queries as $query){
-      $sucesso = $this->executeSQL($query, $params, false);
-      if ($sucesso === false)
-        return false;
-    }
-    return true;
+    return $this->updateUsuario($params, $usuarioId);
   }
 
   /** 
    * Dá um tiro de misericórdia no usuário.
+   * 
+   * Evitar essa funcionalidade.
    * 
    * @param int $usuarioId O Usuário que será excluído
    * 

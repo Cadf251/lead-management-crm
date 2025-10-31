@@ -13,7 +13,7 @@ class LoadViewService
 {
   /** @var string $view Recebe o endereço da VIEW */
   private string $view;
-  
+
   /**
    * Receber o endereço da VIEW e os dados.
    * @param string $nameView Endereço da VIEW que deve ser carregada
@@ -38,7 +38,7 @@ class LoadViewService
       include './app/adms/Views/layouts/main.php';
     } else {
       GenerateLog::generateLog("error", "O arquivo não existe", ["arquivo" => './app/' . $this->nameView . '.php']);
-      die("O arquivo não existe");
+      $this->falha();
     }
   }
 
@@ -53,7 +53,7 @@ class LoadViewService
       include './app/adms/Views/layouts/login.php';
     } else {
       GenerateLog::generateLog("error", "O arquivo não existe", ["arquivo" => './app/' . $this->nameView . '.php']);
-      die("O arquivo não existe");
+      $this->falha();
     }
   }
 
@@ -69,7 +69,7 @@ class LoadViewService
       include './app/adms/Views/layouts/external-error.php';
     } else {
       GenerateLog::generateLog("error", "O arquivo não existe", ["arquivo" => './app/' . $this->nameView . '.php']);
-      die("O arquivo não existe");
+      $this->falha();
     }
   }
 
@@ -83,8 +83,19 @@ class LoadViewService
       // Inclui o layout principal
       include './app/database/Views/layouts/main.php';
     } else {
-      GenerateLog::generateLog("error", "O arquivo não existe", ["arquivo" => './app/' . $this->nameView . '.php']);
-      die("O arquivo não existe");
+      
+      $this->falha();
     }
+  }
+
+  /**
+   * Direciona o cabra para a tela de falha e interrompe o código
+   */
+  private function falha(): void
+  {
+    GenerateLog::generateLog("error", "O arquivo não existe", ["arquivo" => './app/' . $this->nameView . '.php']);
+
+    header("Location: {$_ENV['HOST_BASE']}erro/404");
+    exit;
   }
 }

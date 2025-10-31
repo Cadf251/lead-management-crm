@@ -1,0 +1,22 @@
+ListarEquipes
+  ListarUsuarios
+
+CriarEquipe
+  NovaEquipe
+
+EditarEquipes
+  ApurarEdicao
+
+MudarFuncaoUsuario
+
+PausarEquipe / DespausarEquipe
+
+DesastivarEquipe / AtivarEquipe
+
+DesativarRecebimentoDeLeads / AtivarRecebimentoDeLeads
+
+PriorizarVez / PrejudicarVez
+
+AdicionarUsuario / RemoverUsuario
+
+RenderEquipeCard / RenderUsuariosTable

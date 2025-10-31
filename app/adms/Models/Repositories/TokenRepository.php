@@ -172,7 +172,7 @@ class TokenRepository extends DbOperations
    * 
    * @return string O Token criado
    */
-  public function armazenarToken(string $tipo, string $contexto, int|null $usuarioId = null, int|null $atendimentoId = null):string
+  public function armazenarToken(string $tipo, string $contexto, ?string $prazo = null, int|null $usuarioId = null, int|null $atendimentoId = null):string
   {
     $recuperar = $this->recuperarToken($tipo, $contexto, $usuarioId, $atendimentoId);
 
@@ -182,19 +182,44 @@ class TokenRepository extends DbOperations
     $token = TokenHelper::criarToken();
 
     $query = <<<SQL
-    INSERT INTO tokens (token, tipo, contexto, usuario_id, atendimento_id, token_status_id)
-    VALUES (:token, :tipo, :contexto, :usuario_id, :atendimento_id, 3)
+    INSERT INTO tokens (token, tipo, contexto, prazo, usuario_id, atendimento_id, token_status_id)
+    VALUES (:token, :tipo, :contexto, :prazo, :usuario_id, :atendimento_id, 3)
     SQL;
 
     $params = [
       ":token" => $token,
-      ":atendimento_id" => $atendimentoId,
       ":tipo" => $tipo,
       ":contexto" => $contexto,
+      ":prazo" => $prazo,
+      ":atendimento_id" => $atendimentoId,
       ":usuario_id" => $usuarioId
     ];
 
     $this->executeSQL($query, $params, false);
     return $token;
+  }
+
+  /**
+   * Desativa todos os TOKENs de um usuário.
+   * 
+   * @param int $usuarioId O ID do usuário
+   * 
+   * @return bool Se funcionou
+   */
+  public function desativarDeUsuario(int $usuarioId):bool
+  { 
+    $query = <<<SQL
+      UPDATE tokens
+      SET token_status_id = :token_status_id
+      WHERE
+        usuario_id = :usuario_id
+    SQL;
+
+    $params = [
+      ":token_status_id" => 1,
+      ":usuario_id" => $usuarioId
+    ];
+    
+    return $this->executeSQL($query, $params, false);
   }
 }

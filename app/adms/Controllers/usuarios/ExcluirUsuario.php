@@ -6,7 +6,12 @@ class ExcluirUsuario extends UsuariosReciclagem
 {
   public function index(string|null $usuarioId)
   {
-    $this->fluxoPrincipal($usuarioId);
+    $_SESSION["alerta"] = [
+      "Aviso!",
+      "ℹ️ Essa funcionalidade foi desativada."
+    ];
+    $this->redirect();
+    // $this->fluxoPrincipal($usuarioId);
   }
 
   /** Apaga permanentemente o usuário. */

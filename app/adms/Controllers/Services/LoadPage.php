@@ -20,10 +20,10 @@ class LoadPage
   private array $listPackages = ["adms", "database"];
 
   /** @var array $listDirectory Lista de diretório das classes */
-  private array $listDirectory = ["login", "dashboard", "usuarios", "equipes", "erro", "master"];
+  private array $listDirectory = ["login", "dashboard", "usuarios", "equipes", "erro", "master", "api"];
 
   /** @var array $listPgPublic Lista de páginas públicas */
-  private array $listPgPublic = ["Login", "NovaSenha", "Erro"];
+  private array $listPgPublic = ["Login", "NovaSenha", "Erro", "Api"];
 
   /** @var array $listPgPrivate Lista de páginas privadas */
   private array $listPgPrivate = [
@@ -39,7 +39,14 @@ class LoadPage
     "RecuperarSenha",
     "ExcluirUsuario",
     "ReenviarEmail",
-    "Equipes"
+    "ListarEquipes",
+    "CriarEquipe",
+    "EditarEquipe",
+    "CongelarEquipe",
+    "AtivarEquipe",
+    "DesativarEquipe",
+    "AdicionarUsuario",
+    "EquipesAjax",
   ];
 
   /** @var array $listPgDev Páginas que só podem ser acessadas por DEVs */

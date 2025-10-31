@@ -10,6 +10,9 @@ namespace App\adms\Helpers;
 class SlugController
 {
 
+  /**
+   * Transforma o slug em class
+   */
   public static function slugController(string $slugController):string
   {
     // Converte para lower

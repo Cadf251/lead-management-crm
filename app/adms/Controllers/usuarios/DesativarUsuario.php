@@ -27,11 +27,13 @@ class DesativarUsuario extends UsuariosReciclagem
     
     $desativar = $this->repo->desativar($this->id);
 
+    // Pausa todos os TOKENs dele
+    $this->tokenRepo->desativarDeUsuario($this->id);
+
     if ($desativar){
       $_SESSION["alerta"] = [
         "Sucesso!",
-        ["✅ O usuário foi desativado com sucesso.",
-        "ℹ️ Você ainda pode deletar os dados restantes do usuário se preferir."]
+        ["✅ O usuário foi desativado com sucesso."]
       ];
 
       // Excluir a foto dele

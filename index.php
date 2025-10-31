@@ -10,6 +10,10 @@ session_start();
 ob_start();
 ini_set("display_errors", 0);
 
+// Instancia as variáveis de ambiente
+$dotenv = Dotenv\Dotenv::createUnsafeImmutable(__DIR__);
+$dotenv->load();
+
 date_default_timezone_set($_ENV['TIME_ZONE']);
 
 // Observa erros fatais
@@ -22,10 +26,6 @@ register_shutdown_function(function () {
     ]);
   }
 });
-
-// Instancia as variáveis de ambiente
-$dotenv = Dotenv\Dotenv::createUnsafeImmutable(__DIR__);
-$dotenv->load();
 
 // Instanciar a classe PageController, para tratar a URL
 $url = new PageController();

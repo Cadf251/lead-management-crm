@@ -132,3 +132,18 @@ function confirmarAviso(confirmou) {
 function applyThinnerForm(){
   document.querySelector(".all").classList.add("all--centered");
 }
+
+function postRequest(url, params = ""){
+  fetch(url,{
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: params
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log(data);
+    return data.sucesso;
+  });
+}

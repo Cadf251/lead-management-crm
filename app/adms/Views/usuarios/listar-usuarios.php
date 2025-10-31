@@ -67,18 +67,18 @@ foreach ($this->data["usuarios"] as $usuario) {
 
   $reativar = HTMLHelper::renderButtonAjax($function, "gray", "rotate", "Reativar Usuário");
 
-  $function = <<<JS
-    setWarning(
-      "Deseja excluir o usuário {$usuario['u_nome']}?",
-      "Esta ação não pode ser desfeita. Os leads e atendimentos que eram deste usuário ficarão sem dono.",
-      true,
-      () => {
-        window.location.href = "{$_ENV['HOST_BASE']}excluir-usuario/{$usuario['u_id']}";
-      }
-    )
-  JS;
+  // $function = <<<JS
+  //   setWarning(
+  //     "Deseja excluir o usuário {$usuario['u_nome']}?",
+  //     "Esta ação não pode ser desfeita. Os leads e atendimentos que eram deste usuário ficarão sem dono.",
+  //     true,
+  //     () => {
+  //       window.location.href = "{$_ENV['HOST_BASE']}excluir-usuario/{$usuario['u_id']}";
+  //     }
+  //   )
+  // JS;
 
-  $deletar = HTMLHelper::renderButtonAjax($function, "alerta", "trash-can", "Apagar dados permanentemente");
+  // $deletar = HTMLHelper::renderButtonAjax($function, "alerta", "trash-can", "Apagar dados permanentemente");
 
   $function = <<<JS
     setWarning(

@@ -2,6 +2,7 @@
 
 namespace App\database\Models;
 
+use App\adms\Helpers\GenerateLog;
 use App\adms\Models\Services\DbOperations;
 
 class DatabaseRepository extends DbOperations
@@ -53,5 +54,25 @@ class DatabaseRepository extends DbOperations
   public function ativar(int $servidorId)
   {
     $this->updateSQL("servidores", [":status" => 1], $servidorId);
+  }
+
+  public function verificarTokenApi(string $token)
+  {
+    $query = <<<SQL
+    SELECT host, user, pass, `db_name`
+    FROM servidores
+    WHERE api_token = :token
+    SQL;
+
+    $params = [
+      ":token" => $token
+    ];
+
+    $result = $this->executeSQL($query, $params);
+    
+    if ((empty($result)) || $result === false || $result === null)
+      return false;
+    else
+      return $result[0];
   }
 }

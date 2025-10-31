@@ -18,47 +18,47 @@ if ((selectUsuario !== null) && (selectUsuario !== undefined)){
   });
 }
 
-function postRequest(task, usuarioId, equipeId, btn){
-  fetch('php/post-gerenciar-equipes.php',{
-    method: 'POST',
-    headers: {
-    'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: `task=${task}&usuario_id=${usuarioId}&equipe_id=${equipeId}`
-  })
-  .then(res => res.json())
-  .then(data => {
-    const warning = document.querySelector('.warning');
-    if (data.sucesso) {
-      warning.innerHTML = `
-      <div style="text-align: center;">
-        <b>Sucesso!</b>
-        <p>`+data.mensagem+`</p>
-        <button class="small-btn small-btn--normal" onclick="recarregar(`+data.recarregar+`)">Ok!</button>
-      </div>`;
-      warning.classList.add('warning--show');
-      priorizarBtn = document.getElementById("priorizar-btn-"+usuarioId);
-      prejudicarBtn = document.getElementById("prejudicar-btn-"+usuarioId);
-    } else {
-      warning.innerHTML = `
-      <div style="text-align: center;">
-        <b>Algo deu errado.</b>
-        <p>`+data.mensagem+`</p>
-        <button class="small-btn small-btn--alerta" onclick="document.querySelector('.warning').classList.remove('warning--show')">Ok!</button>
-      </div>`;
-      warning.classList.add('warning--show');
-    }
-  });
-}
+// function postRequest(task, usuarioId, equipeId, btn){
+//   fetch('php/post-gerenciar-equipes.php',{
+//     method: 'POST',
+//     headers: {
+//     'Content-Type': 'application/x-www-form-urlencoded'
+//     },
+//     body: `task=${task}&usuario_id=${usuarioId}&equipe_id=${equipeId}`
+//   })
+//   .then(res => res.json())
+//   .then(data => {
+//     const warning = document.querySelector('.warning');
+//     if (data.sucesso) {
+//       warning.innerHTML = `
+//       <div style="text-align: center;">
+//         <b>Sucesso!</b>
+//         <p>`+data.mensagem+`</p>
+//         <button class="small-btn small-btn--normal" onclick="recarregar(`+data.recarregar+`)">Ok!</button>
+//       </div>`;
+//       warning.classList.add('warning--show');
+//       priorizarBtn = document.getElementById("priorizar-btn-"+usuarioId);
+//       prejudicarBtn = document.getElementById("prejudicar-btn-"+usuarioId);
+//     } else {
+//       warning.innerHTML = `
+//       <div style="text-align: center;">
+//         <b>Algo deu errado.</b>
+//         <p>`+data.mensagem+`</p>
+//         <button class="small-btn small-btn--alerta" onclick="document.querySelector('.warning').classList.remove('warning--show')">Ok!</button>
+//       </div>`;
+//       warning.classList.add('warning--show');
+//     }
+//   });
+// }
 
-function recarregar(a){
-  const warn = document.querySelector('.warning').classList.remove('warning--show');
-  if (a === true) window.location.reload();
-}
+// function recarregar(a){
+//   const warn = document.querySelector('.warning').classList.remove('warning--show');
+//   if (a === true) window.location.reload();
+// }
 
 window.onload = () => {
-  const selectElement = document.querySelectorAll('.select');
-  const saveElement = document.querySelectorAll('.salvar');
+  const selectElement = document.querySelectorAll('.js--select');
+  const saveElement = document.querySelectorAll('.js--salvar');
   
   const selectArray = Array.from(selectElement);
   

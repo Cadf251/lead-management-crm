@@ -7,8 +7,10 @@ use App\adms\Helpers\CreateOptions;
 use App\adms\Helpers\CSRFHelper;
 use App\adms\Helpers\GenerateLog;
 
+/** Manipula novos usuários. */
 class CriarUsuario extends UsuariosAbstract
 {
+  /** Verifica se deve mostrar a VIEW do formulário ou apura os dados do $_POST */
   public function index()
   {
     // Seleciona as opções no banco de dados
