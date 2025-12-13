@@ -17,7 +17,7 @@ class EquipesRepository extends DbOperations
    * 
    * @return string SQL
    */
-  public function getQueryBase(string $where = ""):string
+  public function getQueryBase(string $where = ""): string
   {
     if ($where !== "")
       $where = <<<SQL
@@ -46,7 +46,7 @@ class EquipesRepository extends DbOperations
         AND (e.id IN(:acesso_equipes))
       SQL;
 
-      return $query;
+    return $query;
   }
 
   /**
@@ -62,7 +62,16 @@ class EquipesRepository extends DbOperations
       ":acesso_equipes" => $_SESSION["acesso_equipes"]
     ];
 
-    return $this->executeSQL($query, $params);
+    $equipes = $this->executeSQL($query, $params);
+    $return = [];
+    
+    $i = 0;
+    foreach ($equipes as $equipe){
+      $return[$i] = $equipe;
+      $return[$i]["usuarios"] = $this->listarUsuarios($equipe["equipe_id"]);
+      $i++;
+    }
+    return $return;
   }
 
   /**
@@ -100,7 +109,7 @@ class EquipesRepository extends DbOperations
    * @return array|false
    * 
    */
-  public function selecionarEquipe(int $equipeId):array|false
+  public function selecionarEquipe(int $equipeId): array|false
   {
     $query = $this->getQueryBase("e.id = :equipe_id");
 
@@ -109,7 +118,9 @@ class EquipesRepository extends DbOperations
       ":equipe_id" => $equipeId
     ];
 
-    return $this->executeSQL($query, $params);
+    $equipe = $this->executeSQL($query, $params)[0];
+    $equipe["usuarios"] = $this->listarUsuarios($equipeId);
+    return $equipe;
   }
 
   /** 
@@ -121,7 +132,7 @@ class EquipesRepository extends DbOperations
    * 
    * @return bool Se funcionou
    */
-  public function criarEquipe(string $nome, int $produtoId, ?string $descricao = null):bool
+  public function criarEquipe(string $nome, int $produtoId, ?string $descricao = null): bool
   {
     $params = [
       ":nome" => $nome,
@@ -265,7 +276,7 @@ class EquipesRepository extends DbOperations
    * 
    * @return int
    */
-  public function minVez(int $equipeId):int
+  public function minVez(int $equipeId): int
   {
     $query = <<<SQL
       SELECT
@@ -308,7 +319,7 @@ class EquipesRepository extends DbOperations
   /**
    * Adiciona um usuário em uma equipe com base no $params
    */
-  public function adicionarUsuario(array $params):bool
+  public function adicionarUsuario(array $params): bool
   {
     return $this->insertSQL("equipes_usuarios", $params);
   }
@@ -346,33 +357,33 @@ class EquipesRepository extends DbOperations
 
     $params = [
       ":vez" => $vez,
-      ":pode_receber_leads" => $set  
+      ":pode_receber_leads" => $set
     ];
 
     return $this->updateSQL("equipes_usuarios", $params, $registroId);
   }
 
-  public function priorizar(int $equipeId, int $usuarioId)
+  public function priorizar(int $equipeId, int $usuarioId):bool
   {
-    $this->mudarVez($equipeId, $usuarioId, 1);
+    return $this->mudarVez($equipeId, $usuarioId, 1);
   }
 
-  public function prejudicar(int $equipeId, int $usuarioId)
+  public function prejudicar(int $equipeId, int $usuarioId):bool
   {
-    $this->mudarVez($equipeId, $usuarioId, -1);
+    return $this->mudarVez($equipeId, $usuarioId, -1);
   }
 
-  public function mudarVez(int $equipeId, int $usuarioId, int $set)
+  public function mudarVez(int $equipeId, int $usuarioId, int $set):bool
   {
     $registroId = $this->getIdEquipesUsuarios($equipeId, $usuarioId);
 
     $vez = $this->vezUsuario($registroId);
-    
+
     if (($set === -1) && $vez === 0)
       return false;
 
     $vez = $vez + $set;
-    
+
     $params = [
       ":vez" => $vez
     ];

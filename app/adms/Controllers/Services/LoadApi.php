@@ -14,7 +14,8 @@ class LoadApi
 
   /** @var array $listClasses As Classes disponíveis */
   private array $listClasses = [
-    "NovoLead"
+    "NovoLead",
+    "CriarToken"
   ];
 
   /**

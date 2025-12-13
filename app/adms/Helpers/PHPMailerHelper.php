@@ -9,7 +9,7 @@ use PHPMailer\PHPMailer\SMTP;
 
 class PHPMailerHelper
 {
-  public object|null $mail = null;
+  public ?PHPMailer $mail = null;
 
   public function __construct()
   {

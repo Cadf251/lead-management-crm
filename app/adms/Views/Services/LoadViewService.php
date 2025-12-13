@@ -32,10 +32,10 @@ class LoadViewService
    */
   public function loadView(): void
   {
-    $this->view = "./app/{$this->nameView}.php";
-    if (file_exists('./app/' . $this->nameView . '.php')) {
+    $this->view = APP_ROOT."app/{$this->nameView}.php";
+    if (file_exists(APP_ROOT."app/" . $this->nameView . '.php')) {
       // Inclui o layout principal
-      include './app/adms/Views/layouts/main.php';
+      include APP_ROOT.'app/adms/Views/layouts/main.php';
     } else {
       GenerateLog::generateLog("error", "O arquivo não existe", ["arquivo" => './app/' . $this->nameView . '.php']);
       $this->falha();
@@ -63,12 +63,12 @@ class LoadViewService
    */
   public function loadExternalError(): void
   {
-    $this->view = "./app/{$this->nameView}.php";
-    if (file_exists('./app/' . $this->nameView . '.php')) {
+    $this->view = APP_ROOT."app/{$this->nameView}.php";
+    if (file_exists(APP_ROOT.'app/' . $this->nameView . '.php')) {
       // Inclui o layout principal
-      include './app/adms/Views/layouts/external-error.php';
+      include APP_ROOT.'app/adms/Views/layouts/external-error.php';
     } else {
-      GenerateLog::generateLog("error", "O arquivo não existe", ["arquivo" => './app/' . $this->nameView . '.php']);
+      GenerateLog::generateLog("error", "O arquivo não existe", ["arquivo" => APP_ROOT.'app/' . $this->nameView . '.php']);
       $this->falha();
     }
   }

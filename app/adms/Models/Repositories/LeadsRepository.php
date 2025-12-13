@@ -6,7 +6,7 @@ use App\adms\Models\Services\DbOperations;
 
 class LeadsRepository extends DbOperations
 {
-  private $tabela = "Leads";
+  private $tabela = "leads";
 
   /**
    * Cria um lead e retorna o ID criado ou false se falhar

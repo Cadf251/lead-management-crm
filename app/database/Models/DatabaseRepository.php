@@ -59,7 +59,7 @@ class DatabaseRepository extends DbOperations
   public function verificarTokenApi(string $token)
   {
     $query = <<<SQL
-    SELECT host, user, pass, `db_name`
+    SELECT email_master, host, user, pass, `db_name`
     FROM servidores
     WHERE api_token = :token
     SQL;

@@ -3,6 +3,7 @@
 namespace App\adms\Controllers\atendimentos;
 
 use App\adms\Helpers\GenerateLog;
+use Exception;
 
 class CriarAtendimento extends AtendimentoAbstract
 {
@@ -26,37 +27,29 @@ class CriarAtendimento extends AtendimentoAbstract
    * 
    * @param $this->equipeId
    * 
-   * @return array As informações do atendimento
+   * @return array|Exception As informações do atendimento
    */
-  public function novoAtendimento():array|false
+  public function novoAtendimento():array|Exception
   {
-    if ((!isset($this->equipeId) || (!isset($this->leadId)))){
-      GenerateLog::generateLog("error", "Equipe ID ou Lead ID não está setado.", ["equipe_id" => $this->equipeId]);
-      return false;
-    }
+    if ((!isset($this->equipeId) || (!isset($this->leadId))))
+      throw new Exception("Equipe ID ou Lead ID não está setado.");
 
     // Próximo usuário
     $usuario = $this->repo->pegarProximoUsuario($this->equipeId);
 
-    if ($usuario === false){
-      GenerateLog::generateLog("error", "Não foi possível selecionar um usuário.", []);
-      return false;
-    }
+    if ($usuario === false)
+      throw new Exception("Não foi possível selecionar um usuário nessa equipe.");
 
     // Incrementa a vez do próximo usuário
     $incrementar = $this->repo->incrementarUsuario((int)$usuario["eu_id"]);
 
-    if ($incrementar === false){
-      GenerateLog::generateLog("error", "Não foi possível incrementar a vez do usuário.", ["equipes_usuarios_id" => $usuario["eu_id"]]);
-      return false;
-    }
+    if ($incrementar === false)
+      throw new Exception("Não foi possível incrementar a vez do usuário");
 
     $atendimentoId = $this->repo->novoAtendimento($usuario["usuario_id"], $this->equipeId, $this->leadId);
     
-    if (($atendimentoId === false) || ($atendimentoId === 0)){
-      GenerateLog::generateLog("error", "Não foi possível criar o atendimento no banco de dados.", []);
-      return false;
-    }
+    if (($atendimentoId === false) || ($atendimentoId === 0))
+      throw new Exception("Não foi possível gerar o atendimento.");
 
     return [
       "atendimento_id" => $atendimentoId,

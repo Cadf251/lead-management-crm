@@ -38,9 +38,9 @@ class GenerateLog
     $nameFileLog = date("dmY") . ".log";
 
     $pasta = $_SESSION["servidor_id"] ?? "limbo";
-
+    
     // Cria o diretório
-    $path = "files/logs/$pasta";
+    $path = APP_ROOT."files/logs/$pasta";
 
     // Cria a pasta se não existir
     if (!is_dir($path)){
@@ -62,17 +62,15 @@ class GenerateLog
     }
 
     $log->pushHandler(new StreamHandler($filePath), Level::Debug);
-
-    // Aprimora o $content se existir a $_SESSION
+    
     if (isset($_SESSION["logado"]) && $_SESSION["logado"] === true){
       $content["sessao"] =[
         "usuario_id" => $_SESSION["usuario_id"] ?? null,
         "servidor_id" => $_SESSION["servidor_id"] ?? null
       ];
     }
-    
+
     // Salvar o log no arquivo
     $log->$level($message, $content);
   }
-
 }

@@ -74,18 +74,16 @@ abstract class EquipesAbstract
    */
   public function setInfoById(int $equipeId): void
   {
-    $array = $this->repo->selecionarEquipe($equipeId);
+    $equipe = $this->repo->selecionarEquipe($equipeId);
 
-    if (empty($array)) {
+    if (empty($equipe)) {
       $_SESSION["alerta"] = [
         "Aviso!",
         ["❌ Essa equipe não existe ou você não tem acesso a ela."]
       ];
       $this->redirect();
     }
-
-    $equipe = $array[0];
-
+   
     $this->id = $equipe["equipe_id"];
     $this->nome = $equipe["equipe_nome"];
     $this->descricao = $equipe["equipe_descricao"];

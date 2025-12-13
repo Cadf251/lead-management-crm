@@ -156,7 +156,7 @@ abstract class DbOperations
     SQL;
 
     $params[":id"] = $id;
-
+    GenerateLog::generateLog("info", "query", [$query]);
     return $this->executeSQL($query, $params, false);
   }
 

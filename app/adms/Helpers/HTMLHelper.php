@@ -89,7 +89,7 @@ class HTMLHelper
    * 
    * @return string HTML
    */
-  public static function renderCardComplete(string $title, string $content, string $descricao, string $icons):string
+  public static function renderCardComplete(string $title, string $content, string $descricao, string $icons, array $classes = []):string
   {
     $header = HTMLHelper::renderTitleWIcons($title, $icons);
 
@@ -99,7 +99,7 @@ class HTMLHelper
       $content
     HTML;
 
-    return HTMLHelper::renderCard($contentFinal);
+    return HTMLHelper::renderCard($contentFinal, $classes);
   }
 
   /**

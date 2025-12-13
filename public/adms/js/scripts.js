@@ -133,7 +133,7 @@ function applyThinnerForm(){
   document.querySelector(".all").classList.add("all--centered");
 }
 
-function postRequest(url, params = ""){
+function postRequest(url, params = "", then = null){
   fetch(url,{
     method: 'POST',
     headers: {
@@ -143,7 +143,12 @@ function postRequest(url, params = ""){
   })
   .then(res => res.json())
   .then(data => {
-    console.log(data);
-    return data.sucesso;
+    if((then !== null) && (typeof then === "function")){
+      console.log(data);
+      then(data);
+    } else {
+      console.log("then não é uma função ou é null")
+    }
+    return data;
   });
 }

@@ -10,25 +10,12 @@ class ListarEquipes extends EquipesAbstract
   {
     $funcoes = $this->repo->selecionarOpcoes("equipes_usuarios_funcoes");
 
+    $equipes = $this->repo->listarEquipes();
     $this->setData([
       "css" => ["public/adms/css/equipes.css"],
-      "js" => ["public/adms/js/equipes.js?v=2"],
-      "equipes" => $this->repo->listarEquipes(),
+      "js" => ["public/adms/js/equipes.js?v=433422"],
+      "equipes" => $equipes,
       "funcoes" => $funcoes
-    ]);
-
-    // Processa os usuários de cada equipe
-    $usuarios = [];
-    $proximos = [];
-    foreach ($this->data["equipes"] as $equipe){
-      $usuarios[$equipe["equipe_id"]] = $this->repo->listarUsuarios($equipe["equipe_id"]);
-      $proximos[$equipe["equipe_id"]] = $this->repo->proximos($equipe["equipe_id"]);
-    }
-
-    // Inclui os usuários na VIEW
-    $this->setData([
-      "usuarios" => $usuarios,
-      "proximos" => $proximos
     ]);
     
     // Cria a VIEW
