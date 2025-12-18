@@ -3,7 +3,7 @@
 namespace App\database\Models;
 
 use App\adms\Helpers\GenerateLog;
-use App\adms\Models\Services\DbOperations;
+use App\adms\Database\DbOperations;
 
 class DatabaseRepository extends DbOperations
 {

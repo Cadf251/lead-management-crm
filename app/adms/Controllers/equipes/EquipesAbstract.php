@@ -2,9 +2,9 @@
 
 namespace App\adms\Controllers\equipes;
 
-use App\adms\Models\Repositories\EquipesRepository;
-use App\adms\Models\Services\DbConnectionClient;
-use App\adms\Views\Services\LoadViewService;
+use App\adms\Repositories\EquipesRepository;
+use App\adms\Database\DbConnectionClient;
+use App\adms\Core\LoadView;
 
 abstract class EquipesAbstract
 {
@@ -57,7 +57,7 @@ abstract class EquipesAbstract
    */
   protected function render(string $viewPath): void
   {
-    $loadView = new LoadViewService("adms/Views/equipes/$viewPath", $this->data);
+    $loadView = new LoadView("adms/Views/equipes/$viewPath", $this->data);
     $loadView->loadView();
   }
 

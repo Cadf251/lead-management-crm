@@ -2,8 +2,8 @@
 
 namespace App\adms\Controllers\atendimentos;
 
-use App\adms\Models\Repositories\AtendimentosRepository;
-use App\adms\Models\Services\DbConnectionClient;
+use App\adms\Repositories\AtendimentosRepository;
+use App\adms\Database\DbConnectionClient;
 
 abstract class AtendimentoAbstract
 {

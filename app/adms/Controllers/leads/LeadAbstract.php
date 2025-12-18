@@ -3,8 +3,8 @@
 namespace App\adms\Controllers\leads;
 
 use App\adms\Helpers\GenerateLog;
-use App\adms\Models\Repositories\LeadsRepository;
-use App\adms\Models\Services\DbConnectionClient;
+use App\adms\Repositories\LeadsRepository;
+use App\adms\Database\DbConnectionClient;
 
 abstract class LeadAbstract
 {

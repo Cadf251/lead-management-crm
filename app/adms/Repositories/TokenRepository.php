@@ -1,9 +1,9 @@
 <?php
 
-namespace App\adms\Models\Repositories;
+namespace App\adms\Repositories;
 
 use App\adms\Helpers\TokenHelper;
-use App\adms\Models\Services\DbOperations;
+use App\adms\Database\DbOperations;
 
 /**
  * Repositório de Tokens

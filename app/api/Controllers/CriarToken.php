@@ -3,8 +3,8 @@
 namespace App\api\Controllers;
 
 use App\adms\Helpers\GenerateLog;
-use App\adms\Models\Repositories\TokenRepository;
-use App\adms\Models\Services\DbConnectionClient;
+use App\adms\Repositories\TokenRepository;
+use App\adms\Database\DbConnectionClient;
 use Exception;
 
 /** Cria TOKENS com funções específicas */

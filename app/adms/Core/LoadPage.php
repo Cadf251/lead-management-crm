@@ -1,6 +1,6 @@
 <?php
 
-namespace App\adms\Controllers\Services;
+namespace App\adms\Core;
 
 use App\adms\Helpers\GenerateLog;
 use App\adms\Services\AuthUser;
@@ -23,7 +23,7 @@ class LoadPage
   private array $listDirectory = ["login", "dashboard", "usuarios", "equipes", "erro", "master", "api"];
 
   /** @var array $listPgPublic Lista de páginas públicas */
-  private array $listPgPublic = ["Login", "NovaSenha", "Erro", "Api"];
+  private array $listPgPublic = ["Login", "NovaSenha", "CriarSenha", "Erro", "Api"];
 
   /** @var array $listPgPrivate Lista de páginas privadas */
   private array $listPgPrivate = [

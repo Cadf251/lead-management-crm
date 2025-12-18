@@ -3,9 +3,9 @@
 namespace App\adms\Controllers\dashboard;
 
 use App\adms\Helpers\CSRFHelper;
-use App\adms\Models\Repositories\DashboardRepository;
-use App\adms\Models\Services\DbConnectionClient;
-use App\adms\Views\Services\LoadViewService;
+use App\adms\Repositories\DashboardRepository;
+use App\adms\Database\DbConnectionClient;
+use App\adms\Core\LoadView;
 use DateTime;
 
 class DashboardEquipes
@@ -21,7 +21,7 @@ class DashboardEquipes
     $this->data["title"] = "Dashboard Equipes";
 
     // Carrega a VIEW
-    $loadView = new LoadViewService("adms/Views/dashboard/dashboard-equipes/index", $this->data);
+    $loadView = new LoadView("adms/Views/dashboard/dashboard-equipes/index", $this->data);
     $loadView->loadView();
   }
 }

@@ -2,7 +2,7 @@
 
 namespace App\adms\Helpers;
 
-use App\adms\Views\Services\LoadViewService;
+use App\adms\Core\LoadView;
 
 class ErrorHandler
 {
@@ -30,7 +30,7 @@ class ErrorHandler
       "descricao" => $descricao
     ];
 
-    $loadError = new LoadViewService("adms/Views/erro/fatal", $dataView);
+    $loadError = new LoadView("adms/Views/erro/fatal", $dataView);
     $loadError->loadView();
   }
 }

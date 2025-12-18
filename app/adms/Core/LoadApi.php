@@ -1,6 +1,6 @@
 <?php
 
-namespace App\adms\Controllers\Services;
+namespace App\adms\Core;
 
 use App\adms\Helpers\GenerateLog;
 

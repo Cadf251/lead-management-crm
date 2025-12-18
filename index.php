@@ -1,7 +1,8 @@
 <?php
 
 use App\adms\Controllers\erro\Erro;
-use App\adms\Controllers\Services\PageController;
+use App\adms\Controllers\usuarios\AtivarUsuarioRefactored;
+use App\adms\Core\PageController;
 use App\adms\Helpers\GenerateLog;
 
 // Carregar o composer
@@ -9,7 +10,7 @@ require_once "vendor/autoload.php";
 
 session_start();
 ob_start();
-ini_set("display_errors", 0);
+ini_set("display_errors", 1);
 
 // Instancia as variáveis de ambiente
 $dotenv = Dotenv\Dotenv::createUnsafeImmutable(__DIR__);
@@ -18,6 +19,10 @@ $dotenv->load();
 date_default_timezone_set($_ENV['TIME_ZONE']);
 
 define('APP_ROOT', str_replace("\\", "/", __DIR__)."/");
+
+if($_SERVER["HTTP_HOST"] === "crm.local"){
+  $_ENV["HOST_BASE"] = "http://crm.local/";
+}
 
 // Observa erros fatais
 register_shutdown_function( function () {

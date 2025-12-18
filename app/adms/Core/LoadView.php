@@ -1,6 +1,6 @@
 <?php
 
-namespace App\adms\Views\Services;
+namespace App\adms\Core;
 
 use App\adms\Helpers\GenerateLog;
 
@@ -8,8 +8,7 @@ use App\adms\Helpers\GenerateLog;
  * Carrega as páginas da View
  */
 
-
-class LoadViewService
+class LoadView
 {
   /** @var string $view Recebe o endereço da VIEW */
   private string $view;

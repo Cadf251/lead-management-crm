@@ -2,10 +2,10 @@
 
 namespace App\adms\Controllers\api;
 
-use App\adms\Controllers\Services\LoadApi;
+use App\adms\Core\LoadApi;
 use App\adms\Helpers\GenerateLog;
 use App\adms\Helpers\SlugController;
-use App\adms\Models\Services\DbConnectionGlobal;
+use App\adms\Database\DbConnectionGlobal;
 use App\database\Models\DatabaseRepository;
 
 /** Essa classe é publica e recebe as requisições de POST, faz as devidas confirmações e chama o loadApi. */

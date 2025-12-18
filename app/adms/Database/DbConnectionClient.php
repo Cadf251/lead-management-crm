@@ -1,9 +1,8 @@
 <?php
 
-namespace App\adms\Models\Services;
+namespace App\adms\Database;
 
 use App\adms\Helpers\ErrorHandler;
-use App\adms\Helpers\GenerateLog;
 use PDO;
 use PDOException;
 
@@ -20,7 +19,7 @@ use PDOException;
  */
 class DbConnectionClient
 {
-  public $conexao = null;
+  public ?PDO $conexao = null;
   private string $host;
   private string $db_name;
   private string $user;

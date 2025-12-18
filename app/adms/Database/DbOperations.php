@@ -1,6 +1,6 @@
 <?php
 
-namespace App\adms\Models\Services;
+namespace App\adms\Database;
 
 use App\adms\Helpers\GenerateLog;
 use PDO;

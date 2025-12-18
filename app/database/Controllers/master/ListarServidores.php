@@ -2,8 +2,8 @@
 
 namespace App\database\Controllers\master;
 
-use App\adms\Models\Services\DbConnectionGlobal;
-use App\adms\Views\Services\LoadViewService;
+use App\adms\Database\DbConnectionGlobal;
+use App\adms\Core\LoadView;
 use App\database\Models\DatabaseRepository;
 
 class ListarServidores
@@ -23,7 +23,7 @@ class ListarServidores
     ];
 
     // Carrega a VIEW
-    $loadView = new LoadViewService("database/Views/master/clientes", $this->data);
+    $loadView = new LoadView("database/Views/master/clientes", $this->data);
     $loadView->loadViewMaster();
   }
 }

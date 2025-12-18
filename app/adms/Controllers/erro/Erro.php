@@ -2,7 +2,7 @@
 
 namespace App\adms\Controllers\erro;
 
-use App\adms\Views\Services\LoadViewService;
+use App\adms\Core\LoadView;
 
 class Erro
 {
@@ -25,21 +25,21 @@ class Erro
   public function erro404()
   {
     // Carregar a VIEW
-    $loadView = new LoadViewService("adms/Views/erro/erro404", null);
+    $loadView = new LoadView("adms/Views/erro/erro404", null);
     $loadView->loadExternalError();
   }
 
   public function erro500()
   {
     // Carregar a VIEW
-    $loadView = new LoadViewService("adms/Views/erro/erro500", null);
+    $loadView = new LoadView("adms/Views/erro/erro500", null);
     $loadView->loadExternalError();
   }
 
   public function fatal()
   {
     // Carregar a VIEW
-    $loadView = new LoadViewService("adms/Views/erro/fatal", null);
+    $loadView = new LoadView("adms/Views/erro/fatal", null);
     $loadView->loadView();
   }
 }

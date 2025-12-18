@@ -2,7 +2,7 @@
 
 namespace App\database\Controllers\master;
 
-use App\adms\Models\Services\DbConnectionGlobal;
+use App\adms\Database\DbConnectionGlobal;
 use App\database\Models\DatabaseRepository;
 
 class AtivarServidor

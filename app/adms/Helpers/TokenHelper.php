@@ -5,7 +5,7 @@ namespace App\adms\Helpers;
 /**
  * Esta classe serve para criar TOKENs.
  * 
- * Para gerenciar Tokens, dê uma olhada em: App\adms\Models\Repositories\TokenRepository.
+ * Para gerenciar Tokens, dê uma olhada em: App\adms\Repositories\TokenRepository.
  */
 class TokenHelper
 {

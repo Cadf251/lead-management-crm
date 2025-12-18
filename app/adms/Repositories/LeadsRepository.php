@@ -1,8 +1,8 @@
 <?php
 
-namespace App\adms\Models\Repositories;
+namespace App\adms\Repositories;
 
-use App\adms\Models\Services\DbOperations;
+use App\adms\Database\DbOperations;
 
 class LeadsRepository extends DbOperations
 {

@@ -3,8 +3,8 @@
 namespace App\adms\Controllers\equipes;
 
 use App\adms\Helpers\CSRFHelper;
-use App\adms\Models\Repositories\UsuariosRepository;
-use App\adms\Models\Services\DbConnectionClient;
+use App\adms\Repositories\UsuariosRepository;
+use App\adms\Database\DbConnectionClient;
 
 class AdicionarUsuario extends EquipesAbstract
 {
