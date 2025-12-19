@@ -2,36 +2,19 @@
 
 namespace App\adms\Controllers\usuarios;
 
-class AtivarUsuario extends UsuariosAbstract
+use App\adms\Core\OperationResult;
+use App\adms\Models\Usuario;
+
+class ReativarUsuario extends UsuariosReciclagem
 {
-  public function index(string|null $usuarioId):void {
-    // Instancia o usuário
-    $usuario = $this->repo->selecionar((int)$usuarioId);
+  public function index(string|null $usuarioId): void
+  {
+    // Chama o fluxo principal
+    $this->main($usuarioId);
+  }
 
-    if($usuario === null){
-      $_SESSION["alerta"] = [
-        "❌ Erro",
-        ["Esse usuário não existe."]
-      ];
-      echo json_encode(["sucesso" => false]);
-      exit;
-    }
-
-    $result = $this->service->reativar($usuario);
-  
-    if($result->sucesso() === true){
-      $_SESSION["alerta"] = [
-        "✅ Sucesso!",
-        $result->mensagens()
-      ];
-    } else {
-      $_SESSION["alerta"] = [
-        "❌ Erro!",
-        $result->mensagens()
-      ];
-    }
-
-    echo json_encode(["sucesso" => $result->sucesso(), "html" => $this->renderizarCard($usuario)]);
-    exit;
+  public function executar(Usuario $usuario): OperationResult
+  {
+    return $this->service->reativar($usuario);
   }
 }

@@ -2,6 +2,7 @@
 
 namespace App\adms\Models;
 
+use App\adms\Helpers\CelularFormatter;
 use App\adms\Helpers\NameFormatter;
 use App\adms\Repositories\UsuariosRepository;
 use DomainException;
@@ -35,7 +36,6 @@ class Usuario
     string $nome,
     string $email,
     string $celular,
-    string $foto,
     int $nivelId,
     $repo
   ): self {
@@ -43,8 +43,8 @@ class Usuario
     $usuario->setNome($nome);
     $usuario->setEmail($email);
     $usuario->setCelular($celular);
-    $usuario->setFoto($foto);
     $usuario->setSenha(null);
+    $usuario->setFoto(null);
     $usuario->setStatusById(self::STATUS_CONFIRMACAO, $repo);
     $usuario->setNivelById($nivelId, $repo);
     return $usuario;
@@ -58,7 +58,7 @@ class Usuario
   public function reativar(UsuariosRepository $repo)
   {
     if ($this->status->id !== self::STATUS_DESATIVADO) {
-      throw new DomainException("Usuário deve estar desativado.");
+      throw new DomainException("DOMAIN ERROR: Usuário deve estar desativado.");
     }
 
     $this->setStatusById(self::STATUS_CONFIRMACAO, $repo);
@@ -72,7 +72,7 @@ class Usuario
   public function resetarSenha(UsuariosRepository $repo)
   {
     if ($this->status->id !== self::STATUS_ATIVADO) {
-      throw new DomainException("Usuário deve estar ativado.");
+      throw new DomainException("DOMAIN ERROR: Usuário deve estar ativado.");
     }
 
     $this->setStatusById(self::STATUS_CONFIRMACAO, $repo);
@@ -90,8 +90,13 @@ class Usuario
       throw new DomainException("Usuário deve estar em estágio de confirmação.");
     }
 
-    $this->setStatusById(self::STATUS_CONFIRMACAO, $repo);
+    $this->setStatusById(self::STATUS_ATIVADO, $repo);
     $this->setSenha($novaSenhaHash);
+  }
+
+  public function podeLogar()
+  {
+    return (($this->senhaHash !== null) && ($this->status->id === self::STATUS_ATIVADO));
   }
 
   /**
@@ -139,6 +144,9 @@ class Usuario
 
   public function setCelular(string $celular): void
   {
+    if(!CelularFormatter::esInternacional($celular)){
+      $celular = CelularFormatter::paraInternacional($celular);
+    }
     $this->celular = $celular;
   }
 
@@ -182,7 +190,7 @@ class Usuario
       throw new InvalidArgumentException("Nível de acesso inválido.");
     }
 
-    $this->status = UsuarioStatus::fromId($id, $repo);
+    $this->nivel = NivelAcesso::fromId($id, $repo);
   }
 
   public function setStatus(int $statusId, string $statusNome, string $descricao = "")

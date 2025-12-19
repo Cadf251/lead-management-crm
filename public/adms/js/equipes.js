@@ -41,8 +41,3 @@ window.onload = () => {
     });
   });
 };
-
-function renderizar(html, className){
-  var x = document.querySelector(className);
-  x.innerHTML = html;
-}

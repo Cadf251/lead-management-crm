@@ -4,7 +4,11 @@ use App\adms\Helpers\HTMLHelper;
 
 echo HTMLHelper::renderHeader("Editar Usuário", "{$_ENV['HOST_BASE']}listar-usuarios/", "Voltar", "left-long");
 
-if (empty($this->data['usuario']["u_foto_perfil"]) || $this->data['usuario']["u_foto_perfil"] === null)
+//Resume array de usuarios
+
+$usuario = $this->data["usuarios"][0];
+
+if (empty($usuario["foto_perfil"]) || $usuario["foto_perfil"] === null)
   $foto = <<<HTML
     <label>Faça o upload da foto do usuário</label>
     <input class="form-padrao__input form-padrao__input--thinner" type="file" name="foto">
@@ -14,7 +18,7 @@ else
   $foto = <<<HTML
     <div class="centered w12">
       <div class="foto margin-0">
-        <img src="{$_ENV['HOST_BASE']}files/uploads/{$_SESSION['servidor_id']}/fotos-perfil/{$this->data['usuario']['u_id']}.{$this->data['usuario']['u_foto_perfil']}" height="100%" width="100%">
+        <img src="{$usuario['foto_perfil']}" height="100%" width="100%">
       </div>
       <div class="foto-input">
         <div class="foto-input__container">

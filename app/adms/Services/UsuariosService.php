@@ -2,16 +2,21 @@
 
 namespace App\adms\Services;
 
+use PDO;
+use Exception;
+use DomainException;
 use App\adms\Core\OperationResult;
 use App\adms\Helpers\GenerateLog;
 use App\adms\Helpers\PHPMailerHelper;
 use App\adms\Models\Usuario;
 use App\adms\Repositories\TokenRepository;
 use App\adms\Repositories\UsuariosRepository;
-use DomainException;
-use Exception;
-use PDO;
+use CachingIterator;
 
+/**
+ * 
+ * @author Cadu 
+ */
 class UsuariosService
 {
   private ?PDO $conexao;
@@ -26,13 +31,177 @@ class UsuariosService
   }
 
   /**
+   * Cria um novo usuário, verifica se o email já estpa sendo usado, manda um email para criar senha, e armazena a foto se for enviada no formulário.
+   * 
+   * @param string $nome
+   * @param string $email
+   * @param string $celular Em qualquer formato
+   * @param int $nivId
+   * 
+   * @return OperationResult
+   */
+  public function criar(string $nome, string $email, string $celular, int $nivId): OperationResult
+  {
+    // Verifica se o usuário já existe
+    if ($this->repository->existe($email)) {
+      $this->result->warn("O email já está sendo usado por outro usuário.");
+      return $this->result;
+    }
+
+    try {
+      $usuario = Usuario::novo($nome, $email, $celular, $nivId, $this->repository);
+      $usuario->setId($this->repository->criar($usuario));
+      $this->result->addMensagem("O usuário foi criado com sucesso.");
+    } catch (Exception $e) {
+
+      GenerateLog::generateLog("error", "Não foi possível criar um usuário", [
+        $e->getMessage()
+      ]);
+
+      $this->result->falha("Não foi possível criar o usuário.");
+      return $this->result;
+    }
+
+    try {
+      $this->emailConfirmacao($usuario);
+      $this->result->addMensagem("Peça que o usuário verifique o email $email para criar uma senha.");
+    } catch (Exception $e) {
+      GenerateLog::generateLog("error", $e->getMessage(), [
+        "code" => $e->getCode(),
+        "file" => $e->getFile(),
+        "line" => $e->getLine(),
+        "trace" => $e->getTrace(),
+      ]);
+      $this->result->warn("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
+    }
+
+    if ($_FILES["foto"]["tmp_name"] != '') {
+      try {
+        $this->armazenarFoto($usuario);
+        $this->repository->salvar($usuario);
+      } catch (Exception $e) {
+        GenerateLog::generateLog("error", "não foi possível armazenar um foto de usuário", ["error" => $e->getMessage()]);
+        $this->result->addMensagem("Não foi possível armazenar a foto.");
+      }
+    }
+
+    return $this->result;
+  }
+
+  public function editar(Usuario $usuario, array $dados):?OperationResult
+  {
+    $usuario->setNome($dados["nome"]);
+    $usuario->setCelular($dados["celular"]);
+    $usuario->setNivelById($dados["nivel_acesso_id"], $this->repository);
+
+    if($usuario->email !== $dados["email"]) {
+      $this->mudarEmail($usuario, $dados["email"]);
+    }
+
+    // Verifica o que se deve fazer com a foto de perfil
+    if ((int)$dados["foto_existe"] === 1) {
+      // Foto existe, deve-se trocar ou apagar?
+      if (isset($dados["editar_foto"])){
+        if ($dados["editar_foto"] === "apagar") {
+          try {
+            $this->apagarFoto($usuario);
+            $this->result->addMensagem("A foto foi apagada com sucesso.");
+          } catch (Exception $e) {
+            GenerateLog::generateLog("error", $e->getMessage(), [
+              "code" => $e->getCode(),
+              "file" => $e->getFile(),
+              "line" => $e->getLine(),
+              "trace" => $e->getTrace(),
+            ]);
+            $this->result->warn("Não foi possível apagar a foto do usuário.");
+          }
+        } else if ($dados["editar_foto"] === "trocar") {
+          try {
+            $this->trocarFoto($usuario);
+            $this->result->addMensagem("A foto foi trocada com sucesso.");
+          } catch (Exception $e) {
+            GenerateLog::generateLog("error", $e->getMessage(), [
+              "code" => $e->getCode(),
+              "file" => $e->getFile(),
+              "line" => $e->getLine(),
+              "trace" => $e->getTrace(),
+            ]);
+            $this->result->warn("Não foi possível trocar a foto do usuário.");
+          }
+        }
+      }
+    } else if (!empty($_FILES["foto"]["name"])) {
+      // Se a foto existir, e foi enviado uma nova foto no form, armazena esta foto
+      try {
+        $this->armazenarFoto($usuario);
+        $this->result->addMensagem("A foto foi armazenada com sucesso.");
+      } catch (Exception $e) {
+        GenerateLog::generateLog("error", $e->getMessage(), [
+          "code" => $e->getCode(),
+          "file" => $e->getFile(),
+          "line" => $e->getLine(),
+          "trace" => $e->getTrace(),
+        ]);
+        $this->result->warn("Não foi possível armazenar a foto do usuário.");
+      }
+    }
+
+    $this->repository->salvar($usuario);
+    $this->result->addMensagem("O usuário foi editado com sucesso.");
+    return $this->result;
+  }
+
+  private function mudarEmail(Usuario $usuario, $email)
+  {
+    $emailAntigo = $usuario->email;
+
+    $this->result->addMensagem("O email é diferente do antigo, portanto, deve-se confirmar o novo email.");
+
+    if ($this->repository->existe($email)) {
+      $this->result->warn("O email não foi substituído porque já está sendo usado por outro usuário.");
+      return;
+    }
+
+    try {
+      $usuario->setEmail($email);
+    } catch (Exception $e) {
+      $this->result->warn("O novo email é inválido.");
+      $usuario->setEmail($emailAntigo);
+      return;
+    }
+
+    try {
+      $usuario->resetarSenha($this->repository);
+    } catch (Exception) {
+      $this->result->warn("O email não foi substituído devido a um erro.");
+      $usuario->setEmail($emailAntigo);
+      return;
+    }
+
+    try {
+      $this->emailConfirmacao($usuario);
+      $this->result->addMensagem("Peça que o usuário verifique o email {$usuario->email} para criar uma senha.");
+    } catch (Exception $e) {
+      GenerateLog::generateLog("error", $e->getMessage(), [
+        "code" => $e->getCode(),
+        "file" => $e->getFile(),
+        "line" => $e->getLine(),
+        "trace" => $e->getTrace(),
+      ]);
+      $this->result->warn("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
+      $usuario->setEmail($emailAntigo);
+      return;
+    }
+  }
+
+  /**
    * Retiva o usuário e Reenvia o email de confirmação
    * 
    * @param Usuario $usuario
    * 
    * @return OperationResult
    */
-  public function reativar(Usuario $usuario):OperationResult
+  public function reativar(Usuario $usuario): OperationResult
   {
     // Ativar o usuário
     try {
@@ -40,17 +209,29 @@ class UsuariosService
 
       $this->repository->salvar($usuario);
 
-      $this->result->addMensagem("Usuário foi ativado com sucesso.");
-    } catch (DomainException $e){
+      $this->result->addMensagem("Usuário foi reativado com sucesso.");
+    } catch (DomainException $e) {
       GenerateLog::generateLog("error", "Não foi possível ativar um usuário.", [
         "error" => $e->getMessage()
       ]);
 
-      $this->result->falha("Não foi possível ativar o usuário");
+      $this->result->falha("Não foi possível reativar o usuário");
+      return $this->result;
     }
 
     // Envia o email para nova senha
-    $this->emailConfirmacao($usuario);
+    try {
+      $this->emailConfirmacao($usuario);
+      $this->result->addMensagem("Peça que o usuário verifique o email {$usuario->email} para criar uma senha.");
+    } catch (Exception $e) {
+      GenerateLog::generateLog("error", $e->getMessage(), [
+        "code" => $e->getCode(),
+        "file" => $e->getFile(),
+        "line" => $e->getLine(),
+        "trace" => $e->getTrace(),
+      ]);
+      $this->result->warn("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
+    }
 
     return $this->result;
   }
@@ -62,7 +243,7 @@ class UsuariosService
    * 
    * @return OperationResult
    */
-  public function resetarSenha(Usuario $usuario):OperationResult
+  public function resetarSenha(Usuario $usuario): OperationResult
   {
     // Ativar o usuário
     try {
@@ -71,39 +252,53 @@ class UsuariosService
       $this->repository->salvar($usuario);
 
       $this->result->addMensagem("A senha foi resetada com sucesso.");
-    } catch (DomainException $e){
+    } catch (DomainException $e) {
       GenerateLog::generateLog("error", "Não foi possível resetar a senha de um usuário.", [
         "error" => $e->getMessage()
       ]);
 
       $this->result->falha("Não foi possível resetar a senha.");
+      return $this->result;
     }
 
     // Envia o email para nova senha
-    $this->emailConfirmacao($usuario);
+    try {
+      $this->emailConfirmacao($usuario);
+      $this->result->addMensagem("Peça que o usuário verifique o email {$usuario->email} para criar uma senha.");
+    } catch (Exception $e) {
+      GenerateLog::generateLog("error", $e->getMessage(), [
+        "code" => $e->getCode(),
+        "file" => $e->getFile(),
+        "line" => $e->getLine(),
+        "trace" => $e->getTrace(),
+      ]);
+      $this->result->warn("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
+    }
 
     return $this->result;
   }
 
-  public function desativar(Usuario $usuario){
-    // Instancia o OperationResult
-    $result = new OperationResult();
+  public function desativar(Usuario $usuario):?OperationResult
+  {
+    try {
+      $usuario->desativar($this->repository);
 
-    // Instancia o repositório
-    $repositorio = new UsuariosRepository($this->conexao);
+      $tokenRepo = new TokenRepository($this->conexao);
+      $tokenRepo->desativarDeUsuario($usuario->id);
 
-    $tokenRepo = new TokenRepository($this->conexao);
+      if ($usuario->foto !== null) {
+        $this->apagarFoto($usuario);
+      }
 
-    $usuario->desativar($repositorio);
-
-    if ($usuario->foto !== null){
-      $this->apagarFoto($usuario);
+      $this->repository->salvar($usuario);
+      $this->result->addMensagem("O usuário {$usuario->nome} foi desativado.");
+    } catch (Exception) {
+      $this->result->falha("Não foi possível desativar o usuário.");
     }
-
-    $repositorio->salvar($usuario);
+    return $this->result;
   }
 
-  public function ativar(Usuario $usuario, $senhaHash):?OperationResult
+  public function ativar(Usuario $usuario, $senhaHash): ?OperationResult
   {
     try {
       $usuario->ativar($this->repository, $senhaHash);
@@ -116,22 +311,41 @@ class UsuariosService
         "error" => $e->getMessage()
       ]);
       $this->result->falha("A senha não foi criada com sucesso");
+
+      return $this->result;
     }
 
     return $this->result;
   }
-    
+
+  public function reenviarEmail(Usuario $usuario) :OperationResult
+  {
+    // Envia o email para nova senha
+    try {
+      $this->emailConfirmacao($usuario);
+      $this->result->addMensagem("Peça que o usuário verifique o email {$usuario->email} para criar uma senha.");
+    } catch (Exception $e) {
+      GenerateLog::generateLog("error", $e->getMessage(), [
+        "code" => $e->getCode(),
+        "file" => $e->getFile(),
+        "line" => $e->getLine(),
+        "trace" => $e->getTrace(),
+      ]);
+      $this->result->warn("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
+    }
+
+    return $this->result;
+  }
+
   /**
    * Armazena uma foto de perfil de um usuário. Não funciona se o $_FILES["foto"] não estiver setado.
    * 
-   * @param Usuario $usuario
-   * 
-   * @return Usuario $usuario
+   * @param Usuario $usuario Precisa do ID para criar o arquivo. Modifica o atributo foto
    */
-  private function armazenarFoto(Usuario $usuario):?Usuario
+  private function armazenarFoto(Usuario $usuario):void
   {
     // Verifica se o id está setado
-    if (!isset($usuario->id)){
+    if (!isset($usuario->id)) {
       throw new Exception("O Id do usuário não está setado");
     }
 
@@ -151,7 +365,7 @@ class UsuariosService
     }
 
     $arquivoNome = $usuario->id . $extensoes_permitidas[$tipo];
-    $caminho = APP_ROOT."files/uploads/{$_SESSION['servidor_id']}/fotos-perfil/";
+    $caminho = APP_ROOT . "files/uploads/{$_SESSION['servidor_id']}/fotos-perfil/";
 
     // Tenta criar o diretório se não existir
     if (!is_dir($caminho)) {
@@ -179,14 +393,13 @@ class UsuariosService
     // Tenta criar os uploads
     if (move_uploaded_file($tmp, $final)) {
       // Se o usuário for o próprio, adiciona na SESSION
-      if ($_SESSION["usuario_id"] === $usuario->id){
+      if ($_SESSION["usuario_id"] === $usuario->id) {
         $_SESSION["foto_perfil"] = $final;
       }
 
       // Atualiza o banco de dados
       $tipoFormatado = str_replace(".", "", $extensoes_permitidas[$tipo]);
       $usuario->setFoto($tipoFormatado);
-      return $usuario;
     } else {
       throw new Exception("Algo deu errado");
     }
@@ -195,19 +408,16 @@ class UsuariosService
   /**
    * Apaga o arquivo da foto em uploads
    * 
-   * @param Usuario $usuario
-   * 
-   * @return Usuario $usuario
+   * @param Usuario $usuario Precisa do ID para ler o arquivo. Modifica o atributo foto
    */
-  private function apagarFoto(Usuario $usuario): ?Usuario
+  private function apagarFoto(Usuario $usuario):void
   {
     // Verifica se o id está setado
-    // Verifica se o id está setado
-    if (!isset($usuario->id)){
+    if (!isset($usuario->id)) {
       throw new Exception("O Id do usuário não está setado");
     }
 
-    $caminho = APP_ROOT."files/uploads/{$_SESSION['servidor_id']}/fotos-perfil/{$usuario->id}";
+    $caminho = APP_ROOT . "files/uploads/{$_SESSION['servidor_id']}/fotos-perfil/{$usuario->id}";
 
     $arquivo = "$caminho.{$usuario->foto}";
 
@@ -222,31 +432,32 @@ class UsuariosService
     if ($usuario->id === $_SESSION["usuario_id"]) {
       $_SESSION["foto_perfil"] = null;
     }
-
-    return $usuario;
   }
 
   /**
    * Troca a foto por uma nova, chamando a função apagarFoto e armazenarFoto
    * 
-   * @param Usuario $usuario
+   * @param Usuario $usuario Lê ID, modifica FOTO
    * 
    * @return Usuario $usuario
    */
-  private function trocarFoto(Usuario $usuario): ?Usuario
+  private function trocarFoto(Usuario $usuario):void
   {
-    $usuario = $this->apagarFoto($usuario);
-    return $this->armazenarFoto($usuario);
+    $this->apagarFoto($usuario);
+    $this->armazenarFoto($usuario);
   }
 
   /**
    * Enviar um email de confirmação
    * 
-   * Precisa dos parâmetros setados: id, nome, email
+   * @see GenerateLog Gera Log
+   * @see OperationResult Atribui operarion em $this->result
+   * 
+   * @param Usuario $usuario Lê os parâmetros de ID, NOME e EMAIL
    * 
    * @return bool Se funcionou ou não
    */
-  private function emailConfirmacao(Usuario $usuario): void
+  private function emailConfirmacao(Usuario $usuario, string $msgSucesso = ""): void
   {
     try {
       // Verifica se os parâmetros estão devidamente setados
@@ -274,72 +485,9 @@ class UsuariosService
         "[TOKEN]" => $token
       ];
 
-      $body = <<<HTML
-      <html>
-        <body style="background-color: #bbb; font-family: helvetica, arial;">
-          <div style="margin-left:auto;margin-right:auto;margin-top: 30px;margin-bottom:30px;min-width: 300px; max-width:600px;background-color:#f0f0f0">
-            <table style="border-collapse:collapse;">
-              <tr>
-              <td style="background-color: #404040; margin: 0 auto"><img src="cid:logo" alt="Logo RD Mind" width="70%" style="padding: 50px 0; margin: 0 15%"></td>
-              </tr>
-            </table>
-            <table style="border-collapse:collapse">
-              <tr>
-                <td style="width:30px;height:30px"></td>
-                <td></td>
-                <td style="width:30px;height:30px"></td>
-              </tr>
-              <tr>
-                <td style="width:30px;height:30px"></td>
-                <td><p style="color: #222; font-size: 18px;">Olá [NOME], confirme o seu email acessando nosso portal pela primeira vez e criando uma senha.<br>Use o código da empresa: [SERVIDOR_ID]</p></td>
-                <td style="width:30px;height:30px"></td>
-              </tr>
-              <tr>
-                <td style="width:30px;height:30px"></td>
-                <td></td>
-                <td style="width:30px;height:30px"></td>
-              </tr>
-              <tr>
-                <td style="width:30px;height:30px"></td>
-                <td style="text-align: center;"><a style="padding: 15px 20px;font-size: 20px; color: #f0f0f0;font-weight: bold; background-color: #0ebcc9;" href="{$_ENV['HOST_BASE']}criar-senha/[SERVIDOR_ID]-[TOKEN]">Acessar</a></td>
-                <td style="width:30px;height:30px"></td>
-              </tr>
-              <tr>
-                <td style="width:30px;height:30px"></td>
-                <td></td>
-                <td style="width:30px;height:30px"></td>
-              </tr>
-              <tr>
-                <td style="width:30px;height:30px"></td>
-                <td></td>
-                <td style="width:30px;height:30px"></td>
-              </tr>
-            </table>
-            <table style="border-collapse: collapse; background-color: #404040; color: #f0f0f0;">
-              <tr><td style="width:30px;height:30px"></td><td></td><td style="width:30px;height:30px"></td></tr> 
-              <tr>
-                <td style="width:30px;"></td>
-                <td><p style="font-size: 24px; font-weight: bold; margin: 16px 0 0 0;">Entenda o universo do Marketing Digital com o nosso Blog</p></td>
-                <td style="width:30px;"></td>
-              </tr>
-              <tr>
-                <td style="width:30px;"></td>
-                <td><a style="color: #f0f0f0; margin: 8px 0; font-size: 18px;" href="https://blog.agenciardmind.com.br/trafego-pago/o-que-e-trafego-pago.php">O que é Tráfego Pago?</a><br><a style="color: #f0f0f0; margin: 8px 0; font-size: 18px;" href="https://blog.agenciardmind.com.br/sites/como-criar-um-site.php">Como criar um site?</a></td>
-                <td style="width:30px;"></td>
-              </tr>
-              <tr>
-                <td style="width:30px;"></td>
-                <td><p style="font-size: 24px; font-weight: bold; margin: 16px 0">✅ Responda esse email</p></td>
-                <td style="width:30px;"></td>
-              </tr>
-              <tr><td style="width:30px;height:30px"></td><td></td><td style="width:30px;height:30px"></td></tr> 
-            </table>
-          </div>
-        </body>
-      </html>
-      HTML;
+      $body = require APP_ROOT . "public/adms/emails/confirmacao.php";
 
-      if ($body === false){
+      if ($body === false) {
         throw new Exception("Body está vazio");
       }
 
@@ -348,12 +496,8 @@ class UsuariosService
       $title = "RD Mind | Confirme seu E-mail e Crie sua Senha";
       $mail->setarConteudo($title, $body);
       $mail->enviar();
-      $this->result->addMensagem("O email para gerar nova senha foi enviado.");
-    } catch (Exception $e){
-      GenerateLog::generateLog("error", "Não foi possível enviar um email.", [
-        "error" => $e->getMessage()
-      ]);
-      $this->result->falha("Não foi possível enviar o email para criar nova senha.");
+    } catch (Exception $e) {
+      throw new Exception("Não foi possível enviar um email: " . $e->getMessage(), $e->getCode(), $e);
     }
   }
 }

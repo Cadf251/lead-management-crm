@@ -152,3 +152,8 @@ function postRequest(url, params = "", then = null){
     return data;
   });
 }
+
+function renderizar(html, className){
+  var x = document.querySelector(className);
+  x.innerHTML = html;
+}

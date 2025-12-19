@@ -2,22 +2,26 @@
 
 namespace App\adms\Repositories;
 
-use App\adms\Database\DbOperations;
+use App\adms\Database\DbOperationsRefactored;
 use App\adms\Models\Usuario;
+use Exception;
+use PDO;
 
 /** Manipula os dados de usuários no banco de dados */
-class UsuariosRepository extends DbOperations
+class UsuariosRepository
 {
   /** @var string $tabela é o nome da tabela no banco de dados */
   public string $tabela = "usuarios";
 
+  public DbOperationsRefactored $sql;
+
+  public function __construct(PDO $conexao)
+  {
+    $this->sql = new DbOperationsRefactored($conexao);
+  }
+  
   /**
    * Retorna a base de SQL para consulta de usuários
-   * Retorna um array no padrão:
-   * tabela_campo;
-   * u_id (usuario.id)
-   * niv_nome (nivel_acesso.nome)
-   * us_id (usuario_status.id)
    * 
    * @return string A query SELECT
    */
@@ -47,7 +51,11 @@ class UsuariosRepository extends DbOperations
         CASE WHEN us_id = 2 THEN 1 ELSE 0 END, us_id DESC, u.id
     SQL;
 
-    $array = $this->executeSQL($query);
+    try {
+      $array = $this->sql->execute($query);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
 
     $final = [];
     
@@ -75,10 +83,14 @@ class UsuariosRepository extends DbOperations
     SQL;
 
     $params = [
-      ":usuario_id" => $id
+      "usuario_id" => $id
     ];
 
-    $array = $this->executeSQL($query, $params);
+    try {
+      $array = $this->sql->execute($query, $params);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
 
     if (empty($array)) {
       return null;
@@ -87,7 +99,7 @@ class UsuariosRepository extends DbOperations
     return $this->hydrateUsuario($array[0]);
   }
 
-  public function selecioarByEmail(string $email):?Usuario
+  public function selecionarByEmail(string $email):?Usuario
   {
     $query = $this->queryBase();
     $query .= <<<SQL
@@ -97,10 +109,14 @@ class UsuariosRepository extends DbOperations
     SQL;
 
     $params = [
-      ":email" => $email
+      "email" => $email
     ];
 
-    $array = $this->executeSQL($query, $params);
+    try {
+      $array = $this->sql->execute($query, $params);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
 
     if (empty($array)) {
       return null;
@@ -133,25 +149,62 @@ class UsuariosRepository extends DbOperations
    * Salva o objeto no banco de dados
    * 
    * @param Usuario $usuario
-   * 
    */
   public function salvar(Usuario $usuario):void {
     $params = [
-      ":nome" => $usuario->nome,
-      ":email" => $usuario->email,
-      ":celular" => $usuario->celular,
-      ":senha" => $usuario->senhaHash,
-      ":foto_perfil" => $usuario->foto,
-      ":usuario_status_id" => $usuario->status->id,
-      ":nivel_acesso_id" => $usuario->nivel->id,
-      ":modified" => date($_ENV["DATE_FORMAT"])
+      "nome" => $usuario->nome,
+      "email" => $usuario->email,
+      "celular" => $usuario->celular,
+      "senha" => $usuario->senhaHash,
+      "foto_perfil" => $usuario->foto,
+      "usuario_status_id" => $usuario->status->id,
+      "nivel_acesso_id" => $usuario->nivel->id,
+      "modified" => date($_ENV["DATE_FORMAT"])
     ];
 
-    $this->updateSQL($this->tabela, $params, $usuario->id);
+    try {
+      $this->sql->updateById($this->tabela, $params, $usuario->id);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
+  }
+
+  public function existe(string $email)
+  {
+    return $this->sql->existe(
+      $this->tabela,
+      [["email", "="]],
+      ["email" => $email]
+    );
+  }
+
+  /**
+   * Cria um novo usuário
+   * 
+   * @param Usuario $usuario
+   * 
+   * @return int O id do usuário
+   */
+  public function criar(Usuario $usuario):int
+  {
+    $params = [
+      "nome" => $usuario->nome,
+      "email" => $usuario->email,
+      "celular" => $usuario->celular,
+      "foto_perfil" => $usuario->foto,
+      "nivel_acesso_id" => $usuario->nivel->id,
+      "created" => date($_ENV["DATE_FORMAT"])
+    ];
+
+    try {
+      return $this->sql->insert($this->tabela, $params);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
   }
 
   public function getNivel(int $id){
-    return $this->getStatusOuNivel($id, "nivel_acesso")[0];
+    return $this->getStatusOuNivel($id, "niveis_acesso")[0];
   }
 
   public function getStatus(int $id){
@@ -166,97 +219,12 @@ class UsuariosRepository extends DbOperations
     SQL;
 
     $params = [
-      ":id" => $id
+      "id" => $id
     ];
-
-    return $this->executeSQL($query, $params);
+    try {
+      return $this->sql->execute($query, $params);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
   }
-
-// public function resetarSenha(int $id){
-//   $params = [
-//     ":senha" => null,
-//     ":modified" => date($_ENV["DATE_FORMAT"])
-//   ];
-
-//   return $this->updateSQL($this->tabela, $params, $id);
-// }
-
-// /**
-//  * Atualiza os usuários, e já incluir o modified no $params
-//  * 
-//  * @param array $params Os parâmetros que devem ser ataulizados, no formato: [":campo_literal" => "var"]
-//  * @param int $id O id do usuário que será atualizado
-//  * 
-//  * @return bool
-//  */
-// public function updateUsuario(array $params, int $id)
-// {
-//   $modified = date($_ENV["DATE_FORMAT"]);
-//   $params[":modified"] = $modified;
-//   return $this->updateSQL($this->tabela, $params, $id);
-// }
-  
-//   /**
-//    * Seta o status do usuário como aguardando confirmação
-//    * 
-//    * @param int $usuarioId O ID do usuário
-//    * 
-//    * @return bool
-//    */
-//   public function ativar(int $usuarioId) :bool
-//   {
-//     $params = [
-//       ":usuario_status_id" => 1
-//     ];
-
-//     return $this->updateUsuario($params, $usuarioId);
-//   }
-
-//   /**
-//  * Seta o status do usuário como aguardando confirmação e apaga a senha
-//  * 
-//  * @param int $usuarioId O ID do usuário
-//  * 
-//  * @return bool
-//   */
-//   public function resetarSenha(int $usuarioId) :bool
-//   {
-//     $params = [
-//       ":usuario_status_id" => 1,
-//       ":senha" => null
-//     ];
-
-//     return $this->updateUsuario($params, $usuarioId);
-//   }
-
-//   /**
-//    * Seta o status do usuário como desativado
-//    * 
-//    * @param int $usuarioId O ID do usuário
-//    * 
-//    * @return bool
-//    */
-//   public function desativar(int $usuarioId) :bool
-//   {
-//     $params = [
-//       ":usuario_status_id" => 2,
-//       ":senha" => null
-//     ];
-
-//     return $this->updateUsuario($params, $usuarioId);
-//   }
-
-//   /** 
-//    * Dá um tiro de misericórdia no usuário.
-//    * 
-//    * Evitar essa funcionalidade.
-//    * 
-//    * @param int $usuarioId O Usuário que será excluído
-//    * 
-//    * @return bool
-//    */
-//   public function excluir(int $usuarioId):bool
-//   {
-//     return $this->deleteByIdSQL($this->tabela, $usuarioId);
-//   }
 }

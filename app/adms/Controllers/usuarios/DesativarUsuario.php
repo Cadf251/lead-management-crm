@@ -2,34 +2,30 @@
 
 namespace App\adms\Controllers\usuarios;
 
-use App\adms\Helpers\GenerateLog;
-use Exception;
+use App\adms\Core\OperationResult;
 
 class DesativarUsuario extends UsuariosAbstract
 {
   public function index(string|null $usuarioId)
   {
-    try {
-      $usuario = $this->repo->selecionar((int)$usuarioId);
+    // Instancia o usuário
+    $usuario = $this->repo->selecionar((int)$usuarioId);
 
-      $usuario->desativar($this->repo);
-
-      $this->tokenRepo->desativarDeUsuario($usuario->id);
-
-      if(isset($usuario->foto)){
-        $this->service->apagarFoto($usuario);
-      }
-
-      $this->repo->salvar($usuario);
-
-      echo json_encode(["sucesso" => true, "html" => $this->renderizarCard($usuario)]);
-      exit;
-    } catch (Exception $e){
-      GenerateLog::generateLog("error", "Não foi possível desativar um usuário.", [
-        "usuario_id" => $usuarioId, "error" => $e->getMessage()
-      ]);
+    if($usuario === null){
+      $result = new OperationResult();
+      $result->falha("Esse usuário não existe.");
+      $_SESSION["alerta"] = $result->getAlerta();
       echo json_encode(["sucesso" => false]);
       exit;
     }
+
+    $result = $this->service->desativar($usuario);
+  
+    echo json_encode([
+      "sucesso" => $result->sucesso(),
+      "alerta" => $result->getStatus(),
+      "mensagens" => $result->getMensagens(),
+      "html" => $this->renderizarCard($usuario)]);
+    exit;
   }
 }

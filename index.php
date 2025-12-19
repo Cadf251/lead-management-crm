@@ -10,7 +10,7 @@ require_once "vendor/autoload.php";
 
 session_start();
 ob_start();
-ini_set("display_errors", 1);
+ini_set("display_errors", 0);
 
 // Instancia as variáveis de ambiente
 $dotenv = Dotenv\Dotenv::createUnsafeImmutable(__DIR__);

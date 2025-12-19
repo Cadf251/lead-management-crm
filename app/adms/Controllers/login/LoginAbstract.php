@@ -2,14 +2,13 @@
 
 namespace App\adms\Controllers\login;
 
+use App\adms\Core\OperationResult;
 use App\adms\Database\DbConnectionClient;
 use App\adms\Database\DbConnectionGlobal;
-use App\adms\Helpers\GenerateLog;
 use App\adms\Models\Usuario;
 use App\adms\Repositories\LoginRepository;
 use App\adms\Repositories\TokenRepository;
 use App\adms\Repositories\UsuariosRepository;
-use App\adms\Services\AuthUser;
 use App\adms\Services\UsuariosService;
 use Exception;
 use PDO;
@@ -57,13 +56,23 @@ abstract class LoginAbstract
 
   public function selecionarUsuario(string $email):?Usuario
   {
-    $usuario = $this->usuarioRepository->selecioarByEmail($email);
+    $usuario = $this->usuarioRepository->selecionarByEmail($email);
 
     if($usuario === null){
       throw new Exception("Usuário não existe");
     }
 
     return $usuario;
+  }
+
+  public function fazerLogin(Usuario $usuario):void
+  {
+    // Faz a conexão e passa tudo para o $_SESSION
+    $this->createSession($this->clientCredenciais, (int)$this->data["form"]["servidor_id"], $usuario);
+    $this->permissoesSession($usuario->nivel->id, $usuario->id);
+
+    // Joga para o dashboard
+    $this->redirectDashboard();
   }
 
   public function redirectDashboard()
@@ -76,24 +85,6 @@ abstract class LoginAbstract
   {
     header("Location: {$_ENV['HOST_BASE']}login");
     exit;
-  }
-
-  /**
-   * Cria um log de erro, passa um alerta e redireciona para o login novamente
-   * 
-   * @param array $addLog Um array adicional e opcional para ir no log
-   */
-  public function falha(array $addLog = [])
-  {
-    GenerateLog::generateLog("warning", "O login falhou", [$this->data["form"], $addLog]);
-
-    // Prepara o setWarning
-    $_SESSION["alerta"] = [
-      "❌ Erro!",
-      "O usuário não existe ou esta desativado."
-    ];
-
-    $this->redirectDashboard();
   }
 
   /**

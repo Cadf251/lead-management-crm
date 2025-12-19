@@ -5,7 +5,7 @@ namespace App\adms\Controllers\usuarios;
 use App\adms\Core\OperationResult;
 use App\adms\Models\Usuario;
 
-class ReenviarEmail extends UsuariosReciclagem
+class ResetarSenha extends UsuariosReciclagem
 {
   public function index(string|null $usuarioId):void {
     // Chama o fluxo principal
@@ -14,6 +14,6 @@ class ReenviarEmail extends UsuariosReciclagem
 
   public function executar(Usuario $usuario): OperationResult
   {
-    return $this->service->reenviarEmail($usuario);
+    return $this->service->resetarSenha($usuario);
   }
 }

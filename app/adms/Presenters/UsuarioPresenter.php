@@ -62,12 +62,21 @@ class UsuarioPresenter
             "Será reenviado o email de confirmação de senha.",
             true,
             () => {
-              window.location.href = "{$_ENV['HOST_BASE']}reenviar-email/{$id}";
-            }
+              postRequest(
+                "{$_ENV['HOST_BASE']}/reenviar-email/{$id}",
+                "",
+                (response) => {
+                  renderizar(response.html, ".card--{$id}");
+                  setWarning(
+                    response.alerta,
+                    response.mensagens
+                  );
+                }
+              )            }
           )
         JS,
         "color" => "gray",
-        "icon" => "evelope",
+        "icon" => "envelope",
         "title" => "Reenviar email de confirmação/redefinição de senha"
       ],
       "desativar" => [
@@ -78,7 +87,17 @@ class UsuarioPresenter
             "O usuário será desativado. A ação é reversível.",
             true,
             () => {
-              window.location.href = "{$_ENV['HOST_BASE']}desativar-usuario/{$id}";
+              postRequest(
+                "{$_ENV['HOST_BASE']}/desativar-usuario/{$id}",
+                "",
+                (response) => {
+                  renderizar(response.html, ".card--{$id}");
+                  setWarning(
+                    response.alerta,
+                    response.mensagens
+                  );
+                }
+              )
             }
           )
         JS,
@@ -95,10 +114,14 @@ class UsuarioPresenter
             true,
             () => {
               postRequest(
-                "{$_ENV['HOST_BASE']}ativar-usuario/{$id}",
+                "{$_ENV['HOST_BASE']}/reativar-usuario/{$id}",
                 "",
                 (response) => {
                   renderizar(response.html, ".card--{$id}");
+                  setWarning(
+                    response.alerta,
+                    response.mensagens
+                  );
                 }
               )
             }
@@ -108,21 +131,30 @@ class UsuarioPresenter
         "icon" => "rotate",
         "title" => "Reativar Usuário"
       ],
-      "alterar-senha" => [
+      "resetar-senha" => [
         "type" => "ajax",
         "function" => <<<JS
           setWarning(
-            "Deseja apagar a senha do {$nome}?", 
-            "Ao apagar a senha, será enviado o email para o usuário criar uma nova.", 
+            "Deseja resetar a senha do {$nome}?", 
+            "Ao resetar a senha, será enviado o email para o usuário criar uma nova.", 
             true,
             () => {
-              window.location.href = "{$_ENV['HOST_BASE']}recuperar-senha/{$id}";
-            }
+              postRequest(
+                "{$_ENV['HOST_BASE']}/resetar-senha/{$id}",
+                "",
+                (response) => {
+                  renderizar(response.html, ".card--{$id}");
+                  setWarning(
+                    response.alerta,
+                    response.mensagens
+                  );
+                }
+              )            }
           )
         JS,
         "color" => "gray",
         "icon" => "key",
-        "title" => "Alterar senha do Usuário"
+        "title" => "Resetar senha do Usuário"
       ]
     ];
 
@@ -138,7 +170,7 @@ class UsuarioPresenter
       ],
       3 => [
         $btns["editar"],
-        $btns["alterar-senha"],
+        $btns["resetar-senha"],
         $btns["desativar"]
       ]
     };

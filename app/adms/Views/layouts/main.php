@@ -19,7 +19,7 @@ include_once "./app/adms/Views/partials/head.php";
     ?>
   </main>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="<?php echo SafeEcho::safeEcho($_ENV["HOST_BASE"]) ?>public/adms/js/scripts.js?v=12902190"></script>
+  <script src="<?php echo SafeEcho::safeEcho($_ENV["HOST_BASE"]) ?>public/adms/js/scripts.js?v=516156"></script>
   <?php
   if(isset($this->data["js"])){
     if(is_array($this->data["js"])){

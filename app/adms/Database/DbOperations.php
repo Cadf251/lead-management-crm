@@ -10,6 +10,10 @@ use PDOException;
  * Faz operações no banco de dados usando a conxão recebida
  * Classe abstrata, serve apenas para ser herdada.
  * 
+ * @deprecated
+ * 
+ * @todo Refazer totalmente
+ * 
  * @param $conexao Recebe uma coneão com o banco de dados
  */
 abstract class DbOperations

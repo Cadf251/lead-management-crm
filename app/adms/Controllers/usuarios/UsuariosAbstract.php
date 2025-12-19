@@ -80,41 +80,4 @@ abstract class UsuariosAbstract
     $usuario = $usuarios[0];
     return require APP_ROOT."app/adms/Views/usuarios/partials/usuario-card.php";
   }
-
-  // /** 
-  //  * Recupera os dados do usuário e seta na classe. Também trata os erros e faz o direcionamento caso falhe.
-  //  * 
-  //  * @param int $usuarioId O ID do usuário.
-  //  */
-  // public function setInfoById(int $usuarioId):void
-  // {
-  //   $this->id = (int)$usuarioId;
-  //   $usuarioArray = $this->repo->selecionar($this->id);
-
-  //   // Verifica se houve erro
-  //   if (($usuarioArray === false) || (empty($usuarioArray))) {
-  //     GenerateLog::generateLog("error", "A consulta ao repositório retornou falso ou vazio", ["id" => $usuarioId]);
-
-  //     // Prepara o setWarning
-  //     $_SESSION["alerta"] = [
-  //       "Erro!",
-  //       "❌ O usuário não existe ou foi excluído."
-  //     ];
-
-  //     $this->redirect();
-  //   }
-
-  //   // Simplifica o array
-  //   $usuario = $usuarioArray[0];
-
-  //   // Seta os parâmetros do usuário
-  //   $this->nome = $usuario["u_nome"];
-  //   $this->email = $usuario["u_email"];
-  //   $this->nivId = $usuario["niv_id"];
-  //   $this->statusId = $usuario["us_id"];
-
-  //   // Seta como array também para passar para a VIEW se necessário
-  //   $this->data["usuario"] = $usuario;
-  // }
-
 }

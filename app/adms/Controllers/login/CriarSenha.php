@@ -66,12 +66,7 @@ class CriarSenha extends LoginAbstract
         if($result->sucesso()){
           $_SESSION["alerta"] = $this->sucessMsg;
           
-          // Faz a conexão e passa tudo para o $_SESSION
-          $this->createSession($this->clientCredenciais, (int)$this->data["form"]["servidor_id"], $usuario);
-          $this->permissoesSession($usuario->nivel->id, $usuario->id);
-          
-          // Joga para o dashboard
-          $this->redirectDashboard();
+          $this->fazerLogin($usuario);
         } else {
           $_SESSION["alerta"] = $this->failMsg;
         }

@@ -47,7 +47,7 @@ class CelularFormatter
    * @var string $celular Ex: "(11)9XXXX-XXXX"
    * @return string Ex: "55119XXXXXXXX"
    */
-  public static function paraInternaciona(string $celular):string
+  public static function paraInternacional(string $celular):string
   {
     if (empty($celular) || $celular === null) return "";
 
@@ -63,5 +63,18 @@ class CelularFormatter
     if (strlen($celular) < 12) return "";
 
     return $celular;
+  }
+
+  public static function esInternacional(string $celular):bool
+  {
+    $caracteres = [
+      "(", ")", "-"
+    ];
+
+    foreach($caracteres as $char){
+    if(strpos($celular, $char))
+      return false;
+    }
+    return true;
   }
 }

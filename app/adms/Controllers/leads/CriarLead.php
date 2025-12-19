@@ -25,7 +25,7 @@ class CriarLead extends LeadAbstract
   {
     $this->nome = NameFormatter::formatarNome($nome);
     $this->email = $email;
-    $this->celular = CelularFormatter::paraInternaciona($celular);
+    $this->celular = CelularFormatter::paraInternacional($celular);
     $this->utm = [
       "origem" => $utm["utm_source"] ?? null,
       "meio" => $utm["utm_medium"] ?? null,

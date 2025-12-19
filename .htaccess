@@ -25,7 +25,7 @@ RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]
 
 # deseja capturar apenas URLs que contenham pelo menos um caractere, use "+" (^(.+)$). Se você deseja capturar todas as URLs, incluindo as que estejam vazias, use "" (^(.*)$).
 
-ErrorDocument 403 login
+ErrorDocument 403 login 
 ErrorDocument 500 erro/500
 
 Options -Indexes
@@ -33,8 +33,7 @@ Options -Indexes
 # Bloquear acesso direto a um diretório
 
 RewriteRule ^app - [F]
-RewriteCond %{REQUEST_URI} ^/files/uploads/
-RewriteRule ^files/ - [F]
+RewriteRule ^files/logs/ - [F]
 RewriteRule ^vendor/ - [F]
 
 # Bloquear acesso ao arquivo

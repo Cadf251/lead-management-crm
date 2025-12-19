@@ -29,14 +29,15 @@ class NovaSenha extends LoginAbstract
         unset($_SESSION["servidor_id"]);
 
         $_SESSION["alerta"] = [
-          "✅ Sucesso!",
+          $result->getStatus(),
           $result->mensagens()
         ];
       } catch (Exception $e){
         $_SESSION["alerta"] = [
-          "❌ Erro!",
-          "Algo deu errado."
+          $result->getStatus(),
+          $result->mensagens()
         ];
+        
         GenerateLog::generateLog("error", "Não foi possível resetar uma senha no login", [
           "error" => $e->getMessage()
         ]);

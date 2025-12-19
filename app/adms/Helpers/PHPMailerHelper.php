@@ -103,6 +103,10 @@ class PHPMailerHelper
    * 
    * Cria um log se falhar.
    * 
+   * @todo Remover os returns, prefica throw exception.
+   * 
+   * @throws Exception
+   * 
    * @return bool Se falhou ou não
    */
   public function enviar():bool
@@ -134,6 +138,7 @@ class PHPMailerHelper
       return true;
     } catch (Exception $e){
       GenerateLog::generateLog("error", "Um email não pôde ser enviado", ["erro" => $e->getMessage()]);
+      throw new Exception($e->getMessage());
       return false;
     }
   }
