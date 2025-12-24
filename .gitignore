@@ -1,5 +1,8 @@
 node_modules/
 vendor/
 files/logs/*
+!files/logs/empty
 files/uploads/*
+!files/uploads/empty
 .env
+git
