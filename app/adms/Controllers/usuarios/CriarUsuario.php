@@ -43,7 +43,14 @@ class CriarUsuario extends UsuariosAbstract
       $this->redirect();
     }
 
-    // Carregar a VIEW
-    $this->render("adms/Views/usuarios/criar-usuario");
+    // Retorna a VIEW
+    $content = require APP_ROOT."app/adms/Views/usuarios/criar-usuario.php";
+
+    echo json_encode([
+      "sucesso" => true,
+      "html" => $content]);
+    exit;
+    
+    // $this->render("adms/Views/usuarios/criar-usuario");
   }
 }

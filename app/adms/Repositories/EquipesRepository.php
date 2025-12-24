@@ -2,13 +2,28 @@
 
 namespace App\adms\Repositories;
 
-use App\adms\Database\DbOperations;
+use App\adms\Database\DbOperationsRefactored;
+use App\adms\Helpers\GenerateLog;
+use App\adms\Models\Equipe;
+use App\adms\Models\EquipeFuncao;
+use App\adms\Models\EquipeUsuario;
+use App\adms\Models\Produto;
+use App\adms\Models\Usuario;
+use App\adms\Models\UsuarioStatus;
+use Exception;
+use PDO;
 
 /** Repositório de equipes */
-class EquipesRepository extends DbOperations
+class EquipesRepository
 {
   /** @var string $tabela O nome da tabela no banco de dados */
   private string $tabela = "equipes";
+  public DbOperationsRefactored $sql;
+  
+  public function __construct(PDO $conexao)
+  {
+    $this->sql = new DbOperationsRefactored($conexao);
+  }
 
   /**
    * Retorna a query base para fazer consultas de equipes e trata as permissões também.
@@ -19,12 +34,11 @@ class EquipesRepository extends DbOperations
    */
   public function getQueryBase(string $where = ""): string
   {
-    if ($where !== "")
+    if ($where !== ""){
       $where = <<<SQL
-        WHERE
-          $where
+        AND $where
       SQL;
-
+    }
     $base = <<<SQL
       SELECT
         e.id AS equipe_id, e.nome AS equipe_nome, e.descricao AS equipe_descricao, e.created AS equipe_created, e.modified AS equipe_modified,
@@ -33,7 +47,9 @@ class EquipesRepository extends DbOperations
       FROM {$this->tabela} e
       INNER JOIN produtos p ON p.id = e.produto_id
       INNER JOIN generico_status es ON es.id = e.equipe_status_id
-      $where
+      WHERE
+        e.equipe_status_id != 1
+        $where
       ORDER BY e.equipe_status_id DESC
     SQL;
 
@@ -54,38 +70,92 @@ class EquipesRepository extends DbOperations
    * 
    * @return array|false
    */
-  public function listarEquipes(): array|false
+  public function listarEquipes(): ?array
   {
     $query = $this->getQueryBase();
 
     $params = [
-      ":acesso_equipes" => $_SESSION["acesso_equipes"]
+      "acesso_equipes" => $_SESSION["acesso_equipes"] ?? null
     ];
 
-    $equipes = $this->executeSQL($query, $params);
-    $return = [];
-    
-    $i = 0;
-    foreach ($equipes as $equipe){
-      $return[$i] = $equipe;
-      $return[$i]["usuarios"] = $this->listarUsuarios($equipe["equipe_id"]);
-      $i++;
+    try {
+      $equipes = $this->sql->execute($query, $params);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
     }
-    return $return;
+
+    $final = [];
+
+    foreach ($equipes as $equipe) {
+      $object = $this->hydrateEquipe($equipe);
+      $final[] = $object;
+    }
+
+    return $final;
+  }
+
+  
+  /**
+   * Seleciona apenas uma equipe
+   * 
+   * @param int $equipeId O ID da equipe
+   * 
+   * @return ?Equipe
+   */
+  public function selecionarEquipe(int $equipeId): ?Equipe
+  {
+    $query = $this->getQueryBase("e.id = :equipe_id");
+
+    $params = [
+      "acesso_equipes" => $_SESSION["acesso_equipes"],
+      "equipe_id" => $equipeId
+    ];
+
+    try {
+      $equipes = $this->sql->execute($query, $params);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
+
+    if (empty($equipes)) {
+      return null;
+    }
+
+    $equipe = $equipes[0];
+
+    return $this->hydrateEquipe($equipe);
+  }
+
+  private function hydrateEquipe(array $row):?Equipe
+  {
+    $equipe = new Equipe();
+    $equipe->setId($row["equipe_id"]);
+    $equipe->setNome($row["equipe_nome"]);
+    $equipe->setDescricao($row["equipe_descricao"]);
+    $equipe->setColaboradores(
+      $this->listarUsuarios($equipe->id)
+    );
+    $equipe->setProdutoByArray([
+      "id" => $row["produto_id"],
+      "nome" => $row["produto_nome"],
+      "descricao" => $row["produto_descricao"] ?? null
+    ]);
+    $equipe->setStatus($row["equipe_status_id"]);
+    return $equipe;
   }
 
   /**
    * Lista os usuários háptos de uma equipe e seus detalhes.
    * 
-   * @return array A lista de usuários
+   * @return array A lista de EquipeUsuario
    */
   public function listarUsuarios(int $equipeId): array
   {
     $query = <<<SQL
       SELECT
-        eu.usuario_id, eu.vez, pode_receber_leads, eu.equipe_usuario_funcao_id,
+        eu.id eu_id, eu.usuario_id, eu.vez, pode_receber_leads, eu.equipe_usuario_funcao_id,
         u.nome, u.nivel_acesso_id,
-        euf.nome funcao_nome
+        euf.nome funcao_nome, euf.descricao funcao_desc
       FROM equipes_usuarios eu
       INNER JOIN usuarios u ON u.id = eu.usuario_id
       INNER JOIN equipes_usuarios_funcoes euf ON euf.id = eu.equipe_usuario_funcao_id
@@ -98,133 +168,111 @@ class EquipesRepository extends DbOperations
       ":equipe_id" => $equipeId
     ];
 
-    return $this->executeSQL($query, $params);
+    $array = $this->sql->execute($query, $params);
+    $final = [];
+
+    foreach ($array as $row) {
+      $final[] = $this->hydrateUsuario($row);
+    }
+
+    return $final;
   }
 
-  /**
-   * Seleciona apenas uma equipe
-   * 
-   * @param int $equipeId O ID da equipe
-   * 
-   * @return array|false
-   * 
-   */
-  public function selecionarEquipe(int $equipeId): array|false
+  private function hydrateUsuario(array $row):?EquipeUsuario
   {
-    $query = $this->getQueryBase("e.id = :equipe_id");
+    $usuario = new EquipeUsuario();
+    $usuario->setId($row["eu_id"]);
+    $usuario->setUsuarioId(($row["usuario_id"]));
+    $usuario->setUsuarioNome($row["nome"]);
+    $usuario->setVez($row["vez"]);
+    $usuario->setRecebeLeads($row["pode_receber_leads"]);
+    $usuario->setFuncao(
+      $row["equipe_usuario_funcao_id"],
+      $row["funcao_nome"],
+      $row["funcao_desc"]
+    );
+    return $usuario;
+  }
 
+  public function salvar(Equipe $equipe)
+  {
     $params = [
-      ":acesso_equipes" => $_SESSION["acesso_equipes"],
-      ":equipe_id" => $equipeId
+      "nome" => $equipe->nome,
+      "descricao" => $equipe->descricao,
+      "produto_id" => $equipe->produto->id,
+      "equipe_status_id" => $equipe->status->id,
+      "modified" => date($_ENV["DATE_FORMAT"])
     ];
 
-    $equipe = $this->executeSQL($query, $params)[0];
-    $equipe["usuarios"] = $this->listarUsuarios($equipeId);
-    return $equipe;
+    try {
+      $this->sql->updateById($this->tabela, $params, $equipe->id);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
   }
 
   /** 
    * Cria o registro de uma equipe no banco de dados
    * 
-   * @param string $nome O Nome da equipe
-   * @param int $produtoId o ID do produto
-   * @param string $descricao A descrição da equipe
+   * @param Equipe $equipe
    * 
-   * @return bool Se funcionou
    */
-  public function criarEquipe(string $nome, int $produtoId, ?string $descricao = null): bool
+  public function criarEquipe(Equipe $equipe): void
   {
     $params = [
-      ":nome" => $nome,
-      ":descricao" => $descricao,
-      ":produto_id" => $produtoId,
-      ":created" => date($_ENV['DATE_FORMAT'])
+      "nome" => $equipe->nome,
+      "descricao" => $equipe->descricao,
+      "produto_id" => $equipe->produto->id,
+      "created" => date($_ENV['DATE_FORMAT'])
     ];
-
-    return $this->insertSQL($this->tabela, $params);
+    
+    try {
+      $equipe->setId($this->sql->insert($this->tabela, $params));
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
   }
 
-  /**
-   * Atualiza o registro no banco de dados atualizando o campo de modified.
-   * 
-   * @param array $params Os parâmetros do updateSQL
-   * @param int $equipeId A row de equipes
-   * 
-   * @return bool Se funcionou
-   */
-  public function updateEquipe(array $params, int $equipeId): bool
+  public function getProdutoById(int $produtoId):?Produto
   {
-    $modified = date($_ENV["DATE_FORMAT"]);
-    $params[":modified"] = $modified;
-    return $this->updateSQL($this->tabela, $params, $equipeId);
-  }
+    $query = <<<SQL
+    SELECT id, nome, descricao
+    FROM produtos
+    WHERE id = :id
+    SQL;
 
-  /**
-   * Muda o ID do status de uma equipe
-   * 
-   * @param int $equipeId O ID da equipe a ser editada
-   * @param int $statusId O novo ID do status.
-   * 
-   * @param int $statusId 1 = Desativado
-   * @param int $statusId 2 = Pausado
-   * @param int $statusId 3 = Ativado
-   * 
-   * @return bool Se funcionou
-   */
-  public function mudarStatus(int $equipeId, int $statusId): bool
-  {
     $params = [
-      ":equipe_status_id" => $statusId
+      "id" => $produtoId
     ];
 
-    return $this->updateEquipe($params, $equipeId);
+    try {
+      $produto = $this->sql->execute($query, $params);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
+
+    if (empty($produto)) return null;
+
+    return $this->hydrateProduto($produto[0]);
   }
 
-  /** 
-   * Desativa uma equipe 
-   * 
-   * @param int $equipeId O ID da equipe a ser editada
-   * 
-   * @return bool Se funcionou
-   */
-  public function desativar(int $equipeId): bool
+  private function hydrateProduto(array $row):?Produto
   {
-    // Não retira os usuários da equipe, já que os usuários dela não devem perder o acesso aos leads.
-    return $this->mudarStatus($equipeId, 1);
-  }
-
-  /** 
-   * Pausa uma equipe 
-   * 
-   * @param int $equipeId O ID da equipe a ser editada
-   * 
-   * @return bool Se funcionou
-   */
-  public function congelar(int $equipeId): bool
-  {
-    return $this->mudarStatus($equipeId, 2);
-  }
-
-  /** 
-   * Despausa uma equipe 
-   * 
-   * @param int $equipeId O ID da equipe a ser editada
-   * 
-   * @return bool Se funcionou
-   */
-  public function ativar(int $equipeId): bool
-  {
-    return $this->mudarStatus($equipeId, 3);
+    return new Produto(
+      $row["id"],
+      $row["nome"],
+      $row["descricao"] ?? null
+    );
   }
 
   /**
    * Retorna os usuários que não estão na equipe e estão ativos
    * 
-   * @param int $equipeId O ID da equipe a ser editada
+   * @param Equipe $equipe
    * 
-   * @return array|false
+   * @return array
    */
-  public function eleitosAEquipe(int $equipeId)
+  public function eleitosAEquipe(Equipe $equipe):array
   {
     $usuariosQ = <<<SQL
       SELECT 
@@ -233,167 +281,172 @@ class EquipesRepository extends DbOperations
       WHERE 
         (u.id NOT IN (
           SELECT usuario_id FROM equipes_usuarios WHERE equipe_id = :equipe_id
-        )) AND (u.usuario_status_id = 3)
+        )) AND (u.usuario_status_id = :usuario_id)
     SQL;
 
     $params = [
-      ":equipe_id" => $equipeId
+      "equipe_id" => $equipe->id,
+      "usuario_id" => Usuario::STATUS_ATIVADO
     ];
 
-    return $this->executeSQL($usuariosQ, $params);
+    try {
+      $eleitos = $this->sql->execute($usuariosQ, $params);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
+
+    $final = [];
+    foreach ($eleitos as $eleito) {
+      $final[] = $this->hydrateNewUsuario($eleito);
+    }
+
+    return $final;
   }
 
-  /**
-   * Retorna os usuários que serão os próximos em uma equipe
-   * 
-   * @param int $equipeId O ID da equipe a ser editada
-   * 
-   * @return array|false
-   */
-  public function proximos(int $equipeId)
+  private function hydrateNewUsuario(array $row):?EquipeUsuario
+  {
+    $usuario = EquipeUsuario::novo(
+      $row["id"],
+      $row["nome"],
+      $row["nivel_acesso_id"]
+    );
+    return $usuario;
+  }
+
+  public function getNivel(int $usuarioId):?int
   {
     $query = <<<SQL
-      SELECT 
-        vez, usuario_id 
-      FROM equipes_usuarios 
-      WHERE equipe_id = :equipe_id 
-      AND pode_receber_leads = 1
-      ORDER BY id ASC 
-      LIMIT 3
+    SELECT nivel_acesso_id
+    FROM usuarios
+    WHERE id = :usuario_id
     SQL;
 
     $params = [
-      ":equipe_id" => $equipeId
+      "usuario_id" => $usuarioId
     ];
 
-    return $this->executeSQL($query, $params);
+    $result = $this->sql->execute($query, $params);
+
+    if(empty($result)) return null;
+
+    return $result[0]["nivel_acesso_id"];
   }
 
-  /**
-   * Retorna a menor VEZ de uma equipe
-   * 
-   * @param int $equipeId O ID da equipe a ser editada
-   * 
-   * @return int
-   */
-  public function minVez(int $equipeId): int
+  public function criarColaborador(Equipe $equipe, EquipeUsuario $colab):void
   {
-    $query = <<<SQL
-      SELECT
-        MIN(vez) AS vez 
-      FROM equipes_usuarios 
-      WHERE 
-        (pode_receber_leads = 1)
-        AND (equipe_id = :equipe_id)
-      LIMIT 1
-    SQL;
-
     $params = [
-      ":equipe_id" => $equipeId
+      "vez" => (int)$colab->vez,
+      "pode_receber_leads" => (int)$colab->recebeLeads(),
+      "equipe_usuario_funcao_id" => $colab->funcao->id,
+      "usuario_id" => $colab->usuarioId,
+      "equipe_id" => $equipe->id,
     ];
 
-    $minvez = $this->executeSQL($query, $params, true)[0];
-    if ($minvez["vez"] === null) return 0;
-    return $minvez["vez"];
+    try {
+      $id = $this->sql->insert("equipes_usuarios", $params);
+      $colab->setId($id);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
   }
 
-  public function vezUsuario($registroId)
-  {
-    $query = <<<SQL
-    SELECT vez 
-    FROM equipes_usuarios 
-    WHERE 
-      id = :id
-    LIMIT 1
-    SQL;
+  // public function vezUsuario($registroId)
+  // {
+  //   $query = <<<SQL
+  //   SELECT vez 
+  //   FROM equipes_usuarios 
+  //   WHERE 
+  //     id = :id
+  //   LIMIT 1
+  //   SQL;
 
-    $params = [
-      ":id" => $registroId
-    ];
+  //   $params = [
+  //     ":id" => $registroId
+  //   ];
 
-    $minvez = $this->executeSQL($query, $params, true)[0];
-    if ($minvez["vez"] === null) return 0;
-    return $minvez["vez"];
-  }
+  //   $minvez = $this->executeSQL($query, $params, true)[0];
+  //   if ($minvez["vez"] === null) return 0;
+  //   return $minvez["vez"];
+  // }
 
-  /**
-   * Adiciona um usuário em uma equipe com base no $params
-   */
-  public function adicionarUsuario(array $params): bool
-  {
-    return $this->insertSQL("equipes_usuarios", $params);
-  }
+  // /**
+  //  * Adiciona um usuário em uma equipe com base no $params
+  //  */
+  // public function adicionarUsuario(array $params): bool
+  // {
+  //   return $this->insertSQL("equipes_usuarios", $params);
+  // }
 
-  /**
-   * Pega o ID do registro de equipes_usuarios
-   */
-  public function getIdEquipesUsuarios(int $equipeId, int $usuarioId)
-  {
-    $query = <<<SQL
-      SELECT id
-      FROM equipes_usuarios
-      WHERE
-        equipe_id = :equipe_id
-        AND usuario_id = :usuario_id
-    SQL;
+  // /**
+  //  * Pega o ID do registro de equipes_usuarios
+  //  */
+  // public function getIdEquipesUsuarios(int $equipeId, int $usuarioId)
+  // {
+  //   $query = <<<SQL
+  //     SELECT id
+  //     FROM equipes_usuarios
+  //     WHERE
+  //       equipe_id = :equipe_id
+  //       AND usuario_id = :usuario_id
+  //   SQL;
 
-    $params = [
-      ":equipe_id" => $equipeId,
-      ":usuario_id" => $usuarioId
-    ];
+  //   $params = [
+  //     ":equipe_id" => $equipeId,
+  //     ":usuario_id" => $usuarioId
+  //   ];
 
-    $array = $this->executeSQL($query, $params);
-    return $array[0]["id"];
-  }
+  //   $array = $this->executeSQL($query, $params);
+  //   return $array[0]["id"];
+  // }
 
-  /**
-   * Troca se o usuário pode receber leads ou não
-   */
-  public function alterarRecebimento(int $equipeId, int $usuarioId, int $set)
-  {
-    $registroId = $this->getIdEquipesUsuarios($equipeId, $usuarioId);
+  // /**
+  //  * Troca se o usuário pode receber leads ou não
+  //  */
+  // public function alterarRecebimento(int $equipeId, int $usuarioId, int $set)
+  // {
+  //   $registroId = $this->getIdEquipesUsuarios($equipeId, $usuarioId);
 
-    $vez = $this->minVez($equipeId);
+  //   $vez = $this->minVez($equipeId);
 
-    $params = [
-      ":vez" => $vez,
-      ":pode_receber_leads" => $set
-    ];
+  //   $params = [
+  //     ":vez" => $vez,
+  //     ":pode_receber_leads" => $set
+  //   ];
 
-    return $this->updateSQL("equipes_usuarios", $params, $registroId);
-  }
+  //   return $this->updateSQL("equipes_usuarios", $params, $registroId);
+  // }
 
-  public function priorizar(int $equipeId, int $usuarioId):bool
-  {
-    return $this->mudarVez($equipeId, $usuarioId, 1);
-  }
+  // public function priorizar(int $equipeId, int $usuarioId):bool
+  // {
+  //   return $this->mudarVez($equipeId, $usuarioId, 1);
+  // }
 
-  public function prejudicar(int $equipeId, int $usuarioId):bool
-  {
-    return $this->mudarVez($equipeId, $usuarioId, -1);
-  }
+  // public function prejudicar(int $equipeId, int $usuarioId):bool
+  // {
+  //   return $this->mudarVez($equipeId, $usuarioId, -1);
+  // }
 
-  public function mudarVez(int $equipeId, int $usuarioId, int $set):bool
-  {
-    $registroId = $this->getIdEquipesUsuarios($equipeId, $usuarioId);
+  // public function mudarVez(int $equipeId, int $usuarioId, int $set):bool
+  // {
+  //   $registroId = $this->getIdEquipesUsuarios($equipeId, $usuarioId);
 
-    $vez = $this->vezUsuario($registroId);
+  //   $vez = $this->vezUsuario($registroId);
 
-    if (($set === -1) && $vez === 0)
-      return false;
+  //   if (($set === -1) && $vez === 0)
+  //     return false;
 
-    $vez = $vez + $set;
+  //   $vez = $vez + $set;
 
-    $params = [
-      ":vez" => $vez
-    ];
+  //   $params = [
+  //     ":vez" => $vez
+  //   ];
 
-    return $this->updateSQL("equipes_usuarios", $params, $registroId);
-  }
+  //   return $this->updateSQL("equipes_usuarios", $params, $registroId);
+  // }
 
-  public function retirarUsuario(int $equipeId, int $usuarioId)
-  {
-    $registroId = $this->getIdEquipesUsuarios($equipeId, $usuarioId);
-    return $this->deleteByIdSQL("equipes_usuarios", $registroId);
-  }
+  // public function retirarUsuario(int $equipeId, int $usuarioId)
+  // {
+  //   $registroId = $this->getIdEquipesUsuarios($equipeId, $usuarioId);
+  //   return $this->deleteByIdSQL("equipes_usuarios", $registroId);
+  // }
 }

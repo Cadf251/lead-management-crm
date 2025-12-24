@@ -64,8 +64,6 @@ class Login extends LoginAbstract
         throw new Exception("Usuário não está habilitado a logar.");
       }
 
-      var_dump($usuario->podeLogar());
-
       // Verificar senha
       $this->verificarSenha($this->data["form"]["usuario_senha"], $usuario->senhaHash);
 

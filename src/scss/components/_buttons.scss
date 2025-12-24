@@ -1,0 +1,105 @@
+@use "../base/util" as *;
+
+.btn {
+  background-color: var(--main);
+  padding: 8px 12px;
+  min-width: 100px;
+  margin: auto;
+  width: 75%;
+  color: var(--white);
+  font-weight: bold;
+  border-radius: 8px;
+  transition:
+    background 0.5s ease,
+    color .5s ease,
+    box-shadow .1s ease,
+    transform .1s ease;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--blue-soft);
+    box-shadow: 1.5px 1.5px var(--petroleo);
+    transform: translate(-1.5px, -1.5px);
+    background-color: var(--main-dark);
+  }
+
+  &:focus {
+    background-color: var(--seablue);
+    box-shadow: 0 0 var(--petroleo);
+    transform: translate(0, 0);
+  }
+}
+
+.small-btn {
+  --color: var(--white);
+  --bg: var(--black);
+
+  --hover-color: var(--white);
+  --hover-bg: var(--petroleo);
+
+  &--green {
+    --bg: var(--green);
+  }
+
+  &--blue {
+    --bg: var(--blue);
+  }
+
+  &--silver {
+    --bg: var(--silver);
+  }
+
+  &--gray {
+    --bg: var(--gray-brand);
+  }
+
+  &--red {
+    --bg: var(--red);
+  }
+
+  color: var(--color);
+  background-color: var(--bg);
+  font-size: 0.9em;
+  padding: 8px 15px;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: background .5s ease,
+  color .5s ease;
+  position: relative;
+
+  &,
+  & i {
+    cursor: pointer;
+  }
+
+  &:hover {
+    color: var(--white);
+    background-color: color-mix(in srgb, var(--bg) 75%, var(--black) 25%);
+
+    &[title]:not([title=""]),
+    &[data-tooltip-applied] {
+      &::after {
+        width: 75%;
+      }
+    }
+  }
+
+  &[title]:not([title=""]),
+  &[data-tooltip-applied] {
+    &::after {
+      content: "";
+      position: absolute;
+      background: color-mix(in srgb, var(--bg) 75%, var(--black) 25%);
+      border-radius: 2px;
+      width: 0;
+      bottom: -6px;
+      height: 3px;
+      left: 12.25%;
+      transition: width 0.4s ease;
+    }
+  }
+
+  &:focus {
+    transform: translateY(1px);
+  }
+}

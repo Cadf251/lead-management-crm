@@ -1,0 +1,51 @@
+.editar-usuario {
+  label {
+    &:hover {
+      background-color: unset;
+    }
+  }
+
+  input {
+    display: none;
+  }
+}
+
+.editar-usuario input:checked ~ .foto--editar, .sem--foto {
+  background-color: var(--gray-light) !important;
+
+  img {
+    display: none;
+  }
+
+  .foto--delete {
+    display: none !important;
+  }
+}
+
+.foto--editar {
+  width: 120px;
+  height: 120px;
+
+  &:hover {
+    img {
+      transition: opacity .5s ease;
+      opacity: 0.5;
+    }
+
+    position: relative;
+    background-color: var(--gray-brand);
+
+    .foto--delete {
+      display: flex;
+    }
+  }
+}
+
+.foto--delete {
+  display: none;
+  color: var(--white);
+  position: absolute;
+  align-self: center;
+  justify-self: center;
+  inset: 0;
+}

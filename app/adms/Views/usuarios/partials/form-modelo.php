@@ -1,21 +1,32 @@
 <?php
-use App\adms\Helpers\CelularFormatter;
+
 use App\adms\Helpers\CSRFHelper;
+use App\adms\UI\Field;
 
 $csrf = CSRFHelper::generateCSRFToken("form_usuario");
 
-$content = <<<HTML
-  <label>Qual é o nome do novo usúario?</label>
-  <input class="form-padrao__input" type="text" name="nome" value="{$usuario['nome']}" required>
-  <label>Qual é o email do novo usuário?</label>
-  <input class="form-padrao__input" type="text" name="email" value="{$usuario['email']}" required>
-  <label>Qual é o celular do novo usuário?</label>
-  <input class="form-padrao__input phone" type="text" name="celular" value="{$usuario['celular']}" maxlength="14" placeholder="(xx)9xxxx-xxxx" class="phone" required>
-  $foto
-  <label>Qual será o nível de acesso do usuário?</label>
-  <select class="form-padrao__input" name="nivel_acesso_id" required>
-    <option value="">Selecionar...</option>
-    {$this->data["form-options"]}
-  </select>
-  <input type="hidden" name="csrf_token" value="{$csrf}">
-HTML;
+return [
+  Field::create("Nome completo", "nome")
+    ->value($usuario["nome"] ?? "")
+    ->required(),
+
+  Field::create("Email de acesso", "email")
+    ->value($usuario["email"] ?? "")
+    ->required(),
+
+  Field::create("Celular", "celular")
+    ->value($usuario["celular"] ?? "")
+    ->required()
+    ->placeholder("(xx)9xxxx-xxxx"),
+
+  Field::create("📷 Foto de perfil", "foto")
+    ->type(Field::TYPE_FILE),
+
+  Field::create("Nível de acesso", "nivel_acesso_id")
+  ->type(Field::TYPE_SELECT)
+  ->options($this->data["form-options"]),
+
+  Field::create("", "csrf_token")
+    ->type(Field::TYPE_HIDDEN)
+    ->value($csrf)
+];

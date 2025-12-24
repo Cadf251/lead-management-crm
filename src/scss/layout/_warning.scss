@@ -1,0 +1,22 @@
+.warning {
+  position: fixed;
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  background-color: var(--white);
+  padding: 20px;
+  top: 16px;
+  box-shadow: var(--shadow) 3px 3px 15px;
+  // border: var(--red) solid;
+  // border-width: 3px 3px 8px 3px;
+  justify-self: center;
+  border-radius: 8px;
+  transition: opacity .5s ease, transform .5s ease;
+
+  &--show {
+    opacity: 1;
+    user-select: all;
+    pointer-events: all;
+  }
+}

@@ -1,0 +1,44 @@
+:root {
+  /* BRANCOS */
+  --white: #fff;
+  --white-off: #f2f2f2;
+
+  --gray-light: #cbcbcb;
+  --gray-dark: #525252;
+
+  --black: #000;
+  --shadow: #0004;
+
+  /* BRAND */
+  --main: #0EBCC9;
+  --main-dark: color-mix(in srgb, var(--main) 75%, var(--petroleo) 25%);
+  --gray-brand: #444;
+  --white-brand: #e4e4e4;
+  --black-brand: #000;
+
+  --seablue: #1496e6;
+  --petroleo: #114960;
+
+  /* BOTÕES */
+  --green: #0EC92A;
+  --green-soft: #A5FFB2;
+
+  --blue: var(--main);
+  --blue-soft: #B9FAFE;
+  
+  --red: #FE2C59;
+  --red-soft: #FFBCC5;
+
+  --silver: #747F8A;
+  --silver-soft: #e0e5ea;
+
+  --yellow: #b8b60b;
+  --yellow-soft: #fcfaa9;
+
+  /* OUTROS COMPONENTES */
+  --bg-color: var(--white-off);
+  --bg-card: var(--white);
+  --nav: var(--gray-brand);
+
+  --main-font: "agenda", "verdana", "system-ui";
+}

@@ -4,6 +4,8 @@ namespace App\adms\Helpers;
 
 /**
  * Cria estruturas limpas de HTML com facilidade
+ * 
+ * @deprecated Use UI/ istead
  */
 class HTMLHelper
 {
@@ -30,16 +32,12 @@ class HTMLHelper
    * 
    * @return string HTML
    */
-  public static function renderCard(string $content, array $classes = []) :string
+  public static function renderCard(string $content)
   {
-    if(!empty($classes))
-      $classes = " ".implode(" ", $classes);
-    else 
-      $classes = "";
     return <<<HTML
-      <div class="card-padrao {$classes}">
-        $content
-      </div>
+    <div class="card--object">
+      $content
+    </div>
     HTML;
   }
 
@@ -192,25 +190,43 @@ class HTMLHelper
    * @param array $formClasses As classes adicionais do formulário
    * @param array $cardClasses As classes adicionais do card
    */
-  public static function renderForm(string $content, string $action, bool $allowFiles = false, array $formClasses = [], array $cardClasses = []):string
+  public static function renderForm(string $content, string $cta, string $action = "", bool $allowFiles = false):string
   {
-    if (!empty($formClasses))
-      $formClasses = implode(" ", $formClasses);
-    else 
-      $formClasses = "";
-
     if ($allowFiles)
       $files = " enctype='multipart/form-data' ";
     else 
       $files = " ";
     
-    $form = <<<HTML
-      <form class="form-padrao {$formClasses}"{$files}method="post">
+    return <<<HTML
+      <form class="form"{$files}method="post" action="{$_ENV['HOST_BASE']}$action">
         $content
-        <button type="submit" class="small-btn small-btn--normal">$action</button>
+        <button type="submit" class="small-btn small-btn--blue">$cta</button>
       </form>
     HTML;
-    return HTMLHelper::renderCard($form, $cardClasses);
+  }
+
+  /**
+   * Cria um formulário de edição, com um CSS levemente diferente nos inputs
+   * 
+   * @param string $content O conteúdo com os labels e inputs
+   * @param string $action O placeholder do botão submit
+   * @param bool $allowFiles Se permite o envio de arquivos
+   * @param array $formClasses As classes adicionais do formulário
+   * @param array $cardClasses As classes adicionais do card
+   */
+  public static function renderFormEdit(string $content, string $cta, string $action = "", bool $allowFiles = false):string
+  {
+    if ($allowFiles)
+      $files = " enctype='multipart/form-data' ";
+    else 
+      $files = " ";
+    
+    return <<<HTML
+      <form class="form form--edit js--form-edit"{$files}method="post" action="{$_ENV['HOST_BASE']}$action">
+        $content
+        <button type="submit" class="small-btn small-btn--blue">$cta</button>
+      </form>
+    HTML;
   }
 
   /**
@@ -223,27 +239,13 @@ class HTMLHelper
    * @param array $formClasses As classes adicionais do formulário
    * @param array $cardClasses As classes adicionais do card
    */
-  public static function renderFormWTitle(string $title, string $content, string $action, bool $allowFiles = false, array $formClasses = [], array $cardClasses = []):string
+  public static function renderFormWTitle(string $title, string $content, string $cta, string $action = "", bool $allowFiles = false):string
   {
     $contentFinal = <<<HTML
-      <h2 class="titulo-2">$title</h2>
+      <h2 class="titulo titulo--2">$title</h2>
       $content
     HTML;
-    return HTMLHelper::renderForm($contentFinal, $action, $allowFiles, $formClasses, $cardClasses);
-  }
-
-  /**
-   * Cria um formulário mais fino
-   * 
-   * @param string $title O título do gráfico
-   * @param string $content O conteúdo do form
-   * @param string $action O conteúdo do botão submit
-   * 
-   * @return string HTML renderFormWTitle com classes adicionais
-   */
-  public static function thinnerForm(string $title, string $content, string $action, bool $allowFiles = false)
-  {
-    return HTMLHelper::renderFormWTitle($title, $content, $action, $allowFiles, ['form-padrao--thinner'], ['card-padrao--thinner']);
+    return HTMLHelper::renderForm($contentFinal, $cta, $action, $allowFiles);
   }
 
   /**
@@ -285,15 +287,17 @@ class HTMLHelper
    * 
    * @return string HTML
    */
-  public static function renderHeader(string $title, string $href, string $mouseover, string $icon)
+  public static function renderHeader(string $title, string $taskButton)
   {
     return <<<HTML
-      <div class="page-header">
-        <a href="$href" class="white-btn" title="{$mouseover}">
-          <i class="fa-solid fa-{$icon}"></i>
-        </a>
-        <h2 class="titulo-2">$title</h2>
+    <div class="task-header">
+      <div>
+        <h1 class="titulo titulo--2">$title</h1>
       </div>
+      <div>
+        $taskButton
+      </div>
+    </div>
     HTML;
   }
 
@@ -329,6 +333,8 @@ class HTMLHelper
 
   /**
    * Cria um botão com um formulário
+   * 
+   * @deprecated
    */
   public static function renderButtonForm($task, string $icon, string $mouseover, $inputs, $color = "normal")
   {
@@ -352,6 +358,28 @@ class HTMLHelper
       <a href="$href" class="small-btn small-btn--$color" title="$mouseover">
         <i class="fa-solid fa-{$icon}"></i>
       </a>
+    HTML;
+  }
+
+  public static function renderButtonIcon(string $icon, array $dataSet, string $color = "blue", string $mouseover = "")
+  {
+    $label = <<<HTML
+    <i class="fa-solid fa-{$icon}"></i>
+    HTML;
+    return self::renderButton($label, $dataSet, $color, $mouseover);
+  }
+
+  public static function renderButton(string $label, array $dataSet, string $color = "blue", string $mouseover = "")
+  {
+    $data = "";
+    foreach ($dataSet as $key => $row) {
+      $data .= "data-{$key}='{$row}'\n";
+    }
+    return <<<HTML
+    <button
+      class="small-btn small-btn--{$color}"
+      {$data}
+    >$label</button>
     HTML;
   }
 

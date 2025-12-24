@@ -35,7 +35,6 @@ class EquipesAjax extends EquipesAbstract
           );
           break;
       }
-      GenerateLog::generateLog("info", "gay gay gay", []);
       echo json_encode(["sucesso" => $result, "html" => $this->renderizarCard((int)$_POST["equipe_id"])]);
       exit;
     }

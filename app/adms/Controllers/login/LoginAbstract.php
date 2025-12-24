@@ -71,6 +71,8 @@ abstract class LoginAbstract
     $this->createSession($this->clientCredenciais, (int)$this->data["form"]["servidor_id"], $usuario);
     $this->permissoesSession($usuario->nivel->id, $usuario->id);
 
+    setcookie("codigo_empresa", $_SESSION["servidor_id"]);
+
     // Joga para o dashboard
     $this->redirectDashboard();
   }

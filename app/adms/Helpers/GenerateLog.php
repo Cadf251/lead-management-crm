@@ -23,27 +23,35 @@ use Monolog\Handler\StreamHandler;
 class GenerateLog
 {
 
+  const DEBUG = "debug";
+  const INFO = "info";
+  const NOTICE = "notice";
+  const WARNING = "warning";
+  const ERROR = "error";
+  const CRITICAL = "critical";
+  const ALERT = "alert";
+  const EMERGENCY = "emergency";
+
   /**
    * Método static que pode ser chamado sem criar a instância
    * Códigos de erro personalizados:
    * Cria um LOG
    * 
-   * @return void
+   * @deprecated
    */
-
-  public static function generateLog(string $level, string $message, array|null $content):void
+  public static function generateLog(string $level, string $message, array|null $content): void
   {
     $log = new Logger("name");
 
     $nameFileLog = date("dmY") . ".log";
 
     $pasta = $_SESSION["servidor_id"] ?? "limbo";
-    
+
     // Cria o diretório
-    $path = APP_ROOT."files/logs/$pasta";
+    $path = APP_ROOT . "files/logs/$pasta";
 
     // Cria a pasta se não existir
-    if (!is_dir($path)){
+    if (!is_dir($path)) {
       $novaPasta = mkdir($path, 0777, true);
       if (!$novaPasta) $path = "files/logs/limbo";
     }
@@ -52,8 +60,8 @@ class GenerateLog
     $filePath = "$path/$nameFileLog";
 
     // Verifica se o arquivo existe
-    if (!file_exists($filePath)){
-    
+    if (!file_exists($filePath)) {
+
       // Abre o arquivo
       $fileOpen = fopen($filePath, "w");
 
@@ -62,9 +70,9 @@ class GenerateLog
     }
 
     $log->pushHandler(new StreamHandler($filePath), Level::Debug);
-    
-    if (isset($_SESSION["logado"]) && $_SESSION["logado"] === true){
-      $content["sessao"] =[
+
+    if (isset($_SESSION["logado"]) && $_SESSION["logado"] === true) {
+      $content["sessao"] = [
         "usuario_id" => $_SESSION["usuario_id"] ?? null,
         "servidor_id" => $_SESSION["servidor_id"] ?? null
       ];
@@ -72,5 +80,20 @@ class GenerateLog
 
     // Salvar o log no arquivo
     $log->$level($message, $content);
+  }
+
+  // MÉTODO NOVO: Recebe o objeto de erro diretamente
+  public static function log(\Throwable $e, $level = self::ERROR, array $info = [])
+  {
+    // Extrai os dados automaticamente
+    $dadosDoErro = [
+      'mensagem' => $e->getMessage(),
+      'arquivo'  => $e->getFile(),
+      'linha'    => $e->getLine(),
+    ];
+
+    // Chama o método antigo internamente para salvar, 
+    // assim você não repete a lógica de salvar no arquivo/banco
+    self::generateLog($level, $e->getMessage(), array_merge($dadosDoErro, $info));
   }
 }

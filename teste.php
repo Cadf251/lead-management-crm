@@ -1,42 +1,47 @@
 <?php
 
-class Pessoa
-{
-  public string $nome;
+use App\adms\Models\Equipe;
+use App\adms\Models\EquipeUsuario;
+use App\adms\UI\Field;
 
-  public function __construct(string $nome)
-  {
-    $this->setNome($nome);
-  }
+// Carregar o composer
+require_once "vendor/autoload.php";
 
-  public function setNome(string $nome) {
-    $this->nome = $nome;
-  }
+session_start();
+ob_start();
+ini_set("display_errors", 1);
 
-  public function showNome()
-  {
-    echo $this->nome."<br>";
-  }
+// Instancia as variáveis de ambiente
+$dotenv = Dotenv\Dotenv::createUnsafeImmutable(__DIR__);
+$dotenv->load();
+
+date_default_timezone_set($_ENV['TIME_ZONE']);
+
+define('APP_ROOT', str_replace("\\", "/", __DIR__)."/");
+
+if($_SERVER["HTTP_HOST"] === "crm.local"){
+  $_ENV["HOST_BASE"] = "http://crm.local/";
 }
 
-class Editar
-{
-  public function mostrarPessoa(Pessoa $pessoa)
-  {
-    $pessoaB = $this->editarPessoa($pessoa);
-    $pessoa->showNome();
-    $pessoaB->showNome();
-  }
+$equipe = new Equipe();
 
-  public function editarPessoa(Pessoa $pessoa)
-  {
-    $pessoa->setNome("Emanuel");
-    return $pessoa;
-  }
-}
+$colaborador = new EquipeUsuario();
+$colaborador->setId(0);
+$colaborador->setRecebeLeads(true);
+$colaborador->setVez(1);
 
-$pessoa = new Pessoa("João");
+$colaborador2 = new EquipeUsuario();
+$colaborador2->setId(1);
+$colaborador2->setRecebeLeads(true);
+$colaborador2->setVez(0);
 
-$editar = new Editar();
-$editar->editarPessoa($pessoa);
-$editar->mostrarPessoa($pessoa);
+$colaborador3 = new EquipeUsuario();
+$colaborador3->setId(2);
+$colaborador3->setRecebeLeads(true);
+$colaborador3->setVez(0);
+
+$equipe->setColaboradores([
+  $colaborador, $colaborador2, $colaborador3
+]);
+
+var_dump($equipe->getProximos());

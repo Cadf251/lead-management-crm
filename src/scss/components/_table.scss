@@ -1,0 +1,34 @@
+@use "../base/util" as *;
+
+.table {
+  background: var(--white);
+  box-shadow: 0 4px 10px var(--shadow);
+  padding: 20px 25px;
+  border-radius: 8px;
+  margin-top: 16px;
+  width: 100%;
+  border-spacing: 0 16px;
+
+  th {
+    font-size: 1.1em;
+    text-align: left;
+  }
+
+  td, th {
+    margin: 8px 0;
+  }
+
+  td .input {
+    padding: 6px 8px !important;
+  }
+
+  .cell-centered {
+    text-align: center;
+  }
+
+  .cell-aligned {
+    display: inline-flex;
+    align-items: center;
+    gap: 0 8px;
+  }
+}

@@ -3,7 +3,7 @@
 namespace App\adms\Presenters;
 
 use App\adms\Helpers\CelularFormatter;
-use App\adms\Models\Usuario;
+use App\adms\UI\Button;
 
 class UsuarioPresenter
 {
@@ -22,10 +22,10 @@ class UsuarioPresenter
         "status_id" => $usuario->status->id,
         "status_nome" => $usuario->status->nome,
         "status_descricao" => $usuario->status->descricao,
+        "status_class" => self::getUsuarioStatusClass($usuario->status->id),
         "button" => self::buttons($usuario->status->id, $usuario->id, $usuario->nome)
       ];
     }
-
     return $final;
   }
 
@@ -41,121 +41,77 @@ class UsuarioPresenter
     if(empty($fotoPerfil) || !isset($fotoPerfil) || $fotoPerfil === null){
       return "";
     } else {
-      return "{$_ENV['HOST_BASE']}files/uploads/{$_SESSION['servidor_id']}/fotos-perfil/{$id}.{$fotoPerfil}";
+      return "<img src='{$_ENV['HOST_BASE']}files/uploads/{$_SESSION['servidor_id']}/fotos-perfil/{$id}.{$fotoPerfil}'>";
     }
+  }
+
+  /** Diferente da UtilPresenter::getStatusClass */
+  public static function getUsuarioStatusClass(int $statusId)
+  {
+    $classes = [
+      1 => "blue",
+      2 => "red",
+      3 => "green",
+    ];
+
+    return $classes[$statusId] ?? "gray";
   }
 
   private static function buttons(int $statusId, int $id, string $nome){
     $btns = [
-      "editar" => [
-        "type" => "link",
-        "href" => "{$_ENV['HOST_BASE']}editar-usuario/{$id}",
-        "icon" => "pencil",
-        "title" => "Editar Usuário",
-        "color" => "normal"
-      ],
-      "reenviar-email" => [
-        "type" => "ajax",
-        "function" => <<<JS
-          setWarning(
-            "Reenviar email de {$nome}?",
-            "Será reenviado o email de confirmação de senha.",
-            true,
-            () => {
-              postRequest(
-                "{$_ENV['HOST_BASE']}/reenviar-email/{$id}",
-                "",
-                (response) => {
-                  renderizar(response.html, ".card--{$id}");
-                  setWarning(
-                    response.alerta,
-                    response.mensagens
-                  );
-                }
-              )            }
-          )
-        JS,
-        "color" => "gray",
-        "icon" => "envelope",
-        "title" => "Reenviar email de confirmação/redefinição de senha"
-      ],
-      "desativar" => [
-        "type" => "ajax",
-        "function" => <<<JS
-          setWarning(
-            "Deseja desativar o {$nome}?",
-            "O usuário será desativado. A ação é reversível.",
-            true,
-            () => {
-              postRequest(
-                "{$_ENV['HOST_BASE']}/desativar-usuario/{$id}",
-                "",
-                (response) => {
-                  renderizar(response.html, ".card--{$id}");
-                  setWarning(
-                    response.alerta,
-                    response.mensagens
-                  );
-                }
-              )
-            }
-          )
-        JS,
-        "color" => "alerta",
-        "icon" => "trash-can",
-        "title" => "Desativar Usuário"
-      ],
-      "reativar" => [
-        "type" => "ajax",
-        "function" => <<<JS
-          setWarning(
-            "Deseja reativar o usuário {$nome}?",
-            "Ele terá acesso a praticamente tudo que tinha antes.",
-            true,
-            () => {
-              postRequest(
-                "{$_ENV['HOST_BASE']}/reativar-usuario/{$id}",
-                "",
-                (response) => {
-                  renderizar(response.html, ".card--{$id}");
-                  setWarning(
-                    response.alerta,
-                    response.mensagens
-                  );
-                }
-              )
-            }
-          )
-        JS,
-        "color" => "gray",
-        "icon" => "rotate",
-        "title" => "Reativar Usuário"
-      ],
-      "resetar-senha" => [
-        "type" => "ajax",
-        "function" => <<<JS
-          setWarning(
-            "Deseja resetar a senha do {$nome}?", 
-            "Ao resetar a senha, será enviado o email para o usuário criar uma nova.", 
-            true,
-            () => {
-              postRequest(
-                "{$_ENV['HOST_BASE']}/resetar-senha/{$id}",
-                "",
-                (response) => {
-                  renderizar(response.html, ".card--{$id}");
-                  setWarning(
-                    response.alerta,
-                    response.mensagens
-                  );
-                }
-              )            }
-          )
-        JS,
-        "color" => "gray",
-        "icon" => "key",
-        "title" => "Resetar senha do Usuário"
-      ]
+      "editar" =>
+        Button::create("")
+          ->color("blue")
+          ->data([
+            "action" => "usuario:editar",
+            "usuario-id" => $id
+          ])
+          ->tooltip("Editar Usuário")
+          ->withIcon("pencil"),
+
+      "reenviar-email" =>
+        Button::create("")
+          ->color("gray")
+          ->data([
+            "action" => "usuario:reenviar-email",
+            "usuario-id" => $id,
+            "usuario-nome" => $nome
+          ])
+          ->tooltip("Reenviar email de confirmação/redefinição de senha")
+          ->withIcon("envelope"),
+
+      "desativar" => 
+        Button::create("")
+          ->color("red")
+          ->data([
+            "action" => "usuario:desativar",
+            "usuario-id" => $id,
+            "usuario-nome" => $nome
+          ])
+          ->tooltip("Desativar Usuário")
+          ->withIcon("trash-can"),
+
+      "reativar" => 
+        Button::create("")
+          ->color("green")
+          ->data([
+            "action" => "usuario:reativar",
+            "usuario-id" => $id,
+            "usuario-nome" => $nome
+          ])
+          ->tooltip("Reativar Usuário")
+          ->withIcon("rotate"),
+
+      "resetar-senha" => 
+        Button::create("")
+          ->color("gray")
+          ->data([
+            "action" => "usuario:resetar-senha",
+            "usuario-id" => $id,
+            "usuario-nome" => $nome
+          ])
+          ->tooltip("Resetar senha do Usuário")
+          ->withIcon("key"),
     ];
 
     return match($statusId){
@@ -165,8 +121,7 @@ class UsuarioPresenter
         $btns["desativar"]
       ],
       2 => [
-        $btns["reativar"],
-        $btns["desativar"],
+        $btns["reativar"]
       ],
       3 => [
         $btns["editar"],

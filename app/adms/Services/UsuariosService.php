@@ -88,53 +88,23 @@ class UsuariosService
     return $this->result;
   }
 
-  public function editar(Usuario $usuario, array $dados):?OperationResult
+  public function editar(Usuario $usuario, array $dados): ?OperationResult
   {
     $usuario->setNome($dados["nome"]);
     $usuario->setCelular($dados["celular"]);
     $usuario->setNivelById($dados["nivel_acesso_id"], $this->repository);
 
-    if($usuario->email !== $dados["email"]) {
+    if ($usuario->email !== $dados["email"]) {
       $this->mudarEmail($usuario, $dados["email"]);
     }
 
-    // Verifica o que se deve fazer com a foto de perfil
-    if ((int)$dados["foto_existe"] === 1) {
-      // Foto existe, deve-se trocar ou apagar?
-      if (isset($dados["editar_foto"])){
-        if ($dados["editar_foto"] === "apagar") {
-          try {
-            $this->apagarFoto($usuario);
-            $this->result->addMensagem("A foto foi apagada com sucesso.");
-          } catch (Exception $e) {
-            GenerateLog::generateLog("error", $e->getMessage(), [
-              "code" => $e->getCode(),
-              "file" => $e->getFile(),
-              "line" => $e->getLine(),
-              "trace" => $e->getTrace(),
-            ]);
-            $this->result->warn("Não foi possível apagar a foto do usuário.");
-          }
-        } else if ($dados["editar_foto"] === "trocar") {
-          try {
-            $this->trocarFoto($usuario);
-            $this->result->addMensagem("A foto foi trocada com sucesso.");
-          } catch (Exception $e) {
-            GenerateLog::generateLog("error", $e->getMessage(), [
-              "code" => $e->getCode(),
-              "file" => $e->getFile(),
-              "line" => $e->getLine(),
-              "trace" => $e->getTrace(),
-            ]);
-            $this->result->warn("Não foi possível trocar a foto do usuário.");
-          }
-        }
-      }
-    } else if (!empty($_FILES["foto"]["name"])) {
-      // Se a foto existir, e foi enviado uma nova foto no form, armazena esta foto
+    $substituida = false;
+
+    if (!empty($_FILES["foto"]["name"])) {
       try {
-        $this->armazenarFoto($usuario);
+        $this->trocarFoto($usuario);
         $this->result->addMensagem("A foto foi armazenada com sucesso.");
+        $substituida = true;
       } catch (Exception $e) {
         GenerateLog::generateLog("error", $e->getMessage(), [
           "code" => $e->getCode(),
@@ -143,6 +113,21 @@ class UsuariosService
           "trace" => $e->getTrace(),
         ]);
         $this->result->warn("Não foi possível armazenar a foto do usuário.");
+      }
+    }
+    
+    if ((!$substituida) && ($dados["apagar-foto"] === "on")) {
+      try {
+        $this->apagarFoto($usuario);
+        $this->result->addMensagem("A foto foi apagada com sucesso.");
+      } catch (Exception $e) {
+        GenerateLog::generateLog("error", $e->getMessage(), [
+          "code" => $e->getCode(),
+          "file" => $e->getFile(),
+          "line" => $e->getLine(),
+          "trace" => $e->getTrace(),
+        ]);
+        $this->result->warn("Não foi possível apagar a foto do usuário.");
       }
     }
 
@@ -278,7 +263,7 @@ class UsuariosService
     return $this->result;
   }
 
-  public function desativar(Usuario $usuario):?OperationResult
+  public function desativar(Usuario $usuario): ?OperationResult
   {
     try {
       $usuario->desativar($this->repository);
@@ -318,8 +303,13 @@ class UsuariosService
     return $this->result;
   }
 
-  public function reenviarEmail(Usuario $usuario) :OperationResult
+  public function reenviarEmail(Usuario $usuario): OperationResult
   {
+    if (!$usuario->estaAguardandoConfirmacao()) {
+      $this->result->falha("Esse usuário não tem nenhum token ativo.");
+      return $this->result;
+    }
+
     // Envia o email para nova senha
     try {
       $this->emailConfirmacao($usuario);
@@ -342,7 +332,7 @@ class UsuariosService
    * 
    * @param Usuario $usuario Precisa do ID para criar o arquivo. Modifica o atributo foto
    */
-  private function armazenarFoto(Usuario $usuario):void
+  private function armazenarFoto(Usuario $usuario): void
   {
     // Verifica se o id está setado
     if (!isset($usuario->id)) {
@@ -392,14 +382,14 @@ class UsuariosService
 
     // Tenta criar os uploads
     if (move_uploaded_file($tmp, $final)) {
-      // Se o usuário for o próprio, adiciona na SESSION
-      if ($_SESSION["usuario_id"] === $usuario->id) {
-        $_SESSION["foto_perfil"] = $final;
-      }
-
       // Atualiza o banco de dados
       $tipoFormatado = str_replace(".", "", $extensoes_permitidas[$tipo]);
       $usuario->setFoto($tipoFormatado);
+      
+      // Se o usuário for o próprio, adiciona na SESSION
+      if ($_SESSION["usuario_id"] === $usuario->id) {
+        $_SESSION["foto_perfil"] = $usuario->foto;
+      }
     } else {
       throw new Exception("Algo deu errado");
     }
@@ -410,7 +400,7 @@ class UsuariosService
    * 
    * @param Usuario $usuario Precisa do ID para ler o arquivo. Modifica o atributo foto
    */
-  private function apagarFoto(Usuario $usuario):void
+  private function apagarFoto(Usuario $usuario): void
   {
     // Verifica se o id está setado
     if (!isset($usuario->id)) {
@@ -441,7 +431,7 @@ class UsuariosService
    * 
    * @return Usuario $usuario
    */
-  private function trocarFoto(Usuario $usuario):void
+  private function trocarFoto(Usuario $usuario): void
   {
     $this->apagarFoto($usuario);
     $this->armazenarFoto($usuario);

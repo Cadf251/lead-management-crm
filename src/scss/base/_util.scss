@@ -1,0 +1,105 @@
+$path: "../../public/img/";
+
+// ALINHAMENTO
+
+@mixin vertical_centered{
+  display: flex;
+  align-items: center;
+}
+
+@mixin horizontal_centered{
+  display: flex;
+  justify-content: center;
+}
+
+@mixin column{
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin centered_row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin centered_column {
+  @include centered_row;
+  flex-direction: column;
+}
+
+@mixin wrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+@mixin space-between{
+  display: flex;
+  justify-content: space-between;
+}
+
+@mixin g($columns: 1){
+  display: grid;
+  grid-template-columns: repeat($columns, calc(100% / $columns));
+}
+
+// ESPAÇAMENTO
+@mixin w($input: 12){
+  width: calc(($input / 12) * 100%);
+}
+
+@mixin box{
+  box-sizing: border-box;
+}
+
+@mixin fix($padding: 5% 10%){
+  padding: $padding;
+  width: 100%;
+  flex-direction: column;
+  &>*{
+    width: 100% !important;
+  }
+}
+
+// LAYOUT
+@mixin section($pagePadding: 5%){
+  @include box;
+  width: 100%;
+  padding: $pagePadding;
+}
+
+@mixin container{
+  @include box;
+  @include w(12);
+  @include wrap;
+}
+
+// COMPONENTES
+@mixin pointer{
+  cursor: pointer;
+}
+
+@mixin btn(
+  $font-size: 1em,
+  $boder: none
+){
+  border: $boder;
+  font-size: $font-size;
+  @include pointer;
+}
+
+@mixin show-up($pos: fixed){
+  position: $pos;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@mixin show-up--ativo{
+  pointer-events: all;
+  opacity: 1;
+}
+
+// BREAK POINTS
+$deskL: 1247px;
+$tablet: 1197px;
+$mobile: 768px;

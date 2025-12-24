@@ -1,36 +1,43 @@
 <?php
 
-use App\adms\Helpers\HTMLHelper;
+use App\adms\UI\Badge;
+use App\adms\UI\Card;
 
 $btns = "";
 
 foreach($usuario["button"] as $button){
-  if($button["type"] === "link"){
-    $btns .= HTMLHelper::renderButtonLink($button["href"], $button["icon"], $button["title"], $button["color"]);
-  } else {
-    $btns .= HTMLHelper::renderButtonAjax($button["function"], $button["color"], $button["icon"], $button["title"]);
-  }
+  $btns .= $button->render();
 }
 
+$badge1 = Badge::create($usuario['nivel_nome'], "silver")
+  ->tooltip($usuario['nivel_descricao']);
+
+$badge2 = Badge::create($usuario["status_nome"], $usuario["status_class"])
+  ->tooltip($usuario['status_descricao']);
+
 $content = <<<HTML
-  <div class="centered">
-    <div class="foto"><img src='{$usuario["foto_perfil"]}' height='100%' width='100%'></div>
-    <div class="usr-content">
-      <p><b>{$usuario['nome']}</b></p>
-      <p>{$usuario['email']}</p>
-      <p>{$usuario['celular']}</p>
-      <p>
-        <span class="underline" title="{$usuario['nivel_descricao']}">{$usuario['nivel_nome']}</span><br>
-        <span class="underline" title="{$usuario['status_descricao']}">{$usuario["status_nome"]}</span>
-      </p>
+<div class="card__header center">
+  <div class="foto">
+    {$usuario["foto_perfil"]}
+  </div>
+  <div class="card__header__info">
+    <strong>{$usuario['nome']}</strong>
+    <div class="subinfo">
+      <span>{$usuario['email']}</span>
+      <span>{$usuario['celular']}</span>
     </div>
   </div>
-  <div class="card__icons">
-    $btns
-  </div>
+</div>
+<div class="card__inline-items">
+  $badge1
+  $badge2
+</div>
+<div class="card__inline-items">
+  $btns
+</div>
 HTML;
 
-$final = HTMLHelper::renderCard($content, ["card-padrao--thinner"]);
+$final = Card::create($content);
 
 return <<<HTML
 <div class="card--{$usuario['id']}">

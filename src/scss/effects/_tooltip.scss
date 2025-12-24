@@ -1,0 +1,17 @@
+.tooltip {
+  position: absolute;
+  background-color: var(--white);
+  max-width: 300px;
+  color: var(--black);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: color-mix(in srgb, var(--gray-brand) 50%, #0000 50%) 0px 0px 25px;
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 1000;
+  white-space: normal; /* permite quebra de linha */
+  word-wrap: break-word; /* quebra palavras longas se necessário */
+}

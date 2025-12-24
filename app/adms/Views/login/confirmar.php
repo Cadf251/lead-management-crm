@@ -1,14 +1,16 @@
 <?php
 use App\adms\Helpers\CSRFHelper;
 ?>
-<form method="post" class="form-padrao form--login">
-  <h1 class="titulo-2">Bem-vindo<br>Crie sua nova senha</h1>
-  <label>Insira sua nova Senha</label>
-  <div class="show-password">
-    <input class="form-padrao__input input--login" type="password" name="usuario_senha" id="input">
-    <i onclick="showPassword('input', 'icon')" id="icon" class="pass-icon fa-solid fa-eye"></i>
+<h1 class="titulo titulo--1">Crie sua nova senha</h1>
+<form method="post" class="form">
+  <div class="form__campo">
+    <label>Insira sua nova Senha</label>
+    <div class="campo-senha">
+      <input class="input" type="password" name="usuario_senha">
+      <i class="pass-icon fa-solid fa-eye"></i>
+    </div>
   </div>
-  <input type="hidden" name="csrf_token" value="<?php echo CSRFHelper::generateCSRFToken("form_confirmar"); ?>">
-  <a href="<?php echo $_ENV['HOST_BASE'] ?>login/">Voltar</a>
-  <button type="submit" class="btn">Fazer login</button>
+  <input type="hidden" name="csrf_token" value="<?= CSRFHelper::generateCSRFToken("form_confirmar"); ?>">
+    <a href="<?= $_ENV['HOST_BASE'] ?>login/">Voltar</a>
+  <button type="submit" class="btn">Entrar</button>
 </form>

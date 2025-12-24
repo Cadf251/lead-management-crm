@@ -1,9 +1,17 @@
 <?php
 
-use App\adms\Helpers\CreateOptions;
-use App\adms\Helpers\HTMLHelper;
+use App\adms\UI\Button;
+use App\adms\UI\Header;
 
-echo HTMLHelper::renderHeader("Gerenciar Equipes", "{$_ENV['HOST_BASE']}criar-equipe/", "Crie uma nova equipe", "plus");
+// Cria o botão do header
+$button = Button::create("+ Criar")
+  ->color("black")
+  ->data(["action" => "equipe:criar"]);
+
+$header = Header::create("Gerenciar Equipes")
+  ->addButton($button);
+
+echo $header;
 
 foreach ($this->data["equipes"] as $equipe){
   echo require "partials/equipe-card.php";

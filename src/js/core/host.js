@@ -1,0 +1,1 @@
+export const hostBase = "http://crm.local/";

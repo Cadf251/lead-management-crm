@@ -2,63 +2,57 @@
 
 namespace App\adms\Controllers\equipes;
 
+use App\adms\Core\OperationResult;
 use App\adms\Helpers\CreateOptions;
 use App\adms\Helpers\CSRFHelper;
+use App\adms\Helpers\GenerateLog;
+use App\adms\Presenters\EquipePresenter;
 
 class EditarEquipe extends EquipesAbstract
 {
   public function index(string|null|int $equipeId)
   {
-    // Seta o ID
-    $this->setInfoById((int)$equipeId);
-
     // Verifica se há POST antes de carregar a VIEW
     $this->data["form"] = $_POST;
-
-    if (isset($this->data["form"]["csrf_token"]) && CSRFHelper::validateCSRFToken("form_equipe", $this->data["form"]["csrf_token"])) {
-      // Formata os dados
-      $this->data["form"]["descricao"] = 
-        $this->data["form"]["descricao"] === ""
-        ? null
-        : $this->data["form"]["descricao"];
-        
-      // Tenta fazer upload
-      $params = [
-        ":nome" => $this->data["form"]["nome"],
-        ":descricao" => $this->data["form"]["descricao"],
-        ":produto_id" => $this->data["form"]["produto_id"]
+    $equipe = $this->repo->selecionarEquipe((int)$equipeId);
+    
+    if ($equipe === null) {
+      $result = new OperationResult();
+      $result->falha("Essa equipe não existe.");
+      // Mostrar mensagem de erro
+      $_SESSION["alerta"] = [
+        $result->getStatus(),
+        $result->mensagens()
       ];
-
-      $update = $this->repo->updateEquipe($params, $this->id);
-
-      if ($update)
-        $_SESSION["alerta"] = [
-          "Sucesso!",
-          "✅ Equipe {$this->data['form']['nome']} atualizada com sucesso."
-        ];
-      else
-        $_SESSION["alerta"] = [
-          "Erro!",
-          "❌ A equipe não foi atualizada."
-        ];
-
       $this->redirect();
     }
-    
-    // Prepara um array simplificado para a VIEW
-    $equipe = [
-      "nome" => $this->nome,
-      "descricao" => $this->descricao,
-      "produto_id" => $this->produtoId
-    ];
 
-    $optionsArray = $this->repo->selecionarOpcoes("produtos");
+    if (isset($this->data["form"]["csrf_token"]) && CSRFHelper::validateCSRFToken("form_equipe", $this->data["form"]["csrf_token"])) {
+
+      $dados = $this->data["form"];
+
+      $result = $this->service->editar($equipe, $dados);
+      
+      // Mostrar mensagem de sucesso
+      $_SESSION["alerta"] = [
+        $result->getStatus(),
+        $result->mensagens()
+      ];
+      $this->redirect();
+    }
+
+    $optionsArray = $this->repo->sql->selecionarOpcoes("produtos");
     $this->setData([
       "title" => "Editar Equipe",
-      "equipe" => $equipe,
-      "produtos-options" => CreateOptions::criarOpcoes($optionsArray, $this->produtoId)
+      "equipe" => EquipePresenter::present([$equipe]),
+      "produtos-options" => CreateOptions::criarOpcoes($optionsArray, $equipe->produto->id)
     ]);
 
-    $this->render("editar-equipe");
+    $content = require APP_ROOT."app/adms/Views/equipes/editar-equipe.php";
+    
+    echo json_encode([
+      "sucesso" => true,
+      "html" => $content]);
+    exit;
   }
 }

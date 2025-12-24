@@ -1,0 +1,69 @@
+@use "../base/util" as *;
+
+.animate{
+  @mixin desativado {
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  @mixin ativado{
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+
+  &--opacity{
+    @include desativado;
+
+    &--ativo {
+      @include ativado;
+    }
+  }
+
+  &--to{
+    &-top{
+      @include desativado;
+      transform: translateY(100px);
+
+      &--ativo{
+        @include ativado;
+      }
+    }
+
+    &-bottom{
+      @include desativado;
+      transform: translateY(-100px);
+
+      &--ativo{
+        @include ativado;
+      }
+    }
+
+    &-left{
+      @include desativado;
+      transform: translateX(100px);
+
+      &--ativo{
+        @include ativado;
+      }
+    }
+
+    &-right{
+      @include desativado;
+      transform: translateX(-100px);
+
+      &--ativo{
+        @include ativado;
+      }
+    }
+  }
+
+  &--scale{
+    opacity: 0;
+    transition: transform 1s ease;
+    transform: scale(0.1);
+
+    &--ativo{
+      @include ativado;
+    }
+  }
+}

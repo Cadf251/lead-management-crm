@@ -1,0 +1,45 @@
+@use "../base/util" as *;
+
+main{
+  @include box;
+  min-height: 98vh;
+  padding: 5vh 0;
+    transition: 
+    width 0.5s ease, 
+    padding 0.5s ease, 
+    margin 0.5s ease;
+}
+
+.main{
+  &--recolhido {
+    width: calc(100% - 60px);
+    padding-inline: 5%;
+    margin-left: 60px;
+  }
+
+  &--extendido {
+    padding-inline: 2.5%;
+    width: calc(85% - 60px);
+    margin-left:calc(15% + 60px);
+  }
+
+  &--login {
+    background: linear-gradient(
+      color-mix(in srgb, var(--black) 75%, #0000 25%),
+      color-mix(in srgb, var(--black) 75%, #0000 25%)
+    ), url("#{$path}main-bg.webp");
+    background-position: center;
+    padding: 5%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+  }
+}
+
+body.congelado {
+  overflow: hidden;
+
+  &>:not(.overlay):not(.warning) {
+    filter: blur(1.3px);
+  }
+}

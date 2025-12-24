@@ -2,35 +2,18 @@
 
 namespace App\adms\Controllers\equipes;
 
-class AtivarEquipe extends EquipesAbstract
+use App\adms\Core\OperationResult;
+use App\adms\Models\Equipe;
+
+class AtivarEquipe extends EquipeMain
 {
   public function index(string|int|null $equipeId)
   {
-    $this->setInfoById((int)$equipeId);
+    $this->main($equipeId);
+  }
 
-    // Verifica se já está ativa
-    if ($this->statusId === self::STATUS_ATIVADO){
-      $_SESSION["alerta"] = [
-        "Aviso!",
-        ["ℹ️ Essa equipe já está ativada."]
-      ];
-      $this->redirect();
-    }
-
-    // Congela o ID da equipe
-    $congelar = $this->repo->ativar($this->id);
-
-    if ($congelar)
-      $_SESSION["alerta"] = [
-        "Sucesso!",
-        "✅ A equipe {$this->nome} foi ativada."
-      ];
-    else
-      $_SESSION["alerta"] = [
-        "Erro!",
-        "❌ A equipe não {$this->nome} foi ativada."
-      ];
-    
-      $this->redirect();
+  public function executar(Equipe $equipe): OperationResult
+  {
+    return $this->service->ativar($equipe);
   }
 }

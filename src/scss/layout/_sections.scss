@@ -1,0 +1,22 @@
+@use "../base/util" as *;
+
+.section{
+  @include section;
+}
+
+.task-header {
+  @include space_between;
+  padding: 16px 25px;
+  width: 100%;
+  @include box;
+
+  .titulo {
+    margin: 0;
+  }
+
+  &__buttons {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+  }
+}

@@ -1,0 +1,113 @@
+@use "../base/util" as *;
+
+.form {
+  @include g(1);
+  gap: 16px;
+  width: 100%;
+  
+  &__campo {
+    @include g(1);
+    gap: 8px;
+  }
+
+  &--edit {
+    .input {
+      opacity: 0.5;
+
+      &:hover {
+        opacity: 0.65;
+      }
+
+      &:focus {
+        opacity: 1;
+      }
+
+      &--changed {
+        opacity: 1 !important;
+      }
+    }
+  }
+}
+
+.input {
+  border-radius: 8px;
+  @include box;
+  width: 100%;
+  padding: 8px 12px;
+  background-color: var(--gray-light);
+  border: 2.3px solid #0000;
+  transition: border 0.5s ease;
+  font-size: 0.9em;
+  transform: opacity .4s ease;
+  font-family: arial;
+  
+  &:hover {
+    border: 2.3px solid var(--seablue);
+  }
+
+  &:focus {
+    outline: 2.3px solid var(--petroleo);
+  }
+
+
+
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover, 
+  &:-webkit-autofill:focus, 
+  &:-webkit-autofill:active{
+      -webkit-box-shadow: 0 0 0 30px var(--gray-light) inset !important;
+  }
+}
+
+input[type="file"] {
+  color: var(--gray-dark);
+  // background: none !important;
+  // border: none !important;
+  // outline: none !important;
+  &::file-selector-button {
+    display: none;
+  }
+}
+
+.input-file {
+  border-radius: 8px !important;
+  @include box;
+  width: 100%;
+  padding: 8px 12px;
+  border: 2.3px dotted var(--seablue);
+}
+
+.campo-senha {
+  position: relative;
+
+  i {
+    position: absolute;
+    right: 0;
+    top: 0;
+    transform: translate(-50%, 50%);
+    transition: color .5s ease;
+
+    &:hover {
+      cursor: pointer;
+      color: var(--gray-dark);
+    }
+  }
+}
+
+label {
+  transition: background 0.4s ease;
+  padding: 1.5px 4px;
+  
+  &:hover {
+    background-color: var(--white-brand);
+    border-radius: 4px;
+  }
+}
+
+*:disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  * {
+    cursor: not-allowed !important;
+  }
+}

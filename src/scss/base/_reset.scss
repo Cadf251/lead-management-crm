@@ -1,0 +1,48 @@
+html {
+  background-color: var(--bg-color);
+  font-family: var(--main-font);
+  font-size: clamp(13px, 1.2vw, 18px);
+}
+
+*::selection {
+  color: var(--second-color);
+  background-color: #0000006e;
+  text-shadow: none;
+}
+
+body {
+  margin: 0
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+b,
+span,
+strong,
+textarea,
+form,
+input {
+  font-size: 1em;
+}
+
+a,
+br,
+button,
+input,
+img {
+  user-select: none;
+}
+
+a, a:visited, a:link {
+  text-decoration: none;
+}
+
+input, button {
+  border: none;
+  font-size: 1em;
+}

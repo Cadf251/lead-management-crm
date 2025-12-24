@@ -1,23 +1,3 @@
-const selectUsuario = document.querySelector(".js--usuario-select");
-if ((selectUsuario !== null) && (selectUsuario !== undefined)){
-  const selectFuncao = document.querySelector(".js--usuario-funcao");
-  const opcaoGerente = selectFuncao.querySelector("option[value=\'2\']");
-
-  selectUsuario.addEventListener("change", () => {
-    const valor = selectUsuario.value;
-    const partes = valor.split(",");
-    const nivel = parseInt(partes[1]);
-
-    if (nivel >= 3) {
-      selectFuncao.selectedIndex = 0;
-      opcaoGerente.disabled = false;
-    } else {
-      selectFuncao.selectedIndex = 0;
-      opcaoGerente.disabled = true;
-    }
-  });
-}
-
 window.onload = () => {
   const selectElement = document.querySelectorAll('.js--select');
   const saveElement = document.querySelectorAll('.js--salvar');

@@ -7,8 +7,8 @@ include_once "app/adms/Views/partials/calendar.php";
 
 ?>
 
-<h1 class="titulo-1 w12">Olá, <?php echo $_SESSION["usuario_nome"] ?></h1>
-<h2 class="titulo-3">Selecione um período</h2>
+<h1 class="titulo titulo--1">Olá, <?php echo $_SESSION["usuario_nome"] ?></h1>
+<h2 class="titulo titulo--3">Selecione um período</h2>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <form method="post" class="inline-icons">
@@ -279,27 +279,27 @@ if ($this->data["valido"]) {
     chart.render();
   }
   <?php
-  if(!$this->data["valido"])
-    exit;
-  
-  if(isset($this->data["por_qualificacao"]))
-  echo <<<JS
-  graficoLine();
-  JS;
+  if($this->data["valido"]) {
+    if(isset($this->data["por_qualificacao"]))
+    echo <<<JS
+    graficoLine();
+    JS;
 
-  if(isset($this->data["por_periodo"]))
-  echo <<<JS
-  graficoPie();
-  JS;
+    if(isset($this->data["por_periodo"]))
+    echo <<<JS
+    graficoPie();
+    JS;
 
-  if(isset($this->data["equipes"]))
-  echo <<<JS
-  graficoBar();
-  JS;
+    if(isset($this->data["equipes"]))
+    echo <<<JS
+    graficoBar();
+    JS;
 
-  if(isset($this->data["usuarios"]))
-  echo <<<JS
-  graficoVendedores();
-  JS;
+    if(isset($this->data["usuarios"]))
+    echo <<<JS
+    graficoVendedores();
+    JS;
+  }
+
   ?>
 </script>

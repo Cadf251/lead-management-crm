@@ -1,0 +1,40 @@
+.overlay {
+  position: fixed;
+  background-color: var(--white);
+  width: 50%;
+  box-sizing: border-box;
+  padding: 3% 5%;
+  min-width: 200px;
+  height: 100vh;
+  content: "";
+  top: 0;
+  right: 0;
+  z-index: 950;
+  box-shadow: 0px 0px 30px 100vw #0007;
+  transition: opacity .5s ease, transform .5s ease;
+  overflow-y: scroll;
+
+  &--oculto {
+    pointer-events: none;
+    user-select: none;
+    box-shadow: none;
+    opacity: 0;
+    transform: scale(0.5) translateX(100%);
+  }
+
+  &--close {
+    content: "X";
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    cursor: pointer;
+    background-color: var(--main);
+    color: var(--white);
+    padding: 4px 5px;
+    border-radius: 4px;
+
+    &:hover {
+      background-color: var(--main-dark);
+    }
+  }
+}

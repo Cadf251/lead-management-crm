@@ -2,8 +2,6 @@
 
 namespace App\adms\Models;
 
-use App\adms\Helpers\CelularFormatter;
-use App\adms\Helpers\NameFormatter;
 use App\adms\Repositories\UsuariosRepository;
 use DomainException;
 use Exception;
@@ -12,7 +10,7 @@ use InvalidArgumentException;
 /**
  * Modelo de USUÁRIO para ser instanciado e usado.
  */
-class Usuario
+class Usuario extends Pessoa
 {
   public ?int $id;
   public string $nome;
@@ -31,6 +29,13 @@ class Usuario
   public const NIVEL_FINANCEIRO = 2;
   public const NIVEL_GERENTE = 3;
   public const NIVEL_ADMIN = 4;
+
+  public const VALIDS_NIVEIS = [
+    self::NIVEL_COLABORADOR,
+    self::NIVEL_FINANCEIRO,
+    self::NIVEL_GERENTE,
+    self::NIVEL_ADMIN
+  ];
 
   public static function novo(
     string $nome,
@@ -114,41 +119,14 @@ class Usuario
     $this->setStatusById(self::STATUS_DESATIVADO, $repo);
   }
 
+  public function estaAguardandoConfirmacao()
+  {
+    return $this->status->id === self::STATUS_CONFIRMACAO;
+  }
+
   // |--------------------|
   // |  SETTERS           |
   // |--------------------|
-
-  public function setId(int $id): void
-  {
-    if (isset($this->id)) {
-      throw new DomainException("Usuário já possui ID");
-    }
-
-    $this->id = $id;
-  }
-
-  public function setNome(string $nome): void
-  {
-    $nome = NameFormatter::formatarNome($nome);
-    $this->nome = $nome;
-  }
-
-  public function setEmail(string $email): void
-  {
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-      throw new InvalidArgumentException("E-mail inválido");
-    }
-
-    $this->email = $email;
-  }
-
-  public function setCelular(string $celular): void
-  {
-    if(!CelularFormatter::esInternacional($celular)){
-      $celular = CelularFormatter::paraInternacional($celular);
-    }
-    $this->celular = $celular;
-  }
 
   public function setSenha(?string $senhaHash): void
   {

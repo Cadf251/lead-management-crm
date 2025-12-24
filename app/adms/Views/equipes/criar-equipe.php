@@ -1,9 +1,10 @@
 <?php
 
-use App\adms\Helpers\HTMLHelper;
+use App\adms\UI\Form;
 
-echo HTMLHelper::renderHeader("Criar Equipe", "{$_ENV['HOST_BASE']}listar-equipes/", "Voltar", "left-long");
+$fields = require "partials/form-modelo.php";
 
-include_once "partials/form-modelo.php";
-
-echo HTMLHelper::thinnerForm("Insira os dados", $content, "Criar", true);
+return Form::create("criar-equipe")
+  ->addFields($fields)
+  ->withTitle("Criar equipe")
+  ->render();

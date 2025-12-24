@@ -2,7 +2,6 @@
 
 namespace App\adms\Controllers\usuarios;
 
-use App\adms\Helpers\CelularFormatter;
 use App\adms\Helpers\CreateOptions;
 use App\adms\Helpers\CSRFHelper;
 use App\adms\Presenters\UsuarioPresenter;
@@ -35,7 +34,11 @@ class EditarUsuario extends UsuariosAbstract
       $this->redirect();
     }
 
-    // Carregar a VIEW
-    $this->render("adms/Views/usuarios/editar-usuario");
+    $content = require APP_ROOT."app/adms/Views/usuarios/editar-usuario.php";
+
+    echo json_encode([
+      "sucesso" => true,
+      "html" => $content]);
+    exit;
   }
 }

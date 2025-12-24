@@ -1,0 +1,46 @@
+@use "../base/util" as *;
+
+.card-main {
+  min-width: 150px;
+  min-height: 150px;
+  padding: 2em;
+  @include box;
+  background-color: var(--white-off);
+}
+
+.card--object {
+  width: 100%;
+  padding: 20px 25px;
+  @include box;
+  @include space_between;
+  gap: 64px;
+  background-color: var(--bg-card);
+  margin-bottom: 2px;
+  box-shadow: 0px 4px 10px var(--shadow);
+}
+
+.card__header {
+  display: flex;
+  gap: 16px;
+  width: 40%;
+  justify-content: flex-start;
+
+  &__info {
+    @include g(1);
+    gap: 8px;
+
+    .subinfo {
+      display: inline-flex;
+      gap: 8px;
+      font-size: 0.9em;
+      color: var(--gray-dark);
+    }
+  }
+}
+
+.card__inline-items {
+  gap: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,4 +1,5 @@
-/vendor/
-/files/logs/*
-/files/uploads/*
+node_modules/
+vendor/
+files/logs/*
+files/uploads/*
 .env

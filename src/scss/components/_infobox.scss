@@ -1,0 +1,43 @@
+@use "../base/util" as *;
+
+.info-box {
+  @include box;
+  width: 35%;
+  min-width: 200px;
+  gap: 32px;
+  border-radius: 4px;
+  padding: 32px;
+  justify-self: center;
+  margin: 16px 0 18px 0;
+
+  * {
+    margin: 0;
+  }
+
+  .titulo {
+    text-align: center;
+  }
+
+  &--silver {
+    --color: var(--silver-soft);
+    --bg: var(--silver);
+    --border: var(--gray-brand)
+  }
+
+  &--red {
+    --color: var(--black);
+    --bg: var(--red-soft);
+    --border: var(--red)
+  }
+
+  &--yellow {
+    --color: var(--black);
+    --bg: var(--yellow-soft);
+    --border: var(--yellow);
+  }
+
+  color: var(--color);
+  background-color: var(--bg);
+  border: solid var(--border);
+  border-width: 3px 3px 6px 3px !important;
+}

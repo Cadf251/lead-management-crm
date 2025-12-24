@@ -2,7 +2,7 @@
 use App\adms\Helpers\HTMLHelper;
 ?>
 <nav class="nav nav--preload js--nav">
-  <button type="button" class="nav__button" onclick="resizeNav()">
+  <button type="button" class="nav__button js--nav-button">
     <i class="fa-solid fa-bars"></i>
   </button>
   <div class="nav__userdata">

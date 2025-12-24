@@ -44,8 +44,8 @@ class LoadPage
     "CongelarEquipe",
     "AtivarEquipe",
     "DesativarEquipe",
-    "AdicionarUsuario",
-    "EquipesAjax",
+    "ListarColaboradores",
+    "NovoColaborador"
   ];
 
   /** @var array $listPgDev Páginas que só podem ser acessadas por DEVs */
@@ -160,12 +160,6 @@ class LoadPage
    */
   private function falha(string $mensagem): void
   {
-    GenerateLog::generateLog(
-      "error",
-      $mensagem,
-      ["pagina" => $this->urlController, "parametro" => $this->urlParameter]
-    );
-
     header("Location: {$_ENV['HOST_BASE']}erro/404");
     exit;
   }

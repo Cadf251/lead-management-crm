@@ -10,7 +10,7 @@ class CriarEquipe extends EquipesAbstract
   public function index()
   {
     // Seleciona as opções do banco de dados
-    $optionsArray = $this->repo->selecionarOpcoes("produtos");
+    $optionsArray = $this->repo->sql->selecionarOpcoes("produtos");
     $this->setData([
       "title" => "Criar Equipe",
       "equipe" => null,
@@ -21,33 +21,28 @@ class CriarEquipe extends EquipesAbstract
     $this->data["form"] = $_POST;
 
     if (isset($this->data["form"]["csrf_token"]) && CSRFHelper::validateCSRFToken("form_equipe", $this->data["form"]["csrf_token"])) {
-      // Formata os dados
-      $this->data["form"]["descricao"] = 
-        $this->data["form"]["descricao"] === ""
-        ? null
-        : $this->data["form"]["descricao"];
-        
-      // Tenta criar
-      $criacao = $this->repo->criarEquipe(
-        $this->data["form"]["nome"],
-        (int)$this->data["form"]["produto_id"],
-        $this->data["form"]["descricao"] ?? null,
+      // Resume o array
+      $equipe = $this->data["form"];
+
+      $result = $this->service->criar(
+        $equipe["nome"],
+        $equipe["produto_id"],
+        $equipe["descricao"]
       );
 
-      if ($criacao)
-        $_SESSION["alerta"] = [
-          "Sucesso!",
-          "✅ Equipe {$this->data['form']['nome']} criada com sucesso."
-        ];
-      else
-        $_SESSION["alerta"] = [
-          "Erro!",
-          "❌ A equipe não foi criada."
-        ];
-
+      // Mostrar mensagem de sucesso
+      $_SESSION["alerta"] = [
+        $result->getStatus(),
+        $result->mensagens()
+      ];
       $this->redirect();
     }
-    
-    $this->render("criar-equipe"); 
+    // Retorna a VIEW
+    $content = require APP_ROOT."app/adms/Views/equipes/criar-equipe.php";
+
+    echo json_encode([
+      "sucesso" => true,
+      "html" => $content]);
+    exit;
   }
 }

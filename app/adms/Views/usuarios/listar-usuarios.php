@@ -1,16 +1,17 @@
 <?php
 
-use App\adms\Helpers\CelularFormatter;
-use App\adms\Helpers\HTMLHelper;
-
-if (!isset($this->data["usuarios"])) {
-  echo "Nenhum usuário";
-  die();
-}
+use App\adms\UI\Button;
+use App\adms\UI\Header;
 
 // Cria o botão do header
-$href = "{$_ENV['HOST_BASE']}criar-usuario";
-echo HTMLHelper::renderHeader("Editar Usuários", $href, "Criar um novo usuário", "plus");
+$button = Button::create("+ Criar")
+  ->color("black")
+  ->data(["action" => "usuario:criar"]);
+
+$header = Header::create("Gerenciar Usuários")
+  ->addButton($button);
+
+echo $header;
 
 // Lê o array de usuários e imprime cada um
 foreach ($this->data["usuarios"] as $usuario) {
