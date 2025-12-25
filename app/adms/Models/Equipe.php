@@ -94,23 +94,41 @@ class Equipe
 
     if (empty($recebem)) return [];
 
+    $array = [];
+    foreach ($recebem as $recebe){
+      $array[] = [
+        "id" => $recebe->id,
+        "vez" => $recebe->vez
+      ];
+    }
+
     for ($i = 0; $i < $quantidade; $i++) {
       // Ordena pelo menor VEZ e, em empate, menor ID
-      usort($recebem, function ($a, $b) {
-        if ($a->vez === $b->vez) {
-          return $a->id <=> $b->id;
+      usort($array, function ($a, $b) {
+        if ($a["vez"] === $b["vez"]) {
+          return $a["id"] <=> $b["id"];
         }
-        return $a->vez <=> $b->vez;
+        return $a["vez"] <=> $b["vez"];
       });
 
-      // Pega sempre o primeiro após ordenação
-      $proximos[] = $recebem[0]->id;
+      // Pega o OBJETO, não o array, do proximo
+      $proximos[] = $this->getColaboradorById($array[0]["id"]);
 
       // Incrementa a vez de quem foi escolhido
-      $recebem[0]->incrementarVez();
+      $array[0]["vez"]++;
     }
 
     return $proximos;
+  }
+
+  public function getColaboradorById(int $id):?EquipeUsuario
+  {
+    foreach ($this->colaboradores as $colaborador){
+      if ($colaborador->id === $id){
+        return $colaborador;
+      }
+    }
+    return null;
   }
 
   public function getVezMinima()
@@ -131,6 +149,11 @@ class Equipe
   public function countColaboradores():int
   {
     return count($this->colaboradores);
+  }
+
+  public function detailColaborador()
+  {
+
   }
 
   # | -------------------------|

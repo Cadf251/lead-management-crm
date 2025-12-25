@@ -4,35 +4,6 @@
   margin: 0
 }
 
-.small-btn, .switch {
-  border:none;
-  font-size: 1em;
-  color: var(--white-color);
-  padding: 8px 12px;
-  border-radius: 5px;
-  cursor: pointer !important;
-  transition: border 0.7s ease;
-  transition: background 0.5s ease;
-}
-
-.small-btn:hover {
-  color:var(--white-color);
-}
-
-.switch {
-  font-size: 0.8em;
-}
-
-.switch--ativado {
-  background-color: var(--dark-main-color);
-  border-left: solid 35px var(--gray-color);
-} 
-
-.switch--desativado {
-  background-color: var(--dark-gray-color);
-  border-right: solid 35px var(--gray-color);  
-}
-
 .calendar{
   display: flex;
   gap: 15px;

@@ -11,6 +11,7 @@ $colaboradores = $equipe["colaboradores"];
 
 $proximos = $equipe["proximos"];
 
+// HEADER
 $voltar = Button::create("Voltar")
   ->color("blue")
   ->withIcon("back")
@@ -31,6 +32,10 @@ $header = Header::create("Colaboradores | {$equipe["nome"]}")
 
 echo $header;
 
+// INFORBOX
+echo $equipe["fila"]["infobox"];
+
+// CARD DO USUÁRIO
 $content = <<<HTML
 <div class="card__header center">
   <div class="card__header__info">
@@ -41,17 +46,49 @@ $content = <<<HTML
   </div>
 </div>
 <div class="card__inline-items">
+  {$equipe["numero_badge"]}
   {$equipe["produto_badge"]}
   {$equipe["status_badge"]}
 </div>
 HTML;
 
+echo Card::create($content)->render();
 
-if ($equipe["fila"]["infobox"] !== null) {
-  echo $equipe["fila"]["infobox"];
+// PRÓXIMOS
+$proximosHeader = <<<HTML
+<tr>
+  <th>Posição</th>
+  <th>Usuario</th>
+  <th>Número da vez <i class="fa-solid fa-circle-info"></i></th>
+</tr>
+HTML;
+
+$rows = "";
+if ($proximos === null){
+  $rows .= <<<HTML
+  <tr>
+    <td colspan="3">Nenhum usuário na fila de recebimento</td>
+  </tr>
+  HTML;
+} else {
+  foreach ($proximos as $key => $proximo) {
+    $medalha = "";
+    if ($key === 0) $medalha = "🥇";
+    else if ($key === 1) $medalha = "🥈";
+    else if ($key === 2) $medalha = "🥉";
+    $rows .= <<<HTML
+    <tr>
+      <td>$medalha</td>
+      <td>{$proximo["nome"]}</td>
+      <td>{$proximo["vez"]}</td>
+    </tr>
+    HTML;
+  }
 }
 
-echo Card::create($content)->render();
+echo Table::create($proximosHeader, "")
+  ->withTitle("Próximos na fila")
+  ->addRows($rows);
 
 // Começa a criar a tabela de usuários
 $tableHeader = <<<HTML
@@ -72,21 +109,22 @@ if (empty($colaboradores)) {
     <td colspan="6">Nenhum usuário nessa equipe</td>
   </tr>
   HTML;
-}
-
-foreach ($colaboradores as $colaborador) {
-  $rows .= <<<HTML
-  <tr>
-    <td>{$colaborador["usuario_nome"]}</td>
-    <td>{$colaborador["funcao_select"]}</td>
-    <td class="cell-centered">{$colaborador["recebe_leads_switch"]}</td>
-    <td class="cell-centered">{$colaborador["vez_buttons"]}</td>
-    <td class="cell-centered">{$colaborador["remover_button"]}</td>
-  </tr>
-  HTML;
+} else {
+  foreach ($colaboradores as $colaborador) {
+    $rows .= <<<HTML
+    <tr>
+      <td>{$colaborador["usuario_nome"]}</td>
+      <td>{$colaborador["funcao_select"]}</td>
+      <td class="cell-centered">{$colaborador["recebe_leads_switch"]}</td>
+      <td class="cell-centered">{$colaborador["vez_buttons"]}</td>
+      <td class="cell-centered">{$colaborador["remover_button"]}</td>
+    </tr>
+    HTML;
+  }
 }
 
 $table = Table::create($tableHeader, "table--colaboradores")
+  ->withTitle("Usuários")
   ->addRows($rows)
   ->render();
 

@@ -12,6 +12,7 @@ class Button
   private array $dataset = [];
   private bool $switch = false;
   private bool $disabled = false;
+  private bool $switchAtivo = true;
 
   public static function create(string $label = ''): self
   {
@@ -62,6 +63,12 @@ class Button
     return $this;
   }
 
+  public function setSwitch(bool $set)
+  {
+    $this->switchAtivo = $set;
+    return $this;
+  }
+
   public function setDisabled()
   {
     $this->disabled = true;
@@ -99,10 +106,15 @@ class Button
     }
     
     if($this->switch){
+      if($this->switchAtivo) {
+        $class= "ativado";
+      } else {
+        $class="desativado";
+      }
       return <<<HTML
       <button
         type="button"
-        class="switch-btn switch-btn--{$this->color}"
+        class="switch-btn switch-btn--{$this->color} switch-btn--{$class}"
         title="{$this->tooltip}"
         {$dataAttrs}
         {$disabled}

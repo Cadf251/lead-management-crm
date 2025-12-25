@@ -5,9 +5,20 @@
   box-shadow: 0 4px 10px var(--shadow);
   padding: 20px 25px;
   border-radius: 8px;
+  gap: 16px;
   margin-top: 16px;
   width: 100%;
-  border-spacing: 0 16px;
+  @include box;
+
+  .titulo {
+    text-align: center;
+    margin: 0;
+  }
+
+  table {
+    border-spacing: 0 16px;
+    width: 100%;
+  }
 
   th {
     font-size: 1.1em;

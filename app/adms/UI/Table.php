@@ -38,11 +38,13 @@ class Table
     }
 
     return <<<HTML
-    {$this->title}
-    <table class="table {$this->class}">
-      {$this->header}
-      {$this->rows}
-    </table>
+    <div class="table {$this->class}">
+      $title
+      <table>
+        {$this->header}
+        {$this->rows}
+      </table>
+    </div>
     HTML;
   }
 

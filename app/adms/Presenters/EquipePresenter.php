@@ -133,7 +133,15 @@ class EquipePresenter
 
     if (empty($proximos)) return null;
 
-    return $proximos;
+    $final = [];
+
+    foreach ($proximos as $proximo){
+      $final[] = [
+        "nome" => $proximo->usuarioNome,
+        "vez" => $proximo->vez
+      ];
+    }
+    return $final;
   }
 
   private static function fila(Equipe $equipe): array
@@ -166,7 +174,7 @@ class EquipePresenter
         Badge::create("Fila ativa", "green")
           ->tooltip("A fila está saudável."),
         "infobox" =>
-        null
+        ""
       ];
     }
   }
@@ -202,6 +210,7 @@ class EquipePresenter
 
     return Button::create($label)
       ->switch()
+      ->setSwitch($active)
       ->data([
         "action" => "colaborador:recebimento",
         "colaborador-id" => $colab->id

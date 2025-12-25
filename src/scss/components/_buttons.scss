@@ -30,7 +30,7 @@
   }
 }
 
-.small-btn {
+.small-btn, .switch-btn {
   --color: var(--white);
   --bg: var(--black);
 
@@ -101,5 +101,16 @@
 
   &:focus {
     transform: translateY(1px);
+  }
+}
+
+.switch-btn {
+  &--ativado {
+    border-left: solid 35px var(--gray-light);
+  }
+
+  &--desativado {
+    border-right: solid 35px var(--gray-light);
+    background-color: var(--gray-brand);
   }
 }
