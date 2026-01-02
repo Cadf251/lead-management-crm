@@ -40,7 +40,7 @@ class EquipesService
     return $this->result;
   }
 
-  public function ativar(Equipe $equipe):?OperationResult
+  public function ativar(Equipe $equipe): ?OperationResult
   {
     try {
       $equipe->ativar();
@@ -53,7 +53,7 @@ class EquipesService
     return $this->result;
   }
 
-  public function pausar(Equipe $equipe):?OperationResult
+  public function pausar(Equipe $equipe): ?OperationResult
   {
     try {
       $equipe->pausar();
@@ -65,8 +65,8 @@ class EquipesService
     }
     return $this->result;
   }
-  
-  public function desativar(Equipe $equipe):?OperationResult
+
+  public function desativar(Equipe $equipe): ?OperationResult
   {
     try {
       $equipe->desativar();
@@ -79,7 +79,7 @@ class EquipesService
     return $this->result;
   }
 
-  public function editar(Equipe $equipe, array $dados):?OperationResult
+  public function editar(Equipe $equipe, array $dados): ?OperationResult
   {
     try {
       $equipe->setNome($dados["nome"]);
@@ -95,7 +95,7 @@ class EquipesService
     return $this->result;
   }
 
-  public function novoColaborador(Equipe $equipe, array $dados):?OperationResult
+  public function novoColaborador(Equipe $equipe, array $dados): ?OperationResult
   {
     if ($equipe === null) {
       $this->result->falha("Essa equipe não foi localizada.");
@@ -106,13 +106,13 @@ class EquipesService
 
     $usuarioId = (int)trim($partes[0]);
     // $nivelId = (int)trim($partes[1]);
-  
+
     try {
       // Não confie no valor informado pelo usuário no form
       // O remédio para um psicopata é um psicopata e meio
       $nivelId = $this->repo->getNivel((int)$usuarioId);
 
-      if($nivelId === null){
+      if ($nivelId === null) {
         $this->result->falha("Algo ocorreu errado");
         return $this->result;
       }
@@ -145,6 +145,101 @@ class EquipesService
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR, ["post" => $dados]);
       $this->result->falha("A equipe não foi editada.");
+    }
+
+    return $this->result;
+  }
+
+  public function alterarFuncao(EquipeUsuario $colaborador, int $funcaoId)
+  {
+    try {
+      $funcao = $this->repo->getFuncao($funcaoId);
+
+      $colaborador->setFuncao(
+        $funcao["id"],
+        $funcao["nome"],
+        $funcao["descricao"]
+      );
+
+      $this->repo->salvarColaborador($colaborador);
+      $this->result->addMensagem("Função alterada com sucesso.");
+    } catch (Exception $e) {
+      GenerateLog::log($e, GenerateLog::ERROR, [
+        "colaborador" => $colaborador,
+        "funcao" => $funcaoId
+      ]);
+      $this->result->falha("Não foi possível alterar a função do usuário na equipe.");
+    }
+
+    return $this->result;
+  }
+
+  public function alterarRecebimentoDeLeads(Equipe $equipe, EquipeUsuario $colaborador, bool $set)
+  {
+    try {
+      $colaborador->setRecebeLeads($set);
+
+      if ($set === false) {
+        $colaborador->setVez(0);
+      } else {
+        $colaborador->setVez(
+          $equipe->getVezMinima()
+        );
+      }
+
+      $this->repo->salvarColaborador($colaborador);
+      $this->result->addMensagem("Sucesso silêncioso.");
+    } catch (Exception $e) {
+      GenerateLog::log($e, GenerateLog::ERROR, [
+        "colaborador" => $colaborador,
+        "set" => $set
+      ]);
+      $this->result->falha("Não foi possível mudar o recebimento de leads.");
+    }
+
+    return $this->result;
+  }
+
+  public function prejudicar(EquipeUsuario $colaborador):OperationResult
+  {
+    try {
+      $colaborador->incrementarVez();
+      $this->repo->salvarColaborador($colaborador);
+      $this->result->addMensagem("");
+    } catch (Exception $e){
+      GenerateLog::log($e, GenerateLog::ERROR, [
+        "colaborador" => $colaborador,
+      ]);
+      $this->result->falha("Não foi possível alterar a vez do usuário.");
+    }
+    return $this->result;
+  }
+
+  public function priorizar(EquipeUsuario $colaborador):OperationResult
+  {
+    try {
+      $colaborador->diminuirVez();
+      $this->repo->salvarColaborador($colaborador);
+      $this->result->addMensagem("");
+    } catch (Exception $e){
+      GenerateLog::log($e, GenerateLog::ERROR, [
+        "colaborador" => $colaborador,
+      ]);
+      $this->result->falha("Não foi possível alterar a vez do usuário.");
+    }
+    return $this->result;
+  }
+
+  public function removerColaborador(EquipeUsuario $colaborador):OperationResult
+  {
+    try {
+      $this->repo->removerColaborador($colaborador);
+      $this->result->addMensagem("");
+    } catch (Exception $e) {
+      GenerateLog::log($e, GenerateLog::ERROR, [
+        "colaborador" => $colaborador,
+      ]);
+      $this->result->falha("Não foi possível remover esse usuário.");
     }
 
     return $this->result;

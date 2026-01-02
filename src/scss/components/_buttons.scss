@@ -107,10 +107,19 @@
 .switch-btn {
   &--ativado {
     border-left: solid 35px var(--gray-light);
+    background-color: var(--main);
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--main) 75%, var(--black) 25%);
+    }
   }
 
   &--desativado {
     border-right: solid 35px var(--gray-light);
     background-color: var(--gray-brand);
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--gray-brand) 50%, var(--black) 50%);
+    }
   }
 }

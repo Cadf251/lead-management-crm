@@ -7,6 +7,7 @@ class Badge
   private string $label;
   private string $color;
   private string $tooltip = "";
+  private string $class = "";
 
   public static function create(string $label, string $color):self
   {
@@ -22,11 +23,17 @@ class Badge
     return $this;
   }
 
+  public function addClass(string $class)
+  {
+    $this->class = $class;
+    return $this;
+  }
+
   public function render()
   {
     return <<<HTML
     <span 
-    class="small-badge small-badge--{$this->color}"
+    class="small-badge small-badge--{$this->color} {$this->class}"
     title="{$this->tooltip}">
       {$this->label}
     </span>

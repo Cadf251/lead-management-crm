@@ -1,7 +1,6 @@
 <?php
 
 use App\adms\UI\Button;
-use App\adms\UI\Card;
 use App\adms\UI\Header;
 use App\adms\UI\Table;
 
@@ -28,72 +27,24 @@ $button = Button::create("+ Novo Colaborador")
 $header = Header::create("Colaboradores | {$equipe["nome"]}")
   ->addButton($voltar)
   ->addButton($button)
+  ->addBadge($equipe["produto_badge"])
+  ->addBadge($equipe["status_badge"])
+  ->withDescription($equipe["descricao"])
   ->render();
 
 echo $header;
 
-// INFORBOX
-echo $equipe["fila"]["infobox"];
-
-// CARD DO USUÁRIO
-$content = <<<HTML
-<div class="card__header center">
-  <div class="card__header__info">
-    <strong>{$equipe['nome']}</strong>
-    <div class="subinfo">
-      <span>{$equipe['descricao']}</span>
-    </div>
-  </div>
-</div>
-<div class="card__inline-items">
-  {$equipe["numero_badge"]}
-  {$equipe["produto_badge"]}
-  {$equipe["status_badge"]}
+// INFOBOX
+echo <<<HTML
+<div class="js--infobox">
+{$equipe["fila"]["infobox"]}
 </div>
 HTML;
-
-echo Card::create($content)->render();
-
-// PRÓXIMOS
-$proximosHeader = <<<HTML
-<tr>
-  <th>Posição</th>
-  <th>Usuario</th>
-  <th>Número da vez <i class="fa-solid fa-circle-info"></i></th>
-</tr>
-HTML;
-
-$rows = "";
-if ($proximos === null){
-  $rows .= <<<HTML
-  <tr>
-    <td colspan="3">Nenhum usuário na fila de recebimento</td>
-  </tr>
-  HTML;
-} else {
-  foreach ($proximos as $key => $proximo) {
-    $medalha = "";
-    if ($key === 0) $medalha = "🥇";
-    else if ($key === 1) $medalha = "🥈";
-    else if ($key === 2) $medalha = "🥉";
-    $rows .= <<<HTML
-    <tr>
-      <td>$medalha</td>
-      <td>{$proximo["nome"]}</td>
-      <td>{$proximo["vez"]}</td>
-    </tr>
-    HTML;
-  }
-}
-
-echo Table::create($proximosHeader, "")
-  ->withTitle("Próximos na fila")
-  ->addRows($rows);
 
 // Começa a criar a tabela de usuários
 $tableHeader = <<<HTML
 <tr>
-  <th>Usuários</th>
+  <th>Usuários {$equipe["numero_badge"]}</th>
   <th class="cell-centered">Função</th>
   <th class="cell-centered">Recebe leads?</th>
   <th class="cell-centered">Priorizar/prejudicar</th>

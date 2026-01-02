@@ -6,7 +6,8 @@ class InfoBox
 {
   private int $type = self::TYPE_INFO;
   private string $title = "";
-  private $message = "";
+  private string $message = "";
+  private ?string $content = null;
 
   private array $validTypes = [
     self::TYPE_ALERT,
@@ -33,6 +34,12 @@ class InfoBox
     return $this;
   }
 
+  public function setContent(?string $content):self
+  {
+    $this->content = $content;
+    return $this;
+  }
+
   public function render()
   {
     switch($this->type){
@@ -50,10 +57,19 @@ class InfoBox
         break;
     }
 
+    if ($this->content !== null) {
+      $content = $this->content;
+    } else {
+      $content = "";
+    }
+
     return <<<HTML
     <div class="info-box info-box--{$color}">
       <h4 class="titulo titulo--3">{$this->title}</h4>
       <p><i class="fa-solid fa-{$icon}"></i> {$this->message}</p>
+      <div class="info-box__content">
+        <p>{$content}</p>
+      </div>
     </div>
     HTML;
   }

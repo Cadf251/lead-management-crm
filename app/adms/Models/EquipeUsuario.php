@@ -35,6 +35,11 @@ class EquipeUsuario
     return $instance;
   }
 
+  public function getId():int
+  {
+    return $this->id;
+  }
+
   /**
    * Atenção, esse ID é do registro do colaborador na tabela equipes_usuarios, e não o ID do usuário.
    */
@@ -86,9 +91,7 @@ class EquipeUsuario
 
   public function diminuirVez()
   {
-    if ($this->vez > 0) {
-      $this->vez--;
-    }
+    $this->vez--;
   }
 
   public function incrementarVez()

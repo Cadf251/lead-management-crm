@@ -3,27 +3,29 @@
 namespace App\adms\Presenters;
 
 use App\adms\Helpers\CelularFormatter;
+use App\adms\Models\Usuario;
 use App\adms\UI\Button;
 
 class UsuarioPresenter
 {
   public static function present(array $usuarios):array {
     $final = [];
+    /** @var Usuario $usuario */
     foreach($usuarios as $usuario){
       $final[] = [
-        "id" => $usuario->id,
-        "nome" => $usuario->nome,
-        "email" => $usuario->email,
-        "celular" => self::normalizeCelular($usuario->celular),
-        "foto_perfil" => self::normalizeFoto($usuario->id, $usuario->foto),
-        "nivel_id" => $usuario->nivel->id,
-        "nivel_nome" => $usuario->nivel->nome,
-        "nivel_descricao" => $usuario->nivel->descricao,
-        "status_id" => $usuario->status->id,
-        "status_nome" => $usuario->status->nome,
-        "status_descricao" => $usuario->status->descricao,
-        "status_class" => self::getUsuarioStatusClass($usuario->status->id),
-        "button" => self::buttons($usuario->status->id, $usuario->id, $usuario->nome)
+        "id" => $usuario->getId(),
+        "nome" => $usuario->getNome(),
+        "email" => $usuario->getEmail(),
+        "celular" => self::normalizeCelular($usuario->getCelular()),
+        "foto_perfil" => self::normalizeFoto($usuario->getId(), $usuario->getFoto()),
+        "nivel_id" => $usuario->getNivelAcessoId(),
+        "nivel_nome" => $usuario->getNivelAcessoNome(),
+        "nivel_descricao" => $usuario->getNivelAcessoDescricao(),
+        "status_id" => $usuario->getStatusId(),
+        "status_nome" => $usuario->getStatusNome(),
+        "status_descricao" => $usuario->getStatusDescricao(),
+        "status_class" => self::getUsuarioStatusClass($usuario->getStatusId()),
+        "button" => self::buttons($usuario->getStatusId(), $usuario->getId(), $usuario->getNome())
       ];
     }
     return $final;

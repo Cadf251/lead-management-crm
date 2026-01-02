@@ -19,7 +19,7 @@ class EquipePresenter
       $final[] = [
         "id" => $equipe->id,
         "nome" => $equipe->nome,
-        "descricao" => $equipe->descricao ?? "",
+        "descricao" => $equipe->descricao ?? null,
         "status_badge" => self::getStatusBadge($equipe),
         "produto_badge" => self::getProdutoBadge($equipe),
         "numero_badge" => self::getNumeroBadge($equipe),
@@ -49,10 +49,9 @@ class EquipePresenter
 
     return Badge::create(
       <<<HTML
-      <i class="fa-solid fa-user"></i> $count
+      <i class="fa-solid fa-user"></i> <span class="js--number-badge">$count</span>
       HTML,
-      "blue"
-    );
+      "blue");
   }
 
   private static function buttons(int $equipeId, string $equipeNome, int $statusId)
@@ -133,20 +132,84 @@ class EquipePresenter
 
     if (empty($proximos)) return null;
 
-    $final = [];
+    $simplified = [];
 
-    foreach ($proximos as $proximo){
-      $final[] = [
+    foreach ($proximos as $proximo) {
+      $simplified[] = [
+        "id" => $proximo->id,
         "nome" => $proximo->usuarioNome,
         "vez" => $proximo->vez
       ];
     }
-    return $final;
+
+    return $simplified;
   }
 
-  private static function fila(Equipe $equipe): array
+  private static function proximosResumo(?array $simplified)
+  {
+    if ($simplified === null){
+      return null;
+    }
+    $mapa = [];
+
+    foreach ($simplified as $index => $item) {
+      $id = $item['id'];
+
+      $mapa[$id]['nome'] ??= $item['nome'];
+      $mapa[$id]['posicoes'][] = $index + 1;
+    }
+
+    $frases = [];
+    foreach ($mapa as $pessoa) {
+      $nome = $pessoa['nome'];
+      $pos = $pessoa['posicoes'];
+
+      if ($pos === [1, 2, 3]) {
+        $frases[] = "$nome (Recebe os 3 próximos)";
+        continue;
+      }
+
+      if (count($pos) === 1) {
+        $frases[] = "$nome (Recebe o " . self::ordinal($pos[0]) . ")";
+        continue;
+      }
+
+      $ultimo = array_pop($pos);
+
+      $frase = "$nome (Recebe o ";
+      $m = [];
+
+      foreach($pos as $row) {
+        $m[] = self::ordinal($row);
+      }
+      $frase .= implode(", ", $m);
+
+      $frase .= " e " . self::ordinal($ultimo) . ")";
+      
+      $frases[] = $frase;
+    }
+
+    return $frases;
+  }
+
+  private static function ordinal(int $pos)
+  {
+    return ['primeiro', 'segundo', 'terceiro'][$pos - 1];
+  }
+
+  public static function fila(Equipe $equipe): array
   {
     $recebem = $equipe->getRecebemLeads();
+
+    $proximos = self::proximos($equipe);
+
+    $frases = self::proximosResumo($proximos);
+
+    if ($frases === null) {
+      $content = null;
+    } else {
+      $content = implode(", ", $frases);
+    }
 
     if (empty($recebem)) {
       return [
@@ -157,6 +220,7 @@ class EquipePresenter
         "infobox" =>
         InfoBox::create("Fila inativa", "Nenhum usuário está habilitado a receber leads")
           ->setType(InfoBox::TYPE_ALERT)
+          ->setContent($content)
       ];
     } else if (count($recebem) < 3) {
       return [
@@ -167,6 +231,7 @@ class EquipePresenter
         "infobox" =>
         InfoBox::create("Fila pequena", "Poucos usuários habilitados a receber leads.")
           ->setType(InfoBox::TYPE_WARN)
+          ->setContent($content)
       ];
     } else {
       return [
@@ -174,7 +239,9 @@ class EquipePresenter
         Badge::create("Fila ativa", "green")
           ->tooltip("A fila está saudável."),
         "infobox" =>
-        ""
+        InfoBox::create("Fila saudável", "A fila funciona corretamente e tem usuários suficientes.")
+          ->setType(InfoBox::TYPE_INFO)
+          ->setContent($content)
       ];
     }
   }
@@ -189,16 +256,16 @@ class EquipePresenter
         "id" => $colaborador->id,
         "usuario_id" => $colaborador->usuarioId,
         "usuario_nome" => $colaborador->usuarioNome,
-        "recebe_leads_switch" => self::recebeLeads($colaborador),
+        "recebe_leads_switch" => self::recebeLeads($colaborador, $equipe->id),
         "funcao_select" => self::funcao($colaborador, $funcoes),
-        "vez_buttons" => self::vez($colaborador),
-        "remover_button" => self::remover($colaborador)
+        "vez_buttons" => self::vez($colaborador, $equipe->id),
+        "remover_button" => self::remover($colaborador, $equipe->id)
       ];
     }
     return $final;
   }
-  
-  private static function recebeLeads(EquipeUsuario $colab)
+
+  private static function recebeLeads(EquipeUsuario $colab, $equipeId)
   {
     if ($colab->recebeLeads()) {
       $label = "Sim";
@@ -213,7 +280,8 @@ class EquipePresenter
       ->setSwitch($active)
       ->data([
         "action" => "colaborador:recebimento",
-        "colaborador-id" => $colab->id
+        "colaborador-id" => $colab->id,
+        "equipe-id" => $equipeId
       ])
       ->tooltip("Alterar se recebe leads")
       ->render();
@@ -221,35 +289,48 @@ class EquipePresenter
 
   private static function funcao(EquipeUsuario $colab, $funcoes)
   {
-    $button = Button::create("")
-      ->color("blue")
-      ->data([
-        "action" => "colaborador:alterar-funcao",
-        "colaborador-id" => $colab->id
-      ])
-      ->tooltip("Salvar")
-      ->withIcon("floppy-disk");
+    if ($colab->podeSerGerente()) {
+      $button = Button::create("")
+        ->color("blue")
+        ->data([
+          "action" => "colaborador:alterar-funcao",
+          "colaborador-id" => $colab->id,
+          "original-value" => $colab->funcao->id
+        ])
+        ->setDisabled()
+        ->tooltip("Salvar")
+        ->withIcon("floppy-disk");
 
-    $select = Field::create("", "funcao")
-      ->type(Field::TYPE_SELECT)
-      ->inputOnly()
-      ->options(CreateOptions::criarOpcoes($funcoes, $colab->funcao->id));
+      $select = Field::create("", "funcao")
+        ->type(Field::TYPE_SELECT)
+        ->addClass("js--usuario-funcao")
+        ->inputOnly()
+        ->withoutDefaultOption()
+        ->options(CreateOptions::criarOpcoes($funcoes, $colab->funcao->id));
 
-    return <<<HTML
-    <div class="cell-aligned">
-      {$select->render()}
-      {$button->render()}
-    </div>
-    HTML;
+      return <<<HTML
+      <div class="cell-aligned">
+        {$select->render()}
+        {$button->render()}
+      </div>
+      HTML;
+    } else {
+      return <<<HTML
+      <div class="cell-aligned">
+        {$colab->funcao->nome}
+      </div>
+      HTML;
+    }
   }
 
-  private static function vez(EquipeUsuario $colab)
+  private static function vez(EquipeUsuario $colab, $equipeId)
   {
     $btn1 = Button::create()
       ->color("gray")
       ->data([
         "action" => "colaborador:prejudicar",
-        "equipe-id" => $colab->id
+        "colaborador-id" => $colab->id,
+        "equipe-id" => $equipeId,
       ])
       ->withIcon("minus");
 
@@ -257,7 +338,8 @@ class EquipePresenter
       ->color("silver")
       ->data([
         "action" => "colaborador:priorizar",
-        "equipe-id" => $colab->id
+        "colaborador-id" => $colab->id,
+        "equipe-id" => $equipeId,
       ])
       ->withIcon("plus");
 
@@ -269,13 +351,14 @@ class EquipePresenter
     return "{$btn1} {$btn2}";
   }
 
-  private static function remover(EquipeUsuario $colab)
+  private static function remover(EquipeUsuario $colab, $equipeId)
   {
     return Button::create("")
       ->color("red")
       ->data([
         "action" => "colaborador:remover",
-        "equipe-id" => $colab->id
+        "colaborador-id" => $colab->getId(),
+        "equipe-id" => $equipeId,
       ])
       ->withIcon("trash-can");
   }
@@ -283,7 +366,7 @@ class EquipePresenter
   public static function presentNovoColaborador(array $colaboradores)
   {
     $final = [];
-    foreach($colaboradores as $colaborador){
+    foreach ($colaboradores as $colaborador) {
       $final[] = [
         "usuario_id" => $colaborador->usuarioId,
         "usuario_nome" => $colaborador->usuarioNome,

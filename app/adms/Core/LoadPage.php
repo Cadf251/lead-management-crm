@@ -32,20 +32,27 @@ class LoadPage
     "DashboardUsuarios",
     "DashboardEquipes",
     "ListarUsuarios",
+    "ListarEquipes",
+    "ListarColaboradores",
+  ];
+
+  private array $listPost = [
     "CriarUsuario",
     "EditarUsuario",
     "DesativarUsuario",
     "ReativarUsuario",
     "ResetarSenha",
     "ReenviarEmail",
-    "ListarEquipes",
     "CriarEquipe",
     "EditarEquipe",
     "CongelarEquipe",
     "AtivarEquipe",
     "DesativarEquipe",
-    "ListarColaboradores",
-    "NovoColaborador"
+    "NovoColaborador",
+    "AlterarFuncao",
+    "AlterarRecebimento",
+    "MudarVez",
+    "RemoverColaborador"
   ];
 
   /** @var array $listPgDev Páginas que só podem ser acessadas por DEVs */
@@ -73,7 +80,6 @@ class LoadPage
     $pageExists = $this->pageExists();
 
     if (!$pageExists[0])
-      // GenerateLog::generateLog("error", "002. Página não encontrada.", ["pagina" => $this->urlController, "parametro" => $this->urlParameter]);
       $this->falha("002. Página não encontrada.");
     else if ($pageExists[1] === "private") {
       // Requer login
@@ -82,7 +88,13 @@ class LoadPage
         header("Location: {$_ENV['HOST_BASE']}login");
         exit;
       }
-    } else if (($pageExists[1] === "dev") && ($_SERVER['HTTP_HOST'] !== "localhost")){
+    } else if ($pageExists[1] === "post") {
+      // Permite só POST
+      if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+        header("Location: {$_ENV['HOST_BASE']}dashboard");
+        exit;
+      }
+    } else if (($pageExists[1] === "dev") && ($_SERVER['HTTP_HOST'] !== "localhost")) {
       header("Location: {$_ENV['HOST_BASE']}login");
       exit;
     }
@@ -109,6 +121,9 @@ class LoadPage
     // Verifica se a página está no array de páginas privadas
     if (in_array($this->urlController, $this->listPgPrivate))
       return [true, "private"];
+
+    if (in_array($this->urlController, $this->listPost))
+      return [true, "post"];
 
     // Verifica se a página está no array de devs
     if (in_array($this->urlController, $this->listPgDev))

@@ -178,6 +178,36 @@ class EquipesRepository
     return $final;
   }
 
+  public function selecionarUsuario(int $colaboradorId):?EquipeUsuario
+  {
+    $query = <<<SQL
+      SELECT
+        eu.id eu_id, eu.usuario_id, eu.vez, pode_receber_leads, eu.equipe_usuario_funcao_id,
+        u.nome, u.nivel_acesso_id,
+        euf.nome funcao_nome, euf.descricao funcao_desc
+      FROM equipes_usuarios eu
+      INNER JOIN usuarios u ON u.id = eu.usuario_id
+      INNER JOIN equipes_usuarios_funcoes euf ON euf.id = eu.equipe_usuario_funcao_id
+      WHERE 
+        eu.id = :colaborador_id
+      ORDER BY equipe_usuario_funcao_id DESC
+    SQL;
+
+    $params = [
+      ":colaborador_id" => $colaboradorId
+    ];
+
+    $array = $this->sql->execute($query, $params);
+
+    try {
+      if (empty($array) || $array === null) return null;
+    } catch (Exception $e){
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
+    
+    return $this->hydrateUsuario($array[0]);
+  }
+
   private function hydrateUsuario(array $row):?EquipeUsuario
   {
     $usuario = new EquipeUsuario();
@@ -186,6 +216,7 @@ class EquipesRepository
     $usuario->setUsuarioNome($row["nome"]);
     $usuario->setVez($row["vez"]);
     $usuario->setRecebeLeads($row["pode_receber_leads"]);
+    $usuario->setNivelId($row["nivel_acesso_id"]);
     $usuario->setFuncao(
       $row["equipe_usuario_funcao_id"],
       $row["funcao_nome"],
@@ -332,6 +363,29 @@ class EquipesRepository
     return $result[0]["nivel_acesso_id"];
   }
 
+  public function getFuncao(int $funcaoId):?array
+  {
+    $query = <<<SQL
+    SELECT id, nome, descricao
+    FROM equipes_usuarios_funcoes
+    WHERE id = :funcao_id
+    SQL;
+
+    $params = [
+      "funcao_id" => $funcaoId
+    ];
+
+    try {
+      $result = $this->sql->execute($query, $params);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
+
+    if(empty($result)) return null;
+
+    return $result[0];
+  }
+
   public function criarColaborador(Equipe $equipe, EquipeUsuario $colab):void
   {
     $params = [
@@ -350,103 +404,27 @@ class EquipesRepository
     }
   }
 
-  // public function vezUsuario($registroId)
-  // {
-  //   $query = <<<SQL
-  //   SELECT vez 
-  //   FROM equipes_usuarios 
-  //   WHERE 
-  //     id = :id
-  //   LIMIT 1
-  //   SQL;
+  public function removerColaborador(EquipeUsuario $colaborador):void
+  {
+    try {
+      $this->sql->deleteByIdSQL("equipes_usuarios", $colaborador->getId());
+    } catch (Exception $e){
+      throw new Exception("Não foi possível deletar um colaborador no banco de dados.", $e->getCode(), $e);
+    }
+  }
 
-  //   $params = [
-  //     ":id" => $registroId
-  //   ];
+  public function salvarColaborador(EquipeUsuario $colaborador)
+  {
+    $params = [
+      "vez" => $colaborador->vez,
+      "pode_receber_leads" => $colaborador->recebeLeads,
+      "equipe_usuario_funcao_id" => $colaborador->funcao->id
+    ];
 
-  //   $minvez = $this->executeSQL($query, $params, true)[0];
-  //   if ($minvez["vez"] === null) return 0;
-  //   return $minvez["vez"];
-  // }
-
-  // /**
-  //  * Adiciona um usuário em uma equipe com base no $params
-  //  */
-  // public function adicionarUsuario(array $params): bool
-  // {
-  //   return $this->insertSQL("equipes_usuarios", $params);
-  // }
-
-  // /**
-  //  * Pega o ID do registro de equipes_usuarios
-  //  */
-  // public function getIdEquipesUsuarios(int $equipeId, int $usuarioId)
-  // {
-  //   $query = <<<SQL
-  //     SELECT id
-  //     FROM equipes_usuarios
-  //     WHERE
-  //       equipe_id = :equipe_id
-  //       AND usuario_id = :usuario_id
-  //   SQL;
-
-  //   $params = [
-  //     ":equipe_id" => $equipeId,
-  //     ":usuario_id" => $usuarioId
-  //   ];
-
-  //   $array = $this->executeSQL($query, $params);
-  //   return $array[0]["id"];
-  // }
-
-  // /**
-  //  * Troca se o usuário pode receber leads ou não
-  //  */
-  // public function alterarRecebimento(int $equipeId, int $usuarioId, int $set)
-  // {
-  //   $registroId = $this->getIdEquipesUsuarios($equipeId, $usuarioId);
-
-  //   $vez = $this->minVez($equipeId);
-
-  //   $params = [
-  //     ":vez" => $vez,
-  //     ":pode_receber_leads" => $set
-  //   ];
-
-  //   return $this->updateSQL("equipes_usuarios", $params, $registroId);
-  // }
-
-  // public function priorizar(int $equipeId, int $usuarioId):bool
-  // {
-  //   return $this->mudarVez($equipeId, $usuarioId, 1);
-  // }
-
-  // public function prejudicar(int $equipeId, int $usuarioId):bool
-  // {
-  //   return $this->mudarVez($equipeId, $usuarioId, -1);
-  // }
-
-  // public function mudarVez(int $equipeId, int $usuarioId, int $set):bool
-  // {
-  //   $registroId = $this->getIdEquipesUsuarios($equipeId, $usuarioId);
-
-  //   $vez = $this->vezUsuario($registroId);
-
-  //   if (($set === -1) && $vez === 0)
-  //     return false;
-
-  //   $vez = $vez + $set;
-
-  //   $params = [
-  //     ":vez" => $vez
-  //   ];
-
-  //   return $this->updateSQL("equipes_usuarios", $params, $registroId);
-  // }
-
-  // public function retirarUsuario(int $equipeId, int $usuarioId)
-  // {
-  //   $registroId = $this->getIdEquipesUsuarios($equipeId, $usuarioId);
-  //   return $this->deleteByIdSQL("equipes_usuarios", $registroId);
-  // }
+    try {
+      $this->sql->updateById("equipes_usuarios", $params, $colaborador->id);
+    } catch (Exception $e) {
+      throw new Exception("Não foi possível salvar um colaborador no banco de dados.", $e->getCode(), $e);
+    }
+  }
 }

@@ -37,7 +37,6 @@ class GenerateLog
    * Códigos de erro personalizados:
    * Cria um LOG
    * 
-   * @deprecated
    */
   public static function generateLog(string $level, string $message, array|null $content): void
   {

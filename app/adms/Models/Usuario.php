@@ -55,76 +55,7 @@ class Usuario extends Pessoa
     return $usuario;
   }
 
-  /**
-   * Reativa um usuário DESATIVADO
-   * 
-   * @param UsuariosRepository $repo
-   */
-  public function reativar(UsuariosRepository $repo)
-  {
-    if ($this->status->id !== self::STATUS_DESATIVADO) {
-      throw new DomainException("DOMAIN ERROR: Usuário deve estar desativado.");
-    }
-
-    $this->setStatusById(self::STATUS_CONFIRMACAO, $repo);
-  }
-
-  /**
-   * Retorna um usuário ativo ao status de aguardando confirmação
-   * 
-   * @param UsuariosRepository $repo
-   */
-  public function resetarSenha(UsuariosRepository $repo)
-  {
-    if ($this->status->id !== self::STATUS_ATIVADO) {
-      throw new DomainException("DOMAIN ERROR: Usuário deve estar ativado.");
-    }
-
-    $this->setStatusById(self::STATUS_CONFIRMACAO, $repo);
-    $this->setSenha(null);
-  }
-
-  /**
-   * Ativa um usuário que está aguardando confirmação
-   * 
-   * @param UsuariosRepository $repo
-   */
-  public function ativar(UsuariosRepository $repo, $novaSenhaHash): void
-  {
-    if ($this->status->id !== self::STATUS_CONFIRMACAO) {
-      throw new DomainException("Usuário deve estar em estágio de confirmação.");
-    }
-
-    $this->setStatusById(self::STATUS_ATIVADO, $repo);
-    $this->setSenha($novaSenhaHash);
-  }
-
-  public function podeLogar()
-  {
-    return (($this->senhaHash !== null) && ($this->status->id === self::STATUS_ATIVADO));
-  }
-
-  /**
-   * Desativa qualquer usuário
-   * 
-   * @param UsuariosRepository $repo
-   */
-  public function desativar(UsuariosRepository $repo): void
-  {
-    if ($this->status->id === self::STATUS_DESATIVADO) {
-      throw new DomainException("Usuário já está desativado.");
-    }
-
-    $this->setSenha(null);
-    $this->setStatusById(self::STATUS_DESATIVADO, $repo);
-  }
-
-  public function estaAguardandoConfirmacao()
-  {
-    return $this->status->id === self::STATUS_CONFIRMACAO;
-  }
-
-  // |--------------------|
+    // |--------------------|
   // |  SETTERS           |
   // |--------------------|
 
@@ -195,5 +126,137 @@ class Usuario extends Pessoa
     }
 
     $this->status = UsuarioStatus::fromId($id, $repo);
+  }
+
+  // |--------------------|
+  // |  GETTERS           |
+  // |--------------------|
+  public function getId():?int
+  {
+    return $this->id;
+  }
+
+  public function getNome():string
+  {
+    return $this->nome ?? "";
+  }
+
+  public function getEmail():string
+  {
+    return $this->email ?? "";
+  }
+
+  public function getCelular():string
+  {
+    return $this->celular ?? "";
+  }
+
+  public function getFoto():?string
+  {
+    return $this->foto;
+  }
+
+  public function getSenhaHash():?string
+  {
+    return $this->senhaHash;
+  }
+
+  public function getStatusNome():string
+  {
+    return $this->status->nome;
+  }
+
+  public function getStatusDescricao():string
+  {
+    return $this->status->descricao;
+  }
+
+  public function getStatusId():int
+  {
+    return $this->status->id;
+  }
+
+  public function getNivelAcessoId():int
+  {
+    return $this->nivel->id;
+  }
+
+  public function getNivelAcessoNome():string
+  {
+    return $this->nivel->nome;
+  }
+
+  public function getNivelAcessoDescricao():string
+  {
+    return $this->nivel->descricao;
+  }
+
+  /**
+   * Reativa um usuário DESATIVADO
+   * 
+   * @param UsuariosRepository $repo
+   */
+  public function reativar(UsuariosRepository $repo)
+  {
+    if ($this->status->id !== self::STATUS_DESATIVADO) {
+      throw new DomainException("DOMAIN ERROR: Usuário deve estar desativado.");
+    }
+
+    $this->setStatusById(self::STATUS_CONFIRMACAO, $repo);
+  }
+
+  /**
+   * Retorna um usuário ativo ao status de aguardando confirmação
+   * 
+   * @param UsuariosRepository $repo
+   */
+  public function resetarSenha(UsuariosRepository $repo)
+  {
+    if ($this->status->id !== self::STATUS_ATIVADO) {
+      throw new DomainException("DOMAIN ERROR: Usuário deve estar ativado.");
+    }
+
+    $this->setStatusById(self::STATUS_CONFIRMACAO, $repo);
+    $this->setSenha(null);
+  }
+
+  /**
+   * Ativa um usuário que está aguardando confirmação
+   * 
+   * @param UsuariosRepository $repo
+   */
+  public function ativar(UsuariosRepository $repo, $novaSenhaHash): void
+  {
+    if ($this->status->id !== self::STATUS_CONFIRMACAO) {
+      throw new DomainException("Usuário deve estar em estágio de confirmação.");
+    }
+
+    $this->setStatusById(self::STATUS_ATIVADO, $repo);
+    $this->setSenha($novaSenhaHash);
+  }
+
+  public function podeLogar()
+  {
+    return (($this->senhaHash !== null) && ($this->status->id === self::STATUS_ATIVADO));
+  }
+
+  /**
+   * Desativa qualquer usuário
+   * 
+   * @param UsuariosRepository $repo
+   */
+  public function desativar(UsuariosRepository $repo): void
+  {
+    if ($this->status->id === self::STATUS_DESATIVADO) {
+      throw new DomainException("Usuário já está desativado.");
+    }
+
+    $this->setSenha(null);
+    $this->setStatusById(self::STATUS_DESATIVADO, $repo);
+  }
+
+  public function estaAguardandoConfirmacao()
+  {
+    return $this->status->id === self::STATUS_CONFIRMACAO;
   }
 }

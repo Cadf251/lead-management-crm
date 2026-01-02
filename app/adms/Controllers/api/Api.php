@@ -26,7 +26,6 @@ class Api
 
     // Permite só POST
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-      GenerateLog::generateLog("warning", "Uma requisição ao API não veio por POST.", ["post" => $post]);
       echo json_encode(["sucesso" => false, "mensagem" => "A requisição não é POST."]);
       exit;
     }

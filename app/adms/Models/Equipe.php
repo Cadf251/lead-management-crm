@@ -23,8 +23,7 @@ class Equipe
     string $nome,
     Produto $produto,
     ?string $descricao
-  ):self
-  {
+  ): self {
     $equipe = new self();
     $equipe->setNome($nome);
     $equipe->setProduto($produto);
@@ -81,7 +80,7 @@ class Equipe
   {
     $recebem = [];
     foreach ($this->colaboradores as $colaborador) {
-      if($colaborador->recebeLeads()) {
+      if ($colaborador->recebeLeads()) {
         $recebem[] = $colaborador;
       }
     }
@@ -95,7 +94,7 @@ class Equipe
     if (empty($recebem)) return [];
 
     $array = [];
-    foreach ($recebem as $recebe){
+    foreach ($recebem as $recebe) {
       $array[] = [
         "id" => $recebe->id,
         "vez" => $recebe->vez
@@ -121,10 +120,10 @@ class Equipe
     return $proximos;
   }
 
-  public function getColaboradorById(int $id):?EquipeUsuario
+  public function getColaboradorById(int $id): ?EquipeUsuario
   {
-    foreach ($this->colaboradores as $colaborador){
-      if ($colaborador->id === $id){
+    foreach ($this->colaboradores as $colaborador) {
+      if ($colaborador->id === $id) {
         return $colaborador;
       }
     }
@@ -138,7 +137,7 @@ class Equipe
     if (empty($this->colaboradores)) return 0;
 
     foreach ($this->colaboradores as $colab) {
-      if ($vez < $colab->vez){
+      if ($vez < $colab->vez) {
         $vez = $colab->vez;
       }
     }
@@ -146,15 +145,12 @@ class Equipe
     return $vez;
   }
 
-  public function countColaboradores():int
+  public function countColaboradores(): int
   {
     return count($this->colaboradores);
   }
 
-  public function detailColaborador()
-  {
-
-  }
+  public function detailColaborador() {}
 
   # | -------------------------|
   # | SETTERS                  |
@@ -177,7 +173,7 @@ class Equipe
 
   public function setDescricao(?string $descricao)
   {
-    if(empty($descricao)) $descricao = null;
+    if (empty($descricao)) $descricao = null;
     $this->descricao = $descricao;
   }
 
@@ -221,5 +217,15 @@ class Equipe
   public function setColaboradores(array $colaboradores)
   {
     $this->colaboradores = $colaboradores;
+  }
+
+  public function removerColaborador(int $id)
+  {
+    /** @var EquipesUsuario $colab */
+    foreach ($this->colaboradores as $key => $colab){
+      if ($colab->getId() === $id) {
+        unset($this->colaboradores[$key]);
+      }
+    }
   }
 }

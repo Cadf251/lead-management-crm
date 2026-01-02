@@ -4,18 +4,25 @@
   @include box;
   width: 35%;
   min-width: 200px;
-  gap: 32px;
+  gap: 16px;
+  display: grid;
   border-radius: 4px;
   padding: 32px;
   justify-self: center;
   margin: 16px 0 18px 0;
-
+  transition: all .5s ease;
+  
   * {
     margin: 0;
   }
 
   .titulo {
     text-align: center;
+  }
+
+  &__content {
+    padding-top: 16px;
+    border-top: 2.5px solid var(--border);
   }
 
   &--silver {

@@ -13,6 +13,7 @@ class Field
   private bool $inputOnly = false;
   private array $classes = ["input"];
   private array $radios = [];
+  private bool $selectDefault = true;
 
   public const TYPE_TEXT = "text";
   public const TYPE_FILE = "file";
@@ -87,6 +88,12 @@ class Field
     return $this;
   }
 
+  public function withoutDefaultOption()
+  {
+    $this->selectDefault = false;
+    return $this;
+  }
+
   public function render(): string
   {
     $attrStr = "";
@@ -114,10 +121,17 @@ class Field
 
     // Template para Select
     if ($this->type === self::TYPE_SELECT) {
+      if ($this->selectDefault) {
+        $selectDefault = <<<HTML
+        <option value="">Selecionar...</option>
+        HTML;
+      } else {
+        $selectDefault = "";
+      }
       if ($this->inputOnly) {
         return <<<HTML
-        <select class="input" name="{$this->name}" {$attrStr}>
-          <option value="">Selecionar...</option>
+        <select class="$classes" name="{$this->name}" {$attrStr}>
+          $selectDefault
           {$this->optionsHtml}
         </select>
         HTML;
@@ -126,7 +140,7 @@ class Field
         <div class="form__campo">
           <label>{$this->label}</label>
           <select class="$classes" name="{$this->name}" {$attrStr}>
-            <option value="">Selecionar...</option>
+            $selectDefault
             {$this->optionsHtml}
           </select>
         </div>

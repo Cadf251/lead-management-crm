@@ -5,7 +5,9 @@ namespace App\adms\UI;
 class Header
 {
   private string $title;
+  private string $badges = "";
   private string $buttons = "";
+  private ?string $description = null;
 
   public static function create(string $title):self
   {
@@ -20,12 +22,37 @@ class Header
     return $this;
   }
 
+  public function addBadge(string $badge)
+  {
+    $this->badges .= $badge;
+    return $this;
+  }
+
+  public function withDescription(?string $description)
+  {
+    $this->description = $description;
+    return $this;
+  }
+
   public function render()
   {
+    $desc = "";
+    if ($this->description !== null) {
+      $desc = <<<HTML
+      <p class="task-header__main__description">
+        {$this->description}
+      </p>
+      HTML;
+    }
+    
     return <<<HTML
     <div class="task-header">
-      <div>
-        <h1 class="titulo titulo--2">{$this->title}</h1>
+      <div class="task-header__main">
+        <div class="task-header__main__titulos">
+          <h1 class="titulo titulo--2">{$this->title}</h1>
+          {$this->badges}
+        </div>
+        $desc
       </div>
       <div class="task-header__buttons">
         {$this->buttons}
