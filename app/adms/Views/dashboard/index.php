@@ -1,5 +1,6 @@
 <?php
 
+use App\adms\Core\AppContainer;
 use App\adms\Helpers\CSRFHelper;
 use App\adms\Helpers\HTMLHelper;
 
@@ -7,7 +8,7 @@ include_once "app/adms/Views/partials/calendar.php";
 
 ?>
 
-<h1 class="titulo titulo--1">Olá, <?php echo $_SESSION["usuario_nome"] ?></h1>
+<h1 class="titulo titulo--1">Olá, <?php echo AppContainer::getAuthUser()->getUsuarioNome() ?></h1>
 <h2 class="titulo titulo--3">Selecione um período</h2>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
@@ -19,6 +20,7 @@ include_once "app/adms/Views/partials/calendar.php";
 </form>
 
 <?php
+/*
 if ($this->data["valido"]) {
   echo <<<HTML
     <p class="descricao">Selecionado: {$this->data["form"]["periodo"]}</p>
@@ -302,4 +304,4 @@ if ($this->data["valido"]) {
   }
 
   ?>
-</script>
+</script>*/

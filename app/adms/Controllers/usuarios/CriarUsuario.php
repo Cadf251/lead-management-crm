@@ -2,8 +2,8 @@
 
 namespace App\adms\Controllers\usuarios;
 
-use App\adms\Helpers\CreateOptions;
 use App\adms\Helpers\CSRFHelper;
+use App\adms\Models\NivelSistema;
 
 /** Manipula novos usuários. */
 class CriarUsuario extends UsuariosAbstract
@@ -12,8 +12,7 @@ class CriarUsuario extends UsuariosAbstract
   public function index()
   {
     // Seleciona as opções no banco de dados
-    $optionsArray = $this->repo->sql->selecionarOpcoes("niveis_acesso");
-    $optionsHTML = CreateOptions::criarOpcoes($optionsArray, null);
+    $optionsHTML = NivelSistema::getSelectOptions();
 
     $this->setData([
       "title" => "Criar Usuário",
@@ -50,7 +49,5 @@ class CriarUsuario extends UsuariosAbstract
       "sucesso" => true,
       "html" => $content]);
     exit;
-    
-    // $this->render("adms/Views/usuarios/criar-usuario");
   }
 }

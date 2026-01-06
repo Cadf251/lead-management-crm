@@ -56,11 +56,15 @@ class PHPMailerHelper
           !isset($img["caminho"], $img["nome"]) ||
           !is_string($img["caminho"]) ||
           !is_string($img["nome"])
-      )
+      ) {
         GenerateLog::generateLog("error", "Formato inválido para imagem", ["indice" => $idx, "esperado" => "['caminho' => string, 'nome' => string]"]);
+        return;
+      }
 
-      if (!file_exists($img["caminho"]))
+      if (!file_exists($img["caminho"])){
         GenerateLog::generateLog("error", "Arquivo de imagem não encontrado", ["indice" => $idx, "caminho" => $img["caminho"]]);
+        return;
+      }
 
       $this->mail->AddEmbeddedImage($img["caminho"], $img["nome"]);
     }

@@ -3,7 +3,7 @@
 namespace App\adms\Controllers\equipes;
 
 use App\adms\Core\OperationResult;
-use App\adms\Models\EquipeUsuario;
+use App\adms\Models\teams\Colaborador;
 
 class AlterarFuncao extends ColaboradorMain
 {
@@ -12,7 +12,7 @@ class AlterarFuncao extends ColaboradorMain
     $this->main($colaboradorId);
   }
 
-  public function executar(EquipeUsuario $colaborador, $post): OperationResult
+  public function executar(Colaborador $colaborador, $post): OperationResult
   {
     if (!isset($post["funcao_id"])) {
       $result = new OperationResult();

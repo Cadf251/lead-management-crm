@@ -3,8 +3,8 @@
 namespace App\adms\Controllers\equipes;
 
 use App\adms\Core\OperationResult;
-use App\adms\Models\Equipe;
-use App\adms\Models\EquipeUsuario;
+use App\adms\Models\teams\Equipe;
+use App\adms\Models\teams\Colaborador;
 use App\adms\Presenters\EquipePresenter;
 use App\adms\UI\InfoBox;
 
@@ -13,7 +13,7 @@ abstract class ColaboradorMain extends EquipesAbstract
   protected string $fila = "";
   protected string $numero = "";
 
-  abstract protected function executar(EquipeUsuario $colaborador, array $post) :OperationResult;
+  abstract protected function executar(Colaborador $colaborador, array $post) :OperationResult;
 
   public function main(string|int|null $colaboradorId)
   {

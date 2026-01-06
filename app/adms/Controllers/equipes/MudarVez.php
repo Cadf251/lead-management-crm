@@ -2,7 +2,7 @@
 
 namespace App\adms\Controllers\equipes;
 
-use App\adms\Models\EquipeUsuario;
+use App\adms\Models\teams\Colaborador;
 use App\adms\Core\OperationResult;
 use App\adms\Helpers\GenerateLog;
 
@@ -14,7 +14,7 @@ class MudarVez extends ColaboradorMain
     $this->main($colaboradorId);
   }
 
-  public function executar(EquipeUsuario $colaborador, array $post): OperationResult
+  public function executar(Colaborador $colaborador, array $post): OperationResult
   {
     if ($post["task"] === "prejudicar") {
       $result = $this->service->prejudicar($colaborador);

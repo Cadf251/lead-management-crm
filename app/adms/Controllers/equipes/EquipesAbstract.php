@@ -5,7 +5,7 @@ namespace App\adms\Controllers\equipes;
 use App\adms\Repositories\EquipesRepository;
 use App\adms\Database\DbConnectionClient;
 use App\adms\Core\LoadView;
-use App\adms\Models\Equipe;
+use App\adms\Models\teams\Equipe;
 use App\adms\Presenters\EquipePresenter;
 use App\adms\Services\EquipesService;
 

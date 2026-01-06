@@ -9,10 +9,10 @@ use InvalidArgumentException;
 
 abstract class Pessoa
 {
-  public ?int $id;
-  public string $nome;
-  public string $email;
-  public string $celular;
+  private ?int $id;
+  private ?string $nome;
+  private ?string $email;
+  private ?string $celular;
 
   public function setId(int $id): void
   {
@@ -29,7 +29,7 @@ abstract class Pessoa
     $this->nome = $nome;
   }
 
-  public function setEmail(string $email): void
+  public function setEmail(?string $email): void
   {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
       throw new InvalidArgumentException("E-mail inválido");
@@ -38,11 +38,31 @@ abstract class Pessoa
     $this->email = $email;
   }
 
-  public function setCelular(string $celular): void
+  public function setCelular(?string $celular): void
   {
     if(!CelularFormatter::esInternacional($celular)){
       $celular = CelularFormatter::paraInternacional($celular);
     }
     $this->celular = $celular;
+  }
+  
+  public function getId():?int
+  {
+    return $this->id ?? null;
+  }
+
+  public function getNome():?string
+  {
+    return $this->nome ?? null;
+  }
+
+  public function getEmail():?string
+  {
+    return $this->email ?? null;
+  }
+
+  public function getCelular():?string
+  {
+    return $this->celular ?? null;
   }
 }

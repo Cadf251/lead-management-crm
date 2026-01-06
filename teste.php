@@ -1,7 +1,7 @@
 <?php
 
-use App\adms\Models\Equipe;
-use App\adms\Models\EquipeUsuario;
+use App\adms\Models\teams\Equipe;
+use App\adms\Models\teams\EquipeUsuario;
 use App\adms\UI\Field;
 
 // Carregar o composer

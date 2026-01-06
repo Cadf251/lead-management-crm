@@ -14,7 +14,7 @@ VALUES (
     "5511965828725",
     "$2y$10$jD0vDCsXc3/W324EtRsy3uwKLa3tFMeLCVgRVrgPIBdB0emXc17S.",
     3,
-    4,
+    2,
     NOW()
   ),
   (

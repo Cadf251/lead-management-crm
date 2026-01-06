@@ -1,6 +1,6 @@
 <?php
 
-namespace App\adms\Models;
+namespace App\adms\Models\teams;
 
 class EquipeFuncao
 {

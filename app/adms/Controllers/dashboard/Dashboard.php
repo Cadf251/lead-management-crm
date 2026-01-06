@@ -101,11 +101,11 @@ class Dashboard
     $arrayEquipes = $repository->equipes();
 
     // Visível apenas para adms
-    if (in_array(3, $_SESSION["permissoes"]) || (in_array(4, $_SESSION["permissoes"]))){
-      $this->data["equipes"] = $this->arrangeEquipes($arrayEquipes);
-      $arrayUsuarios = $repository->usuarios();
-      $this->data["usuarios"] = $this->arrangeUsuarios($arrayUsuarios);
-    }
+    // if (in_array(3, $_SESSION["permissoes"]) || (in_array(4, $_SESSION["permissoes"]))){
+    //   $this->data["equipes"] = $this->arrangeEquipes($arrayEquipes);
+    //   $arrayUsuarios = $repository->usuarios();
+    //   $this->data["usuarios"] = $this->arrangeUsuarios($arrayUsuarios);
+    // }
   }
 
   /**

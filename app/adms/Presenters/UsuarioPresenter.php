@@ -2,8 +2,10 @@
 
 namespace App\adms\Presenters;
 
+use App\adms\Core\AppContainer;
 use App\adms\Helpers\CelularFormatter;
 use App\adms\Models\Usuario;
+use App\adms\UI\Badge;
 use App\adms\UI\Button;
 
 class UsuarioPresenter
@@ -13,19 +15,17 @@ class UsuarioPresenter
     /** @var Usuario $usuario */
     foreach($usuarios as $usuario){
       $final[] = [
-        "id" => $usuario->getId(),
-        "nome" => $usuario->getNome(),
-        "email" => $usuario->getEmail(),
+        "id" => $usuario->getId() ?? "",
+        "nome" => $usuario->getNome() ?? "Nome inválido.",
+        "email" => $usuario->getEmail() ?? "Email inválido.",
         "celular" => self::normalizeCelular($usuario->getCelular()),
         "foto_perfil" => self::normalizeFoto($usuario->getId(), $usuario->getFoto()),
-        "nivel_id" => $usuario->getNivelAcessoId(),
-        "nivel_nome" => $usuario->getNivelAcessoNome(),
-        "nivel_descricao" => $usuario->getNivelAcessoDescricao(),
-        "status_id" => $usuario->getStatusId(),
-        "status_nome" => $usuario->getStatusNome(),
-        "status_descricao" => $usuario->getStatusDescricao(),
-        "status_class" => self::getUsuarioStatusClass($usuario->getStatusId()),
-        "button" => self::buttons($usuario->getStatusId(), $usuario->getId(), $usuario->getNome())
+        "nivel_badge" => self::nivelBadge($usuario),
+        "status_badge" => self::statusBadge($usuario),
+        "button" => self::buttons(
+          $usuario->getStatusId(),
+          $usuario->getId(),
+          $usuario->getNome())
       ];
     }
     return $final;
@@ -43,8 +43,24 @@ class UsuarioPresenter
     if(empty($fotoPerfil) || !isset($fotoPerfil) || $fotoPerfil === null){
       return "";
     } else {
-      return "<img src='{$_ENV['HOST_BASE']}files/uploads/{$_SESSION['servidor_id']}/fotos-perfil/{$id}.{$fotoPerfil}'>";
+      $servidorId = AppContainer::getAuthUser()->getServidorId();
+      return "<img src='{$_ENV['HOST_BASE']}files/uploads/{$servidorId}/fotos-perfil/{$id}.{$fotoPerfil}'>";
     }
+  }
+
+  private static function nivelBadge(Usuario $usuario):Badge
+  {
+    return Badge::create($usuario->getNivelAcessoNome() ?? "Nível Inválido", "silver")
+      ->tooltip($usuario->getNivelAcessoDescricao() ?? "");
+  }
+
+  private static function statusBadge(Usuario $usuario):Badge
+  {
+    return Badge::create(
+      $usuario->getStatusNome() ?? "Status inválido",
+      self::getUsuarioStatusClass($usuario->getStatusId())
+      )
+      ->tooltip($usuario->getStatusDescricao() ?? "");
   }
 
   /** Diferente da UtilPresenter::getStatusClass */
@@ -117,19 +133,19 @@ class UsuarioPresenter
     ];
 
     return match($statusId){
-      1 => [
-        $btns["editar"],
-        $btns["reenviar-email"],
-        $btns["desativar"]
-      ],
-      2 => [
-        $btns["reativar"]
-      ],
-      3 => [
-        $btns["editar"],
-        $btns["resetar-senha"],
-        $btns["desativar"]
-      ]
+      1 => <<<HTML
+        {$btns["editar"]}
+        {$btns["reenviar-email"]}
+        {$btns["desativar"]}
+      HTML,
+      2 => <<<HTML
+        {$btns["reativar"]}
+      HTML,
+      3 => <<<HTML
+        {$btns["editar"]}
+        {$btns["resetar-senha"]}
+        {$btns["desativar"]}
+      HTML
     };
   }
 }

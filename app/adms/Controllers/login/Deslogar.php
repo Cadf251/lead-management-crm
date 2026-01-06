@@ -2,12 +2,13 @@
 
 namespace App\adms\Controllers\login;
 
+use App\adms\Core\AppContainer;
 use App\adms\Services\AuthUser;
 
 class Deslogar
 {
   public function index()
   {
-    AuthUser::deslogar();
+    AppContainer::getAuthUser()->deslogar();
   }
 }

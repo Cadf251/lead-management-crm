@@ -3,13 +3,10 @@
 namespace App\adms\Repositories;
 
 use App\adms\Database\DbOperationsRefactored;
-use App\adms\Helpers\GenerateLog;
-use App\adms\Models\Equipe;
-use App\adms\Models\EquipeFuncao;
-use App\adms\Models\EquipeUsuario;
+use App\adms\Models\teams\Equipe;
+use App\adms\Models\teams\Colaborador;
 use App\adms\Models\Produto;
-use App\adms\Models\Usuario;
-use App\adms\Models\UsuarioStatus;
+use App\adms\Models\UserStatus;
 use Exception;
 use PDO;
 
@@ -39,30 +36,17 @@ class EquipesRepository
         AND $where
       SQL;
     }
-    $base = <<<SQL
+
+    return <<<SQL
       SELECT
         e.id AS equipe_id, e.nome AS equipe_nome, e.descricao AS equipe_descricao, e.created AS equipe_created, e.modified AS equipe_modified,
-        p.id AS produto_id, p.nome AS produto_nome, p.descricao AS produto_descricao,
-        es.id AS equipe_status_id, es.nome AS equipe_status_nome
+        e.equipe_status_id
       FROM {$this->tabela} e
-      INNER JOIN produtos p ON p.id = e.produto_id
-      INNER JOIN generico_status es ON es.id = e.equipe_status_id
       WHERE
         e.equipe_status_id != 1
         $where
       ORDER BY e.equipe_status_id DESC
     SQL;
-
-    // Tratar permissões
-    if (in_array(2, $_SESSION["permissoes"]))
-      $query = $base;
-    else if (in_array(4, $_SESSION["permissoes"]))
-      $query = <<<SQL
-      $base
-        AND (e.id IN(:acesso_equipes))
-      SQL;
-
-    return $query;
   }
 
   /**
@@ -107,7 +91,6 @@ class EquipesRepository
     $query = $this->getQueryBase("e.id = :equipe_id");
 
     $params = [
-      "acesso_equipes" => $_SESSION["acesso_equipes"],
       "equipe_id" => $equipeId
     ];
 
@@ -133,13 +116,8 @@ class EquipesRepository
     $equipe->setNome($row["equipe_nome"]);
     $equipe->setDescricao($row["equipe_descricao"]);
     $equipe->setColaboradores(
-      $this->listarUsuarios($equipe->id)
+      $this->listarUsuarios($equipe->getId())
     );
-    $equipe->setProdutoByArray([
-      "id" => $row["produto_id"],
-      "nome" => $row["produto_nome"],
-      "descricao" => $row["produto_descricao"] ?? null
-    ]);
     $equipe->setStatus($row["equipe_status_id"]);
     return $equipe;
   }
@@ -147,7 +125,7 @@ class EquipesRepository
   /**
    * Lista os usuários háptos de uma equipe e seus detalhes.
    * 
-   * @return array A lista de EquipeUsuario
+   * @return array A lista de Colaborador
    */
   public function listarUsuarios(int $equipeId): array
   {
@@ -178,7 +156,7 @@ class EquipesRepository
     return $final;
   }
 
-  public function selecionarUsuario(int $colaboradorId):?EquipeUsuario
+  public function selecionarUsuario(int $colaboradorId):?Colaborador
   {
     $query = <<<SQL
       SELECT
@@ -208,9 +186,9 @@ class EquipesRepository
     return $this->hydrateUsuario($array[0]);
   }
 
-  private function hydrateUsuario(array $row):?EquipeUsuario
+  private function hydrateUsuario(array $row):?Colaborador
   {
-    $usuario = new EquipeUsuario();
+    $usuario = new Colaborador();
     $usuario->setId($row["eu_id"]);
     $usuario->setUsuarioId(($row["usuario_id"]));
     $usuario->setUsuarioNome($row["nome"]);
@@ -228,15 +206,15 @@ class EquipesRepository
   public function salvar(Equipe $equipe)
   {
     $params = [
-      "nome" => $equipe->nome,
-      "descricao" => $equipe->descricao,
-      "produto_id" => $equipe->produto->id,
-      "equipe_status_id" => $equipe->status->id,
+      "nome" => $equipe->getNome(),
+      "descricao" => $equipe->getDescricao() ?? null,
+      "produto_id" => $equipe->getProdutoId(),
+      "equipe_status_id" => $equipe->getStatusId(),
       "modified" => date($_ENV["DATE_FORMAT"])
     ];
 
     try {
-      $this->sql->updateById($this->tabela, $params, $equipe->id);
+      $this->sql->updateById($this->tabela, $params, $equipe->getId());
     } catch (Exception $e) {
       throw new Exception($e->getMessage(), $e->getCode(), $e);
     }
@@ -251,9 +229,9 @@ class EquipesRepository
   public function criarEquipe(Equipe $equipe): void
   {
     $params = [
-      "nome" => $equipe->nome,
-      "descricao" => $equipe->descricao,
-      "produto_id" => $equipe->produto->id,
+      "nome" => $equipe->getNome(),
+      "descricao" => $equipe->getDescricao() ?? null,
+      "produto_id" => $equipe->getProdutoId(),
       "created" => date($_ENV['DATE_FORMAT'])
     ];
     
@@ -316,8 +294,8 @@ class EquipesRepository
     SQL;
 
     $params = [
-      "equipe_id" => $equipe->id,
-      "usuario_id" => Usuario::STATUS_ATIVADO
+      "equipe_id" => $equipe->getId(),
+      "usuario_id" => UserStatus::STATUS_ATIVADO
     ];
 
     try {
@@ -334,9 +312,9 @@ class EquipesRepository
     return $final;
   }
 
-  private function hydrateNewUsuario(array $row):?EquipeUsuario
+  private function hydrateNewUsuario(array $row):?Colaborador
   {
-    $usuario = EquipeUsuario::novo(
+    $usuario = Colaborador::novo(
       $row["id"],
       $row["nome"],
       $row["nivel_acesso_id"]
@@ -386,14 +364,14 @@ class EquipesRepository
     return $result[0];
   }
 
-  public function criarColaborador(Equipe $equipe, EquipeUsuario $colab):void
+  public function criarColaborador(Equipe $equipe, Colaborador $colab):void
   {
     $params = [
-      "vez" => (int)$colab->vez,
-      "pode_receber_leads" => (int)$colab->recebeLeads(),
-      "equipe_usuario_funcao_id" => $colab->funcao->id,
-      "usuario_id" => $colab->usuarioId,
-      "equipe_id" => $equipe->id,
+      "vez" => (int)$colab->getVez(),
+      "pode_receber_leads" => (int)$colab->podeReceberLeads(),
+      "equipe_usuario_funcao_id" => $colab->getFuncaoId(),
+      "usuario_id" => $colab->getUsuarioId(),
+      "equipe_id" => $equipe->getId(),
     ];
 
     try {
@@ -404,7 +382,7 @@ class EquipesRepository
     }
   }
 
-  public function removerColaborador(EquipeUsuario $colaborador):void
+  public function removerColaborador(Colaborador $colaborador):void
   {
     try {
       $this->sql->deleteByIdSQL("equipes_usuarios", $colaborador->getId());
@@ -413,16 +391,16 @@ class EquipesRepository
     }
   }
 
-  public function salvarColaborador(EquipeUsuario $colaborador)
+  public function salvarColaborador(Colaborador $colaborador)
   {
     $params = [
-      "vez" => $colaborador->vez,
-      "pode_receber_leads" => $colaborador->recebeLeads,
-      "equipe_usuario_funcao_id" => $colaborador->funcao->id
+      "vez" => $colaborador->getVez(),
+      "pode_receber_leads" => $colaborador->podeReceberLeads(),
+      "equipe_usuario_funcao_id" => $colaborador->getFuncaoId()
     ];
 
     try {
-      $this->sql->updateById("equipes_usuarios", $params, $colaborador->id);
+      $this->sql->updateById("equipes_usuarios", $params, $colaborador->getId());
     } catch (Exception $e) {
       throw new Exception("Não foi possível salvar um colaborador no banco de dados.", $e->getCode(), $e);
     }

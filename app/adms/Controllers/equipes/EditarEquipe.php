@@ -45,7 +45,7 @@ class EditarEquipe extends EquipesAbstract
     $this->setData([
       "title" => "Editar Equipe",
       "equipe" => EquipePresenter::present([$equipe]),
-      "produtos-options" => CreateOptions::criarOpcoes($optionsArray, $equipe->produto->id)
+      "produtos-options" => CreateOptions::criarOpcoes($optionsArray, $equipe->getProdutoId())
     ]);
 
     $content = require APP_ROOT."app/adms/Views/equipes/editar-equipe.php";

@@ -2,6 +2,7 @@
 
 namespace App\adms\Services;
 
+use App\adms\Core\AppContainer;
 use PDO;
 use Exception;
 use DomainException;
@@ -11,7 +12,6 @@ use App\adms\Helpers\PHPMailerHelper;
 use App\adms\Models\Usuario;
 use App\adms\Repositories\TokenRepository;
 use App\adms\Repositories\UsuariosRepository;
-use CachingIterator;
 
 /**
  * 
@@ -38,6 +38,8 @@ class UsuariosService
    * @param string $celular Em qualquer formato
    * @param int $nivId
    * 
+   * @log
+   * 
    * @return OperationResult
    */
   public function criar(string $nome, string $email, string $celular, int $nivId): OperationResult
@@ -49,15 +51,11 @@ class UsuariosService
     }
 
     try {
-      $usuario = Usuario::novo($nome, $email, $celular, $nivId, $this->repository);
+      $usuario = Usuario::novo($nome, $email, $celular, $nivId);
       $usuario->setId($this->repository->criar($usuario));
       $this->result->addMensagem("O usuário foi criado com sucesso.");
     } catch (Exception $e) {
-
-      GenerateLog::generateLog("error", "Não foi possível criar um usuário", [
-        $e->getMessage()
-      ]);
-
+      GenerateLog::log($e, GenerateLog::ERROR);
       $this->result->falha("Não foi possível criar o usuário.");
       return $this->result;
     }
@@ -66,12 +64,7 @@ class UsuariosService
       $this->emailConfirmacao($usuario);
       $this->result->addMensagem("Peça que o usuário verifique o email $email para criar uma senha.");
     } catch (Exception $e) {
-      GenerateLog::generateLog("error", $e->getMessage(), [
-        "code" => $e->getCode(),
-        "file" => $e->getFile(),
-        "line" => $e->getLine(),
-        "trace" => $e->getTrace(),
-      ]);
+      GenerateLog::log($e, GenerateLog::ERROR);
       $this->result->warn("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
     }
 
@@ -88,13 +81,20 @@ class UsuariosService
     return $this->result;
   }
 
-  public function editar(Usuario $usuario, array $dados): ?OperationResult
+  /**
+   * Edita um usuário
+   * 
+   * @param Usuario $usuario
+   * @param array $dados Dados novos
+   * 
+   * @return OperationResult
+   */
+  public function editar(Usuario $usuario, array $dados): OperationResult
   {
     $usuario->setNome($dados["nome"]);
     $usuario->setCelular($dados["celular"]);
-    $usuario->setNivelById($dados["nivel_acesso_id"], $this->repository);
-
-    if ($usuario->email !== $dados["email"]) {
+    $usuario->setNivel($dados["nivel_acesso_id"]);
+    if ($usuario->getEmail() !== $dados["email"]) {
       $this->mudarEmail($usuario, $dados["email"]);
     }
 
@@ -136,9 +136,19 @@ class UsuariosService
     return $this->result;
   }
 
-  private function mudarEmail(Usuario $usuario, $email)
+  /**
+   * Muda o email de um usuário
+   * 
+   * @param Usuario $usuario
+   * @param string $email
+   * 
+   * @log
+   * 
+   * @return void
+   */
+  private function mudarEmail(Usuario $usuario, string $email):void 
   {
-    $emailAntigo = $usuario->email;
+    $emailAntigo = $usuario->getEmail();
 
     $this->result->addMensagem("O email é diferente do antigo, portanto, deve-se confirmar o novo email.");
 
@@ -156,7 +166,7 @@ class UsuariosService
     }
 
     try {
-      $usuario->resetarSenha($this->repository);
+      $usuario->resetarSenha();
     } catch (Exception) {
       $this->result->warn("O email não foi substituído devido a um erro.");
       $usuario->setEmail($emailAntigo);
@@ -165,17 +175,11 @@ class UsuariosService
 
     try {
       $this->emailConfirmacao($usuario);
-      $this->result->addMensagem("Peça que o usuário verifique o email {$usuario->email} para criar uma senha.");
+      $this->result->addMensagem("Peça que o usuário verifique o email {$usuario->getEmail()} para criar uma senha.");
     } catch (Exception $e) {
-      GenerateLog::generateLog("error", $e->getMessage(), [
-        "code" => $e->getCode(),
-        "file" => $e->getFile(),
-        "line" => $e->getLine(),
-        "trace" => $e->getTrace(),
-      ]);
+      GenerateLog::log($e, GenerateLog::ERROR);
       $this->result->warn("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
       $usuario->setEmail($emailAntigo);
-      return;
     }
   }
 
@@ -190,7 +194,7 @@ class UsuariosService
   {
     // Ativar o usuário
     try {
-      $usuario->reativar($this->repository);
+      $usuario->reativar();
 
       $this->repository->salvar($usuario);
 
@@ -207,14 +211,9 @@ class UsuariosService
     // Envia o email para nova senha
     try {
       $this->emailConfirmacao($usuario);
-      $this->result->addMensagem("Peça que o usuário verifique o email {$usuario->email} para criar uma senha.");
+      $this->result->addMensagem("Peça que o usuário verifique o email {$usuario->getEmail()} para criar uma senha.");
     } catch (Exception $e) {
-      GenerateLog::generateLog("error", $e->getMessage(), [
-        "code" => $e->getCode(),
-        "file" => $e->getFile(),
-        "line" => $e->getLine(),
-        "trace" => $e->getTrace(),
-      ]);
+      GenerateLog::log($e, GenerateLog::ERROR);
       $this->result->warn("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
     }
 
@@ -232,7 +231,7 @@ class UsuariosService
   {
     // Ativar o usuário
     try {
-      $usuario->resetarSenha($this->repository);
+      $usuario->resetarSenha();
 
       $this->repository->salvar($usuario);
 
@@ -249,13 +248,12 @@ class UsuariosService
     // Envia o email para nova senha
     try {
       $this->emailConfirmacao($usuario);
-      $this->result->addMensagem("Peça que o usuário verifique o email {$usuario->email} para criar uma senha.");
+      $this->result->addMensagem("Peça que o usuário verifique o email {$usuario->getEmail()} para criar uma senha.");
     } catch (Exception $e) {
       GenerateLog::generateLog("error", $e->getMessage(), [
         "code" => $e->getCode(),
         "file" => $e->getFile(),
-        "line" => $e->getLine(),
-        "trace" => $e->getTrace(),
+        "line" => $e->getLine()
       ]);
       $this->result->warn("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
     }
@@ -266,17 +264,17 @@ class UsuariosService
   public function desativar(Usuario $usuario): ?OperationResult
   {
     try {
-      $usuario->desativar($this->repository);
+      $usuario->desativar();
 
       $tokenRepo = new TokenRepository($this->conexao);
-      $tokenRepo->desativarDeUsuario($usuario->id);
+      $tokenRepo->desativarDeUsuario($usuario->getId());
 
-      if ($usuario->foto !== null) {
+      if ($usuario->getFoto() !== null) {
         $this->apagarFoto($usuario);
       }
 
       $this->repository->salvar($usuario);
-      $this->result->addMensagem("O usuário {$usuario->nome} foi desativado.");
+      $this->result->addMensagem("O usuário {$usuario->getNome()} foi desativado.");
     } catch (Exception) {
       $this->result->falha("Não foi possível desativar o usuário.");
     }
@@ -286,7 +284,7 @@ class UsuariosService
   public function ativar(Usuario $usuario, $senhaHash): ?OperationResult
   {
     try {
-      $usuario->ativar($this->repository, $senhaHash);
+      $usuario->ativar($senhaHash);
 
       $this->repository->salvar($usuario);
 
@@ -313,7 +311,7 @@ class UsuariosService
     // Envia o email para nova senha
     try {
       $this->emailConfirmacao($usuario);
-      $this->result->addMensagem("Peça que o usuário verifique o email {$usuario->email} para criar uma senha.");
+      $this->result->addMensagem("Peça que o usuário verifique o email {$usuario->getEmail()} para criar uma senha.");
     } catch (Exception $e) {
       GenerateLog::generateLog("error", $e->getMessage(), [
         "code" => $e->getCode(),
@@ -334,11 +332,6 @@ class UsuariosService
    */
   private function armazenarFoto(Usuario $usuario): void
   {
-    // Verifica se o id está setado
-    if (!isset($usuario->id)) {
-      throw new Exception("O Id do usuário não está setado");
-    }
-
     ini_set('file_uploads', '1');
 
     $extensoes_permitidas = [
@@ -354,8 +347,9 @@ class UsuariosService
       throw new Exception("Formato de arquivo inválido na tentativa de upload para foto de perfil");
     }
 
-    $arquivoNome = $usuario->id . $extensoes_permitidas[$tipo];
-    $caminho = APP_ROOT . "files/uploads/{$_SESSION['servidor_id']}/fotos-perfil/";
+    $arquivoNome = $usuario->getId() . $extensoes_permitidas[$tipo];
+    $servidorId = AppContainer::getAuthUser()->getServidorId();
+    $caminho = APP_ROOT . "files/uploads/{$servidorId}/fotos-perfil/";
 
     // Tenta criar o diretório se não existir
     if (!is_dir($caminho)) {
@@ -387,8 +381,8 @@ class UsuariosService
       $usuario->setFoto($tipoFormatado);
       
       // Se o usuário for o próprio, adiciona na SESSION
-      if ($_SESSION["usuario_id"] === $usuario->id) {
-        $_SESSION["foto_perfil"] = $usuario->foto;
+      if (AppContainer::getAuthUser()->getUsuarioId() === $usuario->getId()) {
+        $_SESSION["auth"]["foto_perfil_tipo"] = $usuario->getFoto();
       }
     } else {
       throw new Exception("Algo deu errado");
@@ -402,14 +396,10 @@ class UsuariosService
    */
   private function apagarFoto(Usuario $usuario): void
   {
-    // Verifica se o id está setado
-    if (!isset($usuario->id)) {
-      throw new Exception("O Id do usuário não está setado");
-    }
+    $servidorId = AppContainer::getAuthUser()->getServidorId();
+    $caminho = APP_ROOT . "files/uploads/{$servidorId}/fotos-perfil/{$usuario->getId()}";
 
-    $caminho = APP_ROOT . "files/uploads/{$_SESSION['servidor_id']}/fotos-perfil/{$usuario->id}";
-
-    $arquivo = "$caminho.{$usuario->foto}";
+    $arquivo = "$caminho.{$usuario->getFoto()}";
 
     // Verifique se o arquivo existe
     if (!empty($arquivo) && file_exists($arquivo)) {
@@ -419,8 +409,8 @@ class UsuariosService
     $usuario->setFoto(null);
 
     // Remove da $_SESSION caso seja o mesmo usuário
-    if ($usuario->id === $_SESSION["usuario_id"]) {
-      $_SESSION["foto_perfil"] = null;
+    if ($usuario->getId() === $_SESSION["auth"]["usuario_id"]) {
+      $_SESSION["auth"]["foto_perfil_tipo"] = null;
     }
   }
 
@@ -447,11 +437,11 @@ class UsuariosService
    * 
    * @return bool Se funcionou ou não
    */
-  private function emailConfirmacao(Usuario $usuario, string $msgSucesso = ""): void
+  private function emailConfirmacao(Usuario $usuario): void
   {
     try {
       // Verifica se os parâmetros estão devidamente setados
-      if (($usuario->id === 0) || ($usuario->nome === "") || ($usuario->email === "")) {
+      if (($usuario->getId() === 0) || ($usuario->getNome() === "") || ($usuario->getEmail() === "")) {
         throw new Exception("Não foi possível enviar o email porque há parâmetros faltando.");
       }
 
@@ -460,18 +450,18 @@ class UsuariosService
 
       // Prazo de 7 dias
       $prazo = date($_ENV['DATE_FORMAT'], strtotime('+7 days'));
-      $token = $tokenRepo->armazenarToken("sistema", "confirmar_email_senha", $prazo, $usuario->id);
+      $token = $tokenRepo->armazenarToken("sistema", "confirmar_email_senha", $prazo, $usuario->getId());
 
       // Cria o email de envio
       $mail = new PHPMailerHelper();
 
-      $mail->destinatarios([$usuario->email]);
+      $mail->destinatarios([$usuario->getEmail()]);
 
-      $mail->imagens([["caminho" => "public/adms/img/logo.png", "nome" => "logo"]]);
+      $mail->imagens([["caminho" => APP_ROOT."public/img/logo.png", "nome" => "logo"]]);
 
       $params = [
-        "[NOME]" => $usuario->nome,
-        "[SERVIDOR_ID]" => $_SESSION["servidor_id"],
+        "[NOME]" => $usuario->getNome(),
+        "[SERVIDOR_ID]" => AppContainer::getAuthUser()->getServidorId(),
         "[TOKEN]" => $token
       ];
 

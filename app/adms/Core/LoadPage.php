@@ -20,7 +20,7 @@ class LoadPage
   private array $listPackages = ["adms", "database"];
 
   /** @var array $listDirectory Lista de diretório das classes */
-  private array $listDirectory = ["login", "dashboard", "usuarios", "equipes", "erro", "master", "api"];
+  private array $listDirectory = ["login", "dashboard", "usuarios", "equipes", "atendimentos", "erro", "master", "api"];
 
   /** @var array $listPgPublic Lista de páginas públicas */
   private array $listPgPublic = ["Login", "NovaSenha", "CriarSenha", "Erro", "Api"];
@@ -34,6 +34,7 @@ class LoadPage
     "ListarUsuarios",
     "ListarEquipes",
     "ListarColaboradores",
+    "EmAtendimento"
   ];
 
   private array $listPost = [
@@ -83,8 +84,7 @@ class LoadPage
       $this->falha("002. Página não encontrada.");
     else if ($pageExists[1] === "private") {
       // Requer login
-      $logado = AuthUser::logado();
-      if ($logado === false) {
+      if (!AppContainer::getAuthUser()->estaLogado()) {
         header("Location: {$_ENV['HOST_BASE']}login");
         exit;
       }
@@ -94,7 +94,7 @@ class LoadPage
         header("Location: {$_ENV['HOST_BASE']}dashboard");
         exit;
       }
-    } else if (($pageExists[1] === "dev") && ($_SERVER['HTTP_HOST'] !== "localhost")) {
+    } else if (($pageExists[1] === "dev") && ($_SERVER['HTTP_HOST'] !== "crm.local")) {
       header("Location: {$_ENV['HOST_BASE']}login");
       exit;
     }

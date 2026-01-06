@@ -2,8 +2,8 @@
 
 namespace App\adms\Controllers\usuarios;
 
-use App\adms\Helpers\CreateOptions;
 use App\adms\Helpers\CSRFHelper;
+use App\adms\Models\NivelSistema;
 use App\adms\Presenters\UsuarioPresenter;
 
 class EditarUsuario extends UsuariosAbstract
@@ -13,11 +13,10 @@ class EditarUsuario extends UsuariosAbstract
     $usuario = $this->repo->selecionar($id);
 
     // Seleciona as opções no banco de dados
-    $optionsArray = $this->repo->sql->selecionarOpcoes("niveis_acesso");
-    $optionsHTML = CreateOptions::criarOpcoes($optionsArray, $usuario->nivel->id ?? null);
+    $optionsHTML = NivelSistema::getSelectOptions($usuario->getNivelAcessoId());
 
     $this->setData([
-      "title" => "Editar Usuário | {$usuario->nome}",
+      "title" => "Editar Usuário | {$usuario->getNome()}",
       "usuarios" => UsuarioPresenter::present([$usuario]),
       "form-options" => $optionsHTML
     ]);

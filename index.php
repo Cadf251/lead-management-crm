@@ -2,8 +2,10 @@
 
 use App\adms\Controllers\erro\Erro;
 use App\adms\Controllers\usuarios\AtivarUsuarioRefactored;
+use App\adms\Core\AppContainer;
 use App\adms\Core\PageController;
 use App\adms\Helpers\GenerateLog;
+use App\adms\Services\AuthUser;
 
 // Carregar o composer
 require_once "vendor/autoload.php";
@@ -23,6 +25,11 @@ define('APP_ROOT', str_replace("\\", "/", __DIR__)."/");
 if($_SERVER["HTTP_HOST"] === "crm.local"){
   $_ENV["HOST_BASE"] = "http://crm.local/";
 }
+
+// Instancia o AuthUser
+$auth = AuthUser::create();
+
+AppContainer::setAuthUser($auth);
 
 // Observa erros fatais
 register_shutdown_function( function () {

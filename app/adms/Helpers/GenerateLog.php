@@ -2,6 +2,8 @@
 
 namespace App\adms\Helpers;
 
+use App\adms\Core\AppContainer;
+use App\adms\Services\AuthUser;
 use Exception;
 use Monolog\Level;
 use Monolog\Logger;
@@ -44,7 +46,7 @@ class GenerateLog
 
     $nameFileLog = date("dmY") . ".log";
 
-    $pasta = $_SESSION["servidor_id"] ?? "limbo";
+    $pasta = AppContainer::getAuthUser()->getServidorId() ?? "limbo";
 
     // Cria o diretório
     $path = APP_ROOT . "files/logs/$pasta";
@@ -70,10 +72,10 @@ class GenerateLog
 
     $log->pushHandler(new StreamHandler($filePath), Level::Debug);
 
-    if (isset($_SESSION["logado"]) && $_SESSION["logado"] === true) {
+    if (AppContainer::getAuthUser()->estaLogado()) {
       $content["sessao"] = [
-        "usuario_id" => $_SESSION["usuario_id"] ?? null,
-        "servidor_id" => $_SESSION["servidor_id"] ?? null
+        "usuario_id" =>  AppContainer::getAuthUser()->getUsuarioId() ?? null,
+        "servidor_id" => AppContainer::getAuthUser()->getServidorId() ?? null
       ];
     }
 

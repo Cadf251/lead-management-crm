@@ -2,47 +2,26 @@
 
 namespace App\adms\Models;
 
-use App\adms\Repositories\UsuariosRepository;
 use DomainException;
 use Exception;
-use InvalidArgumentException;
+use App\adms\Models\UserStatus;
 
 /**
+ * Language: MIX
  * Modelo de USUÁRIO para ser instanciado e usado.
  */
 class Usuario extends Pessoa
 {
-  public ?int $id;
-  public string $nome;
-  public string $email;
-  public string $celular;
-  public ?string $foto;
-  public ?string $senhaHash;
-  public UsuarioStatus $status;
-  public NivelAcesso $nivel;
-
-  public const STATUS_CONFIRMACAO = 1;
-  public const STATUS_DESATIVADO = 2;
-  public const STATUS_ATIVADO = 3;
-
-  public const NIVEL_COLABORADOR = 1;
-  public const NIVEL_FINANCEIRO = 2;
-  public const NIVEL_GERENTE = 3;
-  public const NIVEL_ADMIN = 4;
-
-  public const VALIDS_NIVEIS = [
-    self::NIVEL_COLABORADOR,
-    self::NIVEL_FINANCEIRO,
-    self::NIVEL_GERENTE,
-    self::NIVEL_ADMIN
-  ];
+  private ?string $foto;
+  private ?string $senhaHash;
+  private UserStatus $status;
+  private NivelSistema $nivel;
 
   public static function novo(
     string $nome,
     string $email,
     string $celular,
-    int $nivelId,
-    $repo
+    int $nivelId
   ): self {
     $usuario = new self();
     $usuario->setNome($nome);
@@ -50,12 +29,12 @@ class Usuario extends Pessoa
     $usuario->setCelular($celular);
     $usuario->setSenha(null);
     $usuario->setFoto(null);
-    $usuario->setStatusById(self::STATUS_CONFIRMACAO, $repo);
-    $usuario->setNivelById($nivelId, $repo);
+    $usuario->setStatus(UserStatus::STATUS_CONFIRMACAO);
+    $usuario->setNivel($nivelId);
     return $usuario;
   }
 
-    // |--------------------|
+  // |--------------------|
   // |  SETTERS           |
   // |--------------------|
 
@@ -74,82 +53,27 @@ class Usuario extends Pessoa
     $this->foto = $fotoType;
   }
 
-  public function setNivel(int $nivId, string $nivNome, string $descricao = ""): void
+  public function setNivel(int $id)
   {
-    if (!in_array($nivId, [
-      self::NIVEL_COLABORADOR,
-      self::NIVEL_FINANCEIRO,
-      self::NIVEL_GERENTE,
-      self::NIVEL_ADMIN
-    ])) {
-      throw new InvalidArgumentException(("Nível de acesso inválido."));
+    try {
+      $this->nivel = new NivelSistema($id);
+    } catch (Exception $e) {
+      throw new DomainException("Nivel inválido.", $e->getCode(), $e);
     }
-
-    $this->nivel = new NivelAcesso($nivId, $nivNome, $descricao);
   }
 
-  public function setNivelById(int $id, UsuariosRepository $repo)
+  public function setStatus(int $statusId)
   {
-    if (!in_array($id, [
-      self::NIVEL_COLABORADOR,
-      self::NIVEL_FINANCEIRO,
-      self::NIVEL_GERENTE,
-      self::NIVEL_ADMIN
-    ])) {
-      throw new InvalidArgumentException("Nível de acesso inválido.");
+    try {
+      $this->status = new UserStatus($statusId);
+    } catch (Exception $e){
+      throw new Exception("Invalid user status $statusId", $e->getCode(), $e);
     }
-
-    $this->nivel = NivelAcesso::fromId($id, $repo);
-  }
-
-  public function setStatus(int $statusId, string $statusNome, string $descricao = "")
-  {
-    if (!in_array($statusId, [
-      self::STATUS_CONFIRMACAO,
-      self::STATUS_DESATIVADO,
-      self::STATUS_ATIVADO
-    ])) {
-      throw new InvalidArgumentException("Status inválido.");
-    }
-
-    $this->status = new UsuarioStatus($statusId, $statusNome, $descricao);
-  }
-
-  public function setStatusById(int $id, UsuariosRepository $repo)
-  {
-    if (!in_array($id, [
-      self::STATUS_CONFIRMACAO,
-      self::STATUS_DESATIVADO,
-      self::STATUS_ATIVADO
-    ])) {
-      throw new InvalidArgumentException("Status inválido.");
-    }
-
-    $this->status = UsuarioStatus::fromId($id, $repo);
   }
 
   // |--------------------|
   // |  GETTERS           |
   // |--------------------|
-  public function getId():?int
-  {
-    return $this->id;
-  }
-
-  public function getNome():string
-  {
-    return $this->nome ?? "";
-  }
-
-  public function getEmail():string
-  {
-    return $this->email ?? "";
-  }
-
-  public function getCelular():string
-  {
-    return $this->celular ?? "";
-  }
 
   public function getFoto():?string
   {
@@ -163,100 +87,99 @@ class Usuario extends Pessoa
 
   public function getStatusNome():string
   {
-    return $this->status->nome;
+    return $this->status->getName();
   }
 
   public function getStatusDescricao():string
   {
-    return $this->status->descricao;
+    return $this->status->getDescription();
   }
 
   public function getStatusId():int
   {
-    return $this->status->id;
+    return $this->status->getId();
   }
 
   public function getNivelAcessoId():int
   {
-    return $this->nivel->id;
+    return $this->nivel->getId();
   }
 
   public function getNivelAcessoNome():string
   {
-    return $this->nivel->nome;
+    return $this->nivel->getNome();
   }
 
   public function getNivelAcessoDescricao():string
   {
-    return $this->nivel->descricao;
+    return $this->nivel->getDescricao();
   }
+
+  // --- STATUS CHANGERS ---
 
   /**
    * Reativa um usuário DESATIVADO
-   * 
-   * @param UsuariosRepository $repo
    */
-  public function reativar(UsuariosRepository $repo)
+  public function reativar()
   {
-    if ($this->status->id !== self::STATUS_DESATIVADO) {
+    if ($this->status->getId() !== UserStatus::STATUS_DESATIVADO) {
       throw new DomainException("DOMAIN ERROR: Usuário deve estar desativado.");
     }
 
-    $this->setStatusById(self::STATUS_CONFIRMACAO, $repo);
+    $this->setStatus(UserStatus::STATUS_CONFIRMACAO);
   }
 
   /**
    * Retorna um usuário ativo ao status de aguardando confirmação
-   * 
-   * @param UsuariosRepository $repo
    */
-  public function resetarSenha(UsuariosRepository $repo)
+  public function resetarSenha()
   {
-    if ($this->status->id !== self::STATUS_ATIVADO) {
+    if ($this->status->getId() !== UserStatus::STATUS_ATIVADO) {
       throw new DomainException("DOMAIN ERROR: Usuário deve estar ativado.");
     }
 
-    $this->setStatusById(self::STATUS_CONFIRMACAO, $repo);
+    $this->setStatus(UserStatus::STATUS_CONFIRMACAO);
     $this->setSenha(null);
-  }
-
-  /**
-   * Ativa um usuário que está aguardando confirmação
-   * 
-   * @param UsuariosRepository $repo
-   */
-  public function ativar(UsuariosRepository $repo, $novaSenhaHash): void
-  {
-    if ($this->status->id !== self::STATUS_CONFIRMACAO) {
-      throw new DomainException("Usuário deve estar em estágio de confirmação.");
-    }
-
-    $this->setStatusById(self::STATUS_ATIVADO, $repo);
-    $this->setSenha($novaSenhaHash);
-  }
-
-  public function podeLogar()
-  {
-    return (($this->senhaHash !== null) && ($this->status->id === self::STATUS_ATIVADO));
   }
 
   /**
    * Desativa qualquer usuário
-   * 
-   * @param UsuariosRepository $repo
    */
-  public function desativar(UsuariosRepository $repo): void
+  public function desativar(): void
   {
-    if ($this->status->id === self::STATUS_DESATIVADO) {
+    if ($this->status->getId() === UserStatus::STATUS_DESATIVADO) {
       throw new DomainException("Usuário já está desativado.");
     }
 
     $this->setSenha(null);
-    $this->setStatusById(self::STATUS_DESATIVADO, $repo);
+    $this->setStatus(UserStatus::STATUS_DESATIVADO);
   }
 
-  public function estaAguardandoConfirmacao()
+  /**
+   * Ativa um usuário que está aguardando confirmação 
+   */
+  public function ativar($novaSenhaHash): void
   {
-    return $this->status->id === self::STATUS_CONFIRMACAO;
+    if ($this->status->getId() !== UserStatus::STATUS_CONFIRMACAO) {
+      throw new DomainException("Usuário deve estar em estágio de confirmação.");
+    }
+
+    $this->setStatus(UserStatus::STATUS_ATIVADO);
+    $this->setSenha($novaSenhaHash);
+  }
+
+  // --- VERIFIERS ---
+  /**
+   * 
+   * @return bool
+   */
+  public function podeLogar():bool
+  {
+    return (($this->senhaHash !== null) && ($this->status->getId() === UserStatus::STATUS_ATIVADO));
+  }
+
+  public function estaAguardandoConfirmacao():bool
+  {
+    return $this->status->getId() === UserStatus::STATUS_CONFIRMACAO;
   }
 }

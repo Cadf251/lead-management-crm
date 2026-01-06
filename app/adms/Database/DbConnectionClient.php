@@ -2,7 +2,9 @@
 
 namespace App\adms\Database;
 
+use App\adms\Core\AppContainer;
 use App\adms\Helpers\ErrorHandler;
+use App\adms\Services\AuthUser;
 use PDO;
 use PDOException;
 
@@ -27,7 +29,7 @@ class DbConnectionClient
 
   public function __construct(array|null $credenciais)
   {
-    $array = $credenciais ?? $_SESSION["db_credenciais"];
+    $array = $credenciais ?? AppContainer::getAuthUser()->getCredenciais();
 
     $host   = $array['host'];
     $db_name = $array['db_name'];

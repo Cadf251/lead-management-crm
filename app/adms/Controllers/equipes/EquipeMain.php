@@ -3,7 +3,7 @@
 namespace App\adms\Controllers\equipes;
 
 use App\adms\Core\OperationResult;
-use App\adms\Models\Equipe;
+use App\adms\Models\teams\Equipe;
 
 /** Fluxo principal */
 abstract class EquipeMain extends EquipesAbstract

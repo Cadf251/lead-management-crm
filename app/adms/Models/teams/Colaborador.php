@@ -1,20 +1,22 @@
 <?php
 
-namespace App\adms\Models;
+namespace App\adms\Models\teams;
 
 use DomainException;
 use Exception;
 
-class EquipeUsuario
+/**
+ * O usuário em uma equipe
+ */
+class Colaborador
 {
-  public ?int $id = null;
-  public int $usuarioId;
-  public string $usuarioNome;
-  public ?bool $recebeLeads = null;
-  public ?EquipeFuncao $funcao = null;
-  public ?int $nivelId;
-  public ?string $funcaoNome = null;
-  public ?int $vez = 0;
+  private ?int $id = null;
+  private int $usuarioId;
+  private string $usuarioNome;
+  private ?bool $recebeLeads = null;
+  private ?EquipeFuncao $funcao = null;
+  private ?int $nivelId;
+  private ?int $vez = 0;
 
   public const FUNCAO_COLABORADOR = 1;
   public const FUNCAO_GERENTE = 2;
@@ -38,6 +40,36 @@ class EquipeUsuario
   public function getId():int
   {
     return $this->id;
+  }
+
+  public function getUsuarioId():int
+  {
+    return $this->usuarioId;
+  }
+
+  public function getUsuarioNome():string
+  {
+    return $this->usuarioNome;
+  }
+
+  public function getFuncaoId():int
+  {
+    return $this->funcao->id;
+  }
+
+  public function getFuncaoNome():string
+  {
+    return $this->funcao->nome;
+  }
+
+  public function getVez()
+  {
+    return $this->vez;
+  }
+
+  public function getNivelAcessoId():int
+  {
+    return $this->nivelId;
   }
 
   /**
@@ -82,10 +114,6 @@ class EquipeUsuario
 
   public function setNivelId(int $nivelId)
   {
-    if(!in_array($nivelId, Usuario::VALIDS_NIVEIS)) {
-      throw new Exception("nivel de acesso inválido");
-    }
-
     $this->nivelId = $nivelId;
   }
 
@@ -102,13 +130,13 @@ class EquipeUsuario
   /**
    * Retorna se ele pode receber leads
    */ 
-  public function recebeLeads():bool
+  public function podeReceberLeads():bool
   {
     return $this->recebeLeads;
   }
 
   public function podeSerGerente():bool
   {
-    return $this->nivelId >= Usuario::NIVEL_GERENTE;
+    return true;
   }
 }

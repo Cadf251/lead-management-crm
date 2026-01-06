@@ -2,7 +2,7 @@
 
 namespace App\adms\Controllers\equipes;
 
-use App\adms\Models\EquipeUsuario;
+use App\adms\Models\teams\Colaborador;
 use App\adms\Core\OperationResult;
 use Exception;
 
@@ -13,7 +13,7 @@ class RemoverColaborador extends ColaboradorMain
     $this->main($colaboradorId);
   }
 
-  public function executar(EquipeUsuario $colaborador, array $post): OperationResult
+  public function executar(Colaborador $colaborador, array $post): OperationResult
   {
     $result = $this->service->removerColaborador($colaborador);
 

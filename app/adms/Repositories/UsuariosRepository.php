@@ -29,12 +29,8 @@ class UsuariosRepository
   {
     return <<<SQL
       SELECT 
-        u.id u_id, u.nome u_nome, email u_email, u.celular u_celular, u.senha u_senha, u.foto_perfil u_foto_perfil,
-        niv.id niv_id, niv.nome niv_nome, niv.descricao niv_descricao,
-        us.id us_id, us.nome us_nome, us.descricao us_descricao
+        id, nome, email, celular, senha, foto_perfil, nivel_acesso_id AS niv_id, usuario_status_id AS us_id
       FROM {$this->tabela} u
-      INNER JOIN niveis_acesso niv ON niv.id = u.nivel_acesso_id
-      INNER JOIN usuario_status us ON u.usuario_status_id = us.id
     SQL;
   }
 
@@ -48,7 +44,7 @@ class UsuariosRepository
     $query = $this->queryBase();
     $query .= <<<SQL
       ORDER BY
-        CASE WHEN us_id = 2 THEN 1 ELSE 0 END, us_id DESC, u.id
+        CASE WHEN us_id = 2 THEN 1 ELSE 0 END, us_id DESC, id
     SQL;
 
     try {
@@ -134,14 +130,14 @@ class UsuariosRepository
    */
   public function hydrateUsuario(array $row):?Usuario{
     $usuario = new Usuario();
-    $usuario->setId($row["u_id"]);
-    $usuario->setNome($row["u_nome"]);
-    $usuario->setEmail($row["u_email"]);
-    $usuario->setCelular($row["u_celular"]);
-    $usuario->setSenha($row["u_senha"]);
-    $usuario->setFoto($row["u_foto_perfil"]);
-    $usuario->setNivel($row["niv_id"], $row["niv_nome"], $row["niv_descricao"]);
-    $usuario->setStatus($row["us_id"], $row["us_nome"], $row["us_descricao"]);
+    $usuario->setId($row["id"]);
+    $usuario->setNome($row["nome"]);
+    $usuario->setEmail($row["email"]);
+    $usuario->setCelular($row["celular"]);
+    $usuario->setSenha($row["senha"]);
+    $usuario->setFoto($row["foto_perfil"]);
+    $usuario->setNivel($row["niv_id"]);
+    $usuario->setStatus($row["us_id"]);
     return $usuario;
   }
 
@@ -152,18 +148,18 @@ class UsuariosRepository
    */
   public function salvar(Usuario $usuario):void {
     $params = [
-      "nome" => $usuario->nome,
-      "email" => $usuario->email,
-      "celular" => $usuario->celular,
-      "senha" => $usuario->senhaHash,
-      "foto_perfil" => $usuario->foto,
-      "usuario_status_id" => $usuario->status->id,
-      "nivel_acesso_id" => $usuario->nivel->id,
+      "nome" => $usuario->getNome(),
+      "email" => $usuario->getEmail(),
+      "celular" => $usuario->getEmail(),
+      "senha" => $usuario->getSenhaHash(),
+      "foto_perfil" => $usuario->getFoto(),
+      "usuario_status_id" => $usuario->getStatusId(),
+      "nivel_acesso_id" => $usuario->getNivelAcessoId(),
       "modified" => date($_ENV["DATE_FORMAT"])
     ];
 
     try {
-      $this->sql->updateById($this->tabela, $params, $usuario->id);
+      $this->sql->updateById($this->tabela, $params, $usuario->getId());
     } catch (Exception $e) {
       throw new Exception($e->getMessage(), $e->getCode(), $e);
     }
@@ -188,11 +184,11 @@ class UsuariosRepository
   public function criar(Usuario $usuario):int
   {
     $params = [
-      "nome" => $usuario->nome,
-      "email" => $usuario->email,
-      "celular" => $usuario->celular,
-      "foto_perfil" => $usuario->foto,
-      "nivel_acesso_id" => $usuario->nivel->id,
+      "nome" => $usuario->getNome(),
+      "email" => $usuario->getEmail(),
+      "celular" => $usuario->getCelular(),
+      "foto_perfil" => $usuario->getFoto(),
+      "nivel_acesso_id" => $usuario->getNivelAcessoId(),
       "created" => date($_ENV["DATE_FORMAT"])
     ];
 

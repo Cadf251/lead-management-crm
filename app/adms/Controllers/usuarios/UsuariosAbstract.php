@@ -26,14 +26,12 @@ abstract class UsuariosAbstract
 
   protected UsuariosService $service;
   protected UsuariosRepository $repo;
-  protected TokenRepository $tokenRepo;
 
   /** Conecta com o banco de dados do cliente depois inicia o repositório de usuários e de tokens */
   public function __construct(array|null $credenciais = null)
   {
     $conn = new DbConnectionClient($credenciais);
     $this->repo = new UsuariosRepository($conn->conexao);
-    $this->tokenRepo = new TokenRepository($conn->conexao);
     $this->service = new UsuariosService($conn->conexao);
   }
 

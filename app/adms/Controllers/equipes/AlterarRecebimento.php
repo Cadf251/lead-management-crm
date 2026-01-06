@@ -4,7 +4,7 @@ namespace App\adms\Controllers\equipes;
 
 use App\adms\Core\OperationResult;
 use App\adms\Helpers\GenerateLog;
-use App\adms\Models\EquipeUsuario;
+use App\adms\Models\teams\Colaborador;
 
 class AlterarRecebimento extends ColaboradorMain
 {
@@ -13,7 +13,7 @@ class AlterarRecebimento extends ColaboradorMain
     $this->main($colaboradorId);
   }
 
-  public function executar(EquipeUsuario $colaborador, array $post): OperationResult
+  public function executar(Colaborador $colaborador, array $post): OperationResult
   {
     if (!isset($post["recebe_leads"])) {
       $result = new OperationResult();

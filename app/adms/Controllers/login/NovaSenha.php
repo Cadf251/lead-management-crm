@@ -21,12 +21,12 @@ class NovaSenha extends LoginAbstract
         $usuario = $this->selecionarUsuario($this->data["form"]["usuario_email"]);
 
         // Seta o SERVIDOR ID para que ele apareça no email de confirmação de senha
-        $_SESSION["servidor_id"] = (int)$this->data["form"]["servidor_id"];
+        $_SESSION["auth"]["servidor_id"] = (int)$this->data["form"]["servidor_id"];
 
         // Falta enviar o e-mail de confirmação
         $result = $this->usuarioService->resetarSenha($usuario);
 
-        unset($_SESSION["servidor_id"]);
+        unset($_SESSION["auth"]["servidor_id"]);
 
         $_SESSION["alerta"] = [
           $result->getStatus(),

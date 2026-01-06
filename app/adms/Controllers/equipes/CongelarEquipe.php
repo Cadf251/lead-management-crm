@@ -2,7 +2,7 @@
 
 namespace App\adms\Controllers\equipes;
 
-use App\adms\Models\Equipe;
+use App\adms\Models\teams\Equipe;
 use App\adms\Core\OperationResult;
 
 class CongelarEquipe extends EquipeMain

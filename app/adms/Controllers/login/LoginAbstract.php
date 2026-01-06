@@ -69,9 +69,9 @@ abstract class LoginAbstract
   {
     // Faz a conexão e passa tudo para o $_SESSION
     $this->createSession($this->clientCredenciais, (int)$this->data["form"]["servidor_id"], $usuario);
-    $this->permissoesSession($usuario->nivel->id, $usuario->id);
+    // $this->permissoesSession($usuario->getNivelAcessoId(), $usuario->getId());
 
-    setcookie("codigo_empresa", $_SESSION["servidor_id"]);
+    setcookie("codigo_empresa", $_SESSION["auth"]["servidor_id"]);
 
     // Joga para o dashboard
     $this->redirectDashboard();
@@ -99,42 +99,15 @@ abstract class LoginAbstract
   public function createSession(array $servidor, int $servidorId, Usuario $usuario):void
   {
     // Inicia o repositório de níveis de acesso para colocar no SESSION também
-    $_SESSION = array_merge(
-      $_SESSION, [
-        "logado" => true,
-        "usuario_id" => $usuario->id,
-        "usuario_nome" => $usuario->nome,
-        "usuario_email" => $usuario->email,
-        "foto_perfil" => $usuario->foto,
-        "nivel_acesso_id" => (int)$usuario->nivel->id,
-        "servidor_id" => $servidorId,
-        "db_credenciais" => $servidor
-      ]
-    );
-  }
-
-  public function permissoesSession(int $nivId, int $usuarioId)
-  {
-    $_SESSION["permissoes"] = [];
-
-    $permissoes = $this->clientRepo->verificarPermissoes($nivId);
-
-    if ($permissoes === null){
-      return;
-    }
-
-    $_SESSION["nivel_acesso_nome"] = $permissoes[0]["nome"];
-
-    foreach ($permissoes as $permissao){
-      $_SESSION["permissoes"][] = $permissao["id"];
-    }
-
-    if(in_array(4, $_SESSION["permissoes"])){
-      $equipes = $this->clientRepo->acessoEquipes($usuarioId);
-
-      if($equipes !== null){
-        $_SESSION["acesso_equipes"] = implode(", ", $equipes);
-      }
-    }
+    $_SESSION["auth"] = [
+      "logado" => true,
+      "usuario_id" => $usuario->getId(),
+      "usuario_nome" => $usuario->getNome(),
+      "usuario_email" => $usuario->getEmail(),
+      "foto_perfil_tipo" => $usuario->getFoto(),
+      "nivel_acesso_id" => (int)$usuario->getNivelAcessoId(),
+      "servidor_id" => $servidorId,
+      "db_credenciais" => $servidor
+    ];
   }
 }

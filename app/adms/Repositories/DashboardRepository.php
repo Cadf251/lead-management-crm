@@ -2,6 +2,7 @@
 
 namespace App\adms\Repositories;
 
+use App\adms\Core\AppContainer;
 use App\adms\Helpers\GenerateLog;
 use App\adms\Database\DbOperations;
 use Generator;
@@ -89,20 +90,28 @@ class DashboardRepository extends DbOperations
     }
 
     // Verifica as permissões
-    if (!in_array(3, $_SESSION["permissoes"])){
-      if (in_array(4, $_SESSION["permissoes"])){
-        $where .= <<<SQL
-        AND (
-          (e.id IN (:acesso_equipes))
-          OR (a.usuario_id = :usuario_id)
-        )
-        SQL;
-      } else {
-        $where .= <<<SQL
-          AND (a.usuario_id = :usuario_id)
-        SQL;
-      }
-    }
+    // if (!in_array(3, $_SESSION["permissoes"])){
+    //   if (in_array(4, $_SESSION["permissoes"])){
+    //     $where .= <<<SQL
+    //     AND (
+    //       (e.id IN (:acesso_equipes))
+    //       OR (a.usuario_id = :usuario_id)
+    //     )
+    //     SQL;
+    //   } else {
+    //     $where .= <<<SQL
+    //       AND (a.usuario_id = :usuario_id)
+    //     SQL;
+    //   }
+    // }
+
+    // FALLBACK
+    $where .= <<<SQL
+    AND (
+      (e.id IN (:acesso_equipes))
+      OR (a.usuario_id = :usuario_id)
+    )
+    SQL;
 
     return <<<SQL
       SELECT
@@ -138,8 +147,8 @@ class DashboardRepository extends DbOperations
     $query = $this->leadsQuery($whereFinal, $metodo);
 
     $params = [
-      ":usuario_id" => $_SESSION["usuario_id"],
-      "acesso_equipes" => $_SESSION["acesso_equipes"] ?? ""
+      ":usuario_id" => AppContainer::getAuthUser()->getUsuarioId(),
+      "acesso_equipes" => ""
     ];
 
     return $this->executeSQL($query, $params);
@@ -181,15 +190,15 @@ class DashboardRepository extends DbOperations
     SQL;
 
     // Verifica as permissões
-    if (!in_array(3, $_SESSION["permissoes"])){
-      if (in_array(4, $_SESSION["permissoes"])){
-        $where .= <<<SQL
-          AND (e.id IN (:acesso_equipes))
-        SQL;
-      } else {
-        GenerateLog::generateLog("info", "Um usuário sem permissão 3 e 4 tentou acessar o relatório de equipes, o que é um erro de desenvolvimento, porque ele não deve ter acesso a esse tipo de relatório.", []);
-      }
-    }
+    // if (!in_array(3, $_SESSION["permissoes"])){
+    //   if (in_array(4, $_SESSION["permissoes"])){
+    //     $where .= <<<SQL
+    //       AND (e.id IN (:acesso_equipes))
+    //     SQL;
+    //   } else {
+    //     GenerateLog::generateLog("info", "Um usuário sem permissão 3 e 4 tentou acessar o relatório de equipes, o que é um erro de desenvolvimento, porque ele não deve ter acesso a esse tipo de relatório.", []);
+    //   }
+    // }
 
     $queryBase = <<<SQL
       SELECT

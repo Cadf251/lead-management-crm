@@ -6,6 +6,12 @@ namespace App\adms\Helpers;
  * Esta classe serve para criar TOKENs.
  * 
  * Para gerenciar Tokens, dê uma olhada em: App\adms\Repositories\TokenRepository.
+ * 
+ * @deprecated
+ * @deprecated
+ * @deprecated
+ * @deprecated
+ * @deprecated
  */
 class TokenHelper
 {

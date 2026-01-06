@@ -4,10 +4,9 @@ namespace App\adms\Services;
 
 use App\adms\Core\OperationResult;
 use App\adms\Helpers\GenerateLog;
-use App\adms\Models\Equipe;
-use App\adms\Models\EquipeUsuario;
+use App\adms\Models\teams\Equipe;
+use App\adms\Models\teams\Colaborador;
 use App\adms\Repositories\EquipesRepository;
-use App\adms\Repositories\UsuariosRepository;
 use Exception;
 use PDO;
 
@@ -27,9 +26,7 @@ class EquipesService
   public function criar(string $nome, int $produtoId, ?string $descricao = null): ?OperationResult
   {
     try {
-      $produto = $this->repo->getProdutoById($produtoId);
-
-      $equipe = Equipe::novo($nome, $produto, $descricao);
+      $equipe = Equipe::novo($nome, null, $descricao);
 
       $this->repo->criarEquipe($equipe);
       $this->result->addMensagem("A equipe foi criada com sucesso.");
@@ -45,7 +42,7 @@ class EquipesService
     try {
       $equipe->ativar();
       $this->repo->salvar($equipe);
-      $this->result->addMensagem("A equipe {$equipe->nome} foi ativada com sucesso.");
+      $this->result->addMensagem("A equipe {$equipe->getNome()} foi ativada com sucesso.");
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR, ["equipe" => $equipe]);
       $this->result->falha("A equipe não foi ativada.");
@@ -58,7 +55,7 @@ class EquipesService
     try {
       $equipe->pausar();
       $this->repo->salvar($equipe);
-      $this->result->addMensagem("A equipe {$equipe->nome} foi pausada com sucesso.");
+      $this->result->addMensagem("A equipe {$equipe->getNome()} foi pausada com sucesso.");
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR, ["equipe" => $equipe]);
       $this->result->falha("A equipe não foi pausada.");
@@ -71,7 +68,7 @@ class EquipesService
     try {
       $equipe->desativar();
       $this->repo->salvar($equipe);
-      $this->result->addMensagem("A equipe {$equipe->nome} foi desativada com sucesso.");
+      $this->result->addMensagem("A equipe {$equipe->getNome()} foi desativada com sucesso.");
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR, ["equipe" => $equipe]);
       $this->result->falha("A equipe não foi desativada.");
@@ -84,8 +81,6 @@ class EquipesService
     try {
       $equipe->setNome($dados["nome"]);
       $equipe->setDescricao($dados["descricao"]);
-      $produto = $this->repo->getProdutoById($dados["produto_id"]);
-      $equipe->setProduto($produto);
       $this->repo->salvar($equipe);
       $this->result->addMensagem("A equipe foi editada com sucesso.");
     } catch (Exception $e) {
@@ -127,7 +122,7 @@ class EquipesService
     $podeReceberLeads = (bool)$dados["pode_receber_leads"];
 
     try {
-      $colaborador = new EquipeUsuario();
+      $colaborador = new Colaborador();
       $colaborador->setUsuarioId($usuarioId);
       $colaborador->setRecebeLeads($podeReceberLeads);
       $colaborador->setNivelId($nivelId);
@@ -150,7 +145,7 @@ class EquipesService
     return $this->result;
   }
 
-  public function alterarFuncao(EquipeUsuario $colaborador, int $funcaoId)
+  public function alterarFuncao(Colaborador $colaborador, int $funcaoId)
   {
     try {
       $funcao = $this->repo->getFuncao($funcaoId);
@@ -174,7 +169,7 @@ class EquipesService
     return $this->result;
   }
 
-  public function alterarRecebimentoDeLeads(Equipe $equipe, EquipeUsuario $colaborador, bool $set)
+  public function alterarRecebimentoDeLeads(Equipe $equipe, Colaborador $colaborador, bool $set)
   {
     try {
       $colaborador->setRecebeLeads($set);
@@ -200,7 +195,7 @@ class EquipesService
     return $this->result;
   }
 
-  public function prejudicar(EquipeUsuario $colaborador):OperationResult
+  public function prejudicar(Colaborador $colaborador):OperationResult
   {
     try {
       $colaborador->incrementarVez();
@@ -215,7 +210,7 @@ class EquipesService
     return $this->result;
   }
 
-  public function priorizar(EquipeUsuario $colaborador):OperationResult
+  public function priorizar(Colaborador $colaborador):OperationResult
   {
     try {
       $colaborador->diminuirVez();
@@ -230,7 +225,7 @@ class EquipesService
     return $this->result;
   }
 
-  public function removerColaborador(EquipeUsuario $colaborador):OperationResult
+  public function removerColaborador(Colaborador $colaborador):OperationResult
   {
     try {
       $this->repo->removerColaborador($colaborador);

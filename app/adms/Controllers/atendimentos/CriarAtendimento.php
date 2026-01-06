@@ -5,6 +5,10 @@ namespace App\adms\Controllers\atendimentos;
 use App\adms\Helpers\GenerateLog;
 use Exception;
 
+
+/**
+ * @deprecated
+ */
 class CriarAtendimento extends AtendimentoAbstract
 {
   public function index()

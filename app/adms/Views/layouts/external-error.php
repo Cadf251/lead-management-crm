@@ -2,14 +2,13 @@
 <html lang="pt-br">
 <?php
 
-use App\adms\Helpers\SafeEcho;
-use App\adms\Services\AuthUser;
+use App\adms\Core\AppContainer;
 
 include_once "./app/adms/Views/partials/head.php";
 ?>
 <body class="js--body">
   <?php
-  if (AuthUser::logado())
+  if (AppContainer::getAuthUser()->estaLogado())
     include_once "./app/adms/Views/partials/nav.php";
   else
     $class = "main--external-error";

@@ -2,10 +2,10 @@
 
 namespace App\adms\Controllers\login;
 
+use App\adms\Core\AppContainer;
 use App\adms\Helpers\CSRFHelper;
 use App\adms\Core\LoadView;
 use App\adms\Core\OperationResult;
-use App\adms\Services\AuthUser;
 use Exception;
 
 /**
@@ -21,7 +21,7 @@ class Login extends LoginAbstract
   public function index()
   {
     // Se já tiver logado, manda para o dashboard
-    if (AuthUser::logado()) {
+    if (AppContainer::getAuthUser()->estaLogado()) {
       $this->redirectDashboard();
     }
 
@@ -65,7 +65,7 @@ class Login extends LoginAbstract
       }
 
       // Verificar senha
-      $this->verificarSenha($this->data["form"]["usuario_senha"], $usuario->senhaHash);
+      $this->verificarSenha($this->data["form"]["usuario_senha"], $usuario->getSenhaHash());
 
       // Finaliza o Login
       $this->fazerLogin($usuario);
