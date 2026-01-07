@@ -11,17 +11,16 @@ use App\adms\Presenters\UsuarioPresenter;
 use App\adms\Services\UsuariosService;
 
 /** 
+ * ✅ FUNCIONAL - CUMPRE V1
+ * 
  * Define funções universais para as classes de usuários. 
  * Tem o objetivo de ser herdado. 
  * Instancia o repositório automaticamente.
  */
 abstract class UsuariosAbstract
 {
-  /** @var array $data Contém as informações da VIEW, evite usar no back-end. */
   protected array $data = [
     "title" => "Usuários",
-    "css" => ["public/adms/css/usuarios.css"],
-    "js" => []
   ];
 
   protected UsuariosService $service;

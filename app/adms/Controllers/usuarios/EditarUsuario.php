@@ -6,9 +6,12 @@ use App\adms\Helpers\CSRFHelper;
 use App\adms\Models\NivelSistema;
 use App\adms\Presenters\UsuarioPresenter;
 
+/**
+ * ✅ FUNCIONAL - CUMPRE V1
+ */
 class EditarUsuario extends UsuariosAbstract
 {
-  public function index(string|int $id)
+  public function index(string|int $id):void
   {
     $usuario = $this->repo->selecionar($id);
 

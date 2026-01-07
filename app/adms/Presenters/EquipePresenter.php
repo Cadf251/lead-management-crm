@@ -10,6 +10,9 @@ use App\adms\UI\Button;
 use App\adms\UI\Field;
 use App\adms\UI\InfoBox;
 
+/**
+ * ✅ FUNCIONAL - CUMPRE V1
+ */
 class EquipePresenter
 {
   public static function present(array $equipes, array $funcoes = []): array
@@ -22,7 +25,6 @@ class EquipePresenter
         "nome" => $equipe->getNome() ?? "Sem nome",
         "descricao" => $equipe->getDescricao() ?? "",
         "status_badge" => self::getStatusBadge($equipe),
-        "produto_badge" => self::getProdutoBadge($equipe),
         "numero_badge" => self::getNumeroBadge($equipe),
         "buttons" => self::buttons($equipe->getId(), $equipe->getNome(), $equipe->getStatusId()),
         "proximos" => self::proximos($equipe),
@@ -37,11 +39,6 @@ class EquipePresenter
   {
     $class = UtilPresenter::getStatusClass($equipe->getStatusId());
     return Badge::create($equipe->getStatusNome(), $class);
-  }
-
-  private static function getProdutoBadge(Equipe $equipe)
-  {
-    return Badge::create($equipe->getProdutoNome() ?? "Produto inválido.", "silver");
   }
 
   private static function getNumeroBadge(Equipe $equipe)

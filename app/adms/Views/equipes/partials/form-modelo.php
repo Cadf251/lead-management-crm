@@ -18,10 +18,6 @@ return [
     ->value($equipe["descricao"] ?? "")
     ->maxLength(255),
 
-  Field::create("Produto da equipe", "produto_id")
-    ->type(Field::TYPE_SELECT)
-    ->options($this->data["produtos-options"]),
-
   Field::create("", "csrf_token")
     ->type(Field::TYPE_HIDDEN)
     ->value($csrf)

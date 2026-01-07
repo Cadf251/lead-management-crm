@@ -29,7 +29,7 @@ foreach($this->data["servidores"] as $servidor){
   <a href="">Ativar</a>
   HTML;
 
-  echo HTMLHelper::renderCard($content);
+  // echo HTMLHelper::renderCard($content);
 }
 ?>
 </div>

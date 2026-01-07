@@ -20,6 +20,10 @@ class MudarVez extends ColaboradorMain
       $result = $this->service->prejudicar($colaborador);
     } else if ($post["task"] === "priorizar") {
       $result = $this->service->priorizar($colaborador);
+    } else {
+      $result = new OperationResult();
+      $result->falha("Post mal formado.");
+      return $result;
     }
 
     $equipe = $this->repo->selecionarEquipe((int)$post["equipe_id"]);

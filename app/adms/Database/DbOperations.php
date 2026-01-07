@@ -12,8 +12,6 @@ use PDOException;
  * 
  * @deprecated
  * 
- * @todo Refazer totalmente
- * 
  * @param $conexao Recebe uma coneão com o banco de dados
  */
 abstract class DbOperations

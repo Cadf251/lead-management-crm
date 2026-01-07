@@ -2,7 +2,7 @@
 
 namespace App\adms\Models\teams;
 
-class EquipeFuncao
+class ColaboradorFuncao
 {
   public function __construct(
     public int $id,

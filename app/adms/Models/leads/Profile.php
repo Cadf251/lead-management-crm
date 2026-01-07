@@ -2,7 +2,7 @@
 
 namespace App\adms\Models\leads;
 
-class Perfil
+class Profile
 {
   private int $id;
   private int $leadId;

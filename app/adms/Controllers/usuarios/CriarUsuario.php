@@ -5,11 +5,15 @@ namespace App\adms\Controllers\usuarios;
 use App\adms\Helpers\CSRFHelper;
 use App\adms\Models\NivelSistema;
 
-/** Manipula novos usuários. */
+/** 
+ * ✅ FUNCIONAL - CUMPRE V1
+ * 
+ * Manipula novos usuários.
+ */
 class CriarUsuario extends UsuariosAbstract
 {
   /** Verifica se deve mostrar a VIEW do formulário ou apura os dados do $_POST */
-  public function index()
+  public function index(): void
   {
     // Seleciona as opções no banco de dados
     $optionsHTML = NivelSistema::getSelectOptions();

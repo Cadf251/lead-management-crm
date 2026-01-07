@@ -6,6 +6,9 @@ use App\adms\Core\AppContainer;
 use App\adms\Models\NivelSistema;
 use App\adms\UI\NavLink;
 
+/**
+ * ✅ FUNCIONAL - CUMPRE V1
+ */
 class NavPresenter
 {
   public static function present()
@@ -19,7 +22,7 @@ class NavPresenter
     return [
       "servidor_id" => $servidorId ?? "",
       "usuario_nome" => $usuarioNome ?? "Nome Inválido",
-      "nivel_acesso_nome" => $nivelAcessoNome ?? "Nível Inválido",
+      "nivel_acesso_nome" => $nivelAcessoNome,
       "foto" => self::normalizeFoto(
         $servidorId,
         $usuarioId,

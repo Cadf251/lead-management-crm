@@ -2,7 +2,6 @@
 
 namespace App\adms\Controllers\login;
 
-use App\adms\Core\OperationResult;
 use App\adms\Database\DbConnectionClient;
 use App\adms\Database\DbConnectionGlobal;
 use App\adms\Models\Usuario;
@@ -13,6 +12,9 @@ use App\adms\Services\UsuariosService;
 use Exception;
 use PDO;
 
+/**
+ * ✅ FUNCIONAL - CUMPRE V1
+ */
 abstract class LoginAbstract
 {
   protected array|string|null $data = null;
@@ -69,7 +71,6 @@ abstract class LoginAbstract
   {
     // Faz a conexão e passa tudo para o $_SESSION
     $this->createSession($this->clientCredenciais, (int)$this->data["form"]["servidor_id"], $usuario);
-    // $this->permissoesSession($usuario->getNivelAcessoId(), $usuario->getId());
 
     setcookie("codigo_empresa", $_SESSION["auth"]["servidor_id"]);
 

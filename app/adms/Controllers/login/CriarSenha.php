@@ -4,32 +4,24 @@ namespace App\adms\Controllers\login;
 
 use App\adms\Helpers\CSRFHelper;
 use App\adms\Helpers\GenerateLog;
-use App\adms\Repositories\TokenRepository;
 use App\adms\Core\LoadView;
+use App\adms\Core\OperationResult;
+use App\adms\Models\Token;
+use App\adms\Services\TokenService;
 use Exception;
 
+/**
+ * ✅ FUNCIONAL - CUMPRE V1
+ */
 class CriarSenha extends LoginAbstract
 {
-  private array $sucessMsg = [
-    "✅ Sucesso!",
-    "Senha criada com sucesso!"
-  ];
-
-  private array $failMsg = [
-    "❌ Erro!",
-    "Algo deu errado."
-  ];
-
-  private array $tokenFail = [
-    "ℹ️ Atenção!",
-    "O TOKEN expirou."
-  ];
-
   public function index(int|string|null $param)
   {
     // Verifique o $param
     if (empty($param) && $param === null){
-      $_SESSION["alerta"] = $this->tokenFail;
+      $result = new OperationResult();
+      $result->warn("O TOKEN expirou.");
+      $result->report();
       $this->redirectLogin();
     }
 
@@ -40,13 +32,19 @@ class CriarSenha extends LoginAbstract
     try {
       $this->connectClient($servidorId);
 
-      // Verifica o token pelo servidor do cliente
-      $this->tokenRepository = new TokenRepository($this->clientConn);
-      $valido = $this->tokenRepository->tokenValido($token, "sistema", "confirmar_email_senha");
-      
+      // Token
+      $tokenService = new TokenService($this->clientConn);
+
+      try {
+        $valido = $tokenService->validate($token, Token::TYPE_SYSTEM, Token::CONTEXT_CONFIRMAR_EMAIL);
+      } catch (Exception $e) {
+        throw new Exception("Não foi possível validar um TOKEN: " . $e->getMessage(), $e->getCode(), $e);
+      }
+
       if ($valido === false) {
-        $_SESSION["alerta"] = $this->tokenFail;
-        $this->redirectLogin();
+        $result = new OperationResult();
+        $result->warn("O TOKEN expirou.");
+        $result->report();
       }
 
       // Verifica se há POST antes de carregar a VIEW
@@ -54,27 +52,31 @@ class CriarSenha extends LoginAbstract
         // Crie a nova senha, atualiza o status do usuário, desative o token e direcione para o dashboard
         $senhaHash = password_hash($this->data["form"]["usuario_senha"], PASSWORD_BCRYPT);
         
-        $usuario = $this->usuarioRepository->selecionar($valido["usuario_id"]);
+        $usuario = $this->usuarioRepository->selecionar($valido->getUserId());
 
         $result = $this->usuarioService->ativar($usuario, $senhaHash);
 
-        $this->tokenRepository->desativarToken($token);
+        $tokenService->disable($valido);
+
+        $operation = new OperationResult();
 
         if($result->sucesso()){
-          $_SESSION["alerta"] = $this->sucessMsg;
-          
           $this->fazerLogin($usuario);
         } else {
-          $_SESSION["alerta"] = $this->failMsg;
+          $operation = new OperationResult();
+          $operation->falha("Algo deu errado.");
+          $operation->report();
         }
         
         $this->redirectLogin();
       }
     } catch (Exception $e){
-      GenerateLog::generateLog("error", "Não foi possível gerar nova senha", [
-        "error" => $e->getMessage()
-      ]);
-      $_SESSION["alerta"] = $this->failMsg;
+      GenerateLog::log($e, GenerateLog::ERROR);
+
+      $operation = new OperationResult();
+      $operation->falha("Algo deu errado.");
+      $operation->report();
+
       $this->redirectLogin();
     }
     

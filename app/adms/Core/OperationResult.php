@@ -2,6 +2,8 @@
 
 namespace App\adms\Core;
 
+use App\adms\Helpers\GenerateLog;
+
 /**
  * @todo remover atributo status
  */
@@ -47,12 +49,20 @@ class OperationResult
     else return "ℹ️ Atenção!";
   }
 
+  /**
+   * Formatado para $_SESSION["alerta"]
+   */
   public function getAlerta():array
   {
     return [
       $this->getStatus(),
       $this->mensagens()
     ];
+  }
+
+  public function report()
+  {
+    $_SESSION["alerta"] = $this->getAlerta();
   }
 
   public function getMensagens(){

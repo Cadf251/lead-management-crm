@@ -9,6 +9,8 @@ use App\adms\Core\OperationResult;
 use Exception;
 
 /**
+ * ✅ FUNCIONAL - CUMPRE V1
+ * 
  * Opera o LOGIN, chama o formulário, verifica os dados, etc.
  */
 class Login extends LoginAbstract
@@ -77,8 +79,7 @@ class Login extends LoginAbstract
   private function loadViewLogin()
   {
     $loadView = new LoadView("adms/Views/login/login", [
-      "title" => "Login",
-      "css" => ["public/adms/css/login.css"]
+      "title" => "Login"
     ]);
     $loadView->loadViewLogin();
   }

@@ -2,201 +2,138 @@
 
 namespace App\adms\Repositories;
 
-use App\adms\Helpers\TokenHelper;
-use App\adms\Database\DbOperations;
+use App\adms\Models\Token;
+use App\adms\Database\DbOperationsRefactored as DbOperations;
+use App\adms\Helpers\GenerateLog;
+use App\adms\Models\Status;
+use Exception;
+use PDO;
 
 /**
+ * ✅ FUNCIONAL - CUMPRE V1
+ * 
  * Repositório de Tokens
  */
-class TokenRepository extends DbOperations
+class TokenRepository
 {
-  /**
-   * Verifica se um token já existe, independente do contexto
-   * 
-   * @param string $token O token a ser procurado
-   * 
-   * @return bool Se existe ou não
-   */
-  public function tokenExiste(string $token): bool
+  private DbOperations $sql;
+
+  private const TABLE = "tokens";
+
+  private function queryBase()
   {
-    $tokenQ = <<<SQL
-    SELECT token
-    FROM tokens
-    WHERE 
-      ((prazo >= NOW()) OR (prazo IS NULL))
-      AND (token = :token)
-      AND (token_status_id = 3)
+    $table = self::TABLE;
+    return <<<SQL
+    SELECT id, token, tipo, contexto, prazo, usuario_id, atendimento_id, token_status_id
+    FROM $table
     SQL;
-
-    $params = [
-      [":token" => $token]
-    ];
-
-    $tokenArray = $this->executeSQL($tokenQ, $params, true);
-
-    if (empty($tokenArray))
-      return false;
-    else
-      return true;
   }
 
-  /**
-   * Valida um TOKEN levando em conta o contexto e tipo
-   * 
-   * @param string $token O token
-   * @param string $tipo O tipo do tokne
-   * @param string $contexto O contexto do token
-   * 
-   * @return array|false
-   */
-  public function tokenValido(string $token, string $tipo, string $contexto):array|false
+  public function __construct(PDO $conn)
+  {
+    $this->sql = new DbOperations($conn);
+  }
+
+  public function select(string $token): ?Token
   {
     $query = <<<SQL
-      SELECT id, usuario_id, atendimento_id
-      FROM tokens
-      WHERE
-        (token = :token)
-        AND (tipo LIKE :tipo) AND (contexto LIKE :contexto)
-        AND (token_status_id = 3)
-        AND ((prazo >= :agora) OR (prazo IS NULL))
-      LIMIT 1
+    {$this->queryBase()}
+    WHERE token = :token
     SQL;
 
     $params = [
-      ":token" => $token,
-      ":tipo" => $tipo,
-      ":contexto" => $contexto,
-      ":agora" => date($_ENV["DATE_FORMAT"])
+      "token" => $token
     ];
 
-    $result = $this->executeSQL($query, $params);
-    if (empty($result))
-      return false;
-    else 
-      return $result[0];
-  }
-
-  /**
-   * Desativa um TOKEN
-   * 
-   * Ele muda o token_status_id para 1 (desativado)
-   * 
-   * @param string $token O token a ser desativado
-   * 
-   * @return void
-   */
-  public function desativarToken(string $token): bool
-  {
-    $tokenQ = <<<SQL
-    UPDATE tokens
-    SET token_status_id = 1
-    WHERE (token = :token)
-    LIMIT 1
-    SQL;
-
-    $params = [
-      ":token" => $token
-    ];
-
-    return $this->executeSQL($tokenQ, $params, false);
-  }
-
-  /**
-   * Recupera um TOKEN ativo usando os valores passados.
-   * 
-   * @param string $tipo O tipo do TOKEN
-   * @param string $contexto O contexto do TOKEN
-   * @param int|null $usuarioId O ID do usuário
-   * @param int|null $atendimentoId O ID do atendimento
-   * 
-   * @return string|false String se existir, false se não existir
-   */
-  public function recuperarToken(string $tipo, string $contexto, int|null $usuarioId = null, int|null $atendimentoId = null):string|false
-  {
-    $base = <<<SQL
-    SELECT token
-    FROM tokens
-    WHERE 
-      ((prazo >= NOW()) OR (prazo IS NULL))
-      AND ((tipo LIKE :tipo) AND (contexto LIKE :contexto))
-      AND (token_status_id = 3)
-    SQL;
-
-    $conds = [];
-
-    if ($atendimentoId !== null)
-      $conds[] = <<<SQL
-        (atendimento_id = :atendimento_id)
-      SQL;
-
-    if ($usuarioId !== null)
-      $conds[] = <<<SQL
-        (usuario_id = :usuario_id)
-      SQL;
-
-    if (!empty($conds)){
-      $imploded = implode(" OR ", $conds);
-      $base .= <<<SQL
-         AND ($imploded)
-      SQL;
+    try {
+      $array = $this->sql->execute($query, $params);
+    } catch (Exception $e) {
+      throw new Exception("Erro ao consultar o banco de dados na query: \n $query \n", $e->getCode(), $e);
     }
 
-    $query = $base.<<<SQL
-      LIMIT 1
-    SQL;
+    if (empty($array)) {
+      return null;
+    }
 
-    $params = [
-      ":atendimento_id" => $atendimentoId,
-      ":tipo" => $tipo,
-      ":contexto" => $contexto,
-      ":usuario_id" => $usuarioId
-    ];
-
-    $token = $this->executeSQL($query, $params);
-
-    if (($token !== false) && (!empty($token)))
-      return $token[0]["token"];
-    else 
-      return false;
+    return $this->hydrate($array[0]);
   }
 
   /**
-   * Cria um TOKEN e armazena no banco de dados caso ele não exista.
-   * 
-   * Se já existir um com o mesmo $tipo e $contexto, ele recupera e retorna.
-   * 
-   * @param string $tipo O tipo do TOKEN
-   * @param string $contexto O contexto do TOKEN
-   * @param int|null $usuarioId O ID do usuário
-   * @param int|null $atendimentoId O ID do atendimento
-   * 
-   * @return string O Token criado
+   * Recupera um TOKEN exato
    */
-  public function armazenarToken(string $tipo, string $contexto, ?string $prazo = null, int|null $usuarioId = null, int|null $atendimentoId = null):string
+  public function recover(string $token, string $type, string $context):?Token
   {
-    $recuperar = $this->recuperarToken($tipo, $contexto, $usuarioId, $atendimentoId);
-
-    if($recuperar !== false)
-      return $recuperar;
-
-    $token = TokenHelper::criarToken();
-
     $query = <<<SQL
-    INSERT INTO tokens (token, tipo, contexto, prazo, usuario_id, atendimento_id, token_status_id)
-    VALUES (:token, :tipo, :contexto, :prazo, :usuario_id, :atendimento_id, 3)
+    {$this->queryBase()}
+    WHERE
+      token = :token
+      AND (tipo = :tipo)
+      AND (contexto = :contexto)
     SQL;
 
     $params = [
-      ":token" => $token,
-      ":tipo" => $tipo,
-      ":contexto" => $contexto,
-      ":prazo" => $prazo,
-      ":atendimento_id" => $atendimentoId,
-      ":usuario_id" => $usuarioId
+      "token" => $token,
+      "tipo" => $type,
+      "contexto" => $context
     ];
 
-    $this->executeSQL($query, $params, false);
-    return $token;
+    try {
+      $array = $this->sql->execute($query, $params);
+    } catch (Exception $e) {
+      throw new Exception("Erro ao consultar o banco de dados na query: \n $query \n", $e->getCode(), $e);
+    }
+
+    if (empty($array)) {
+      return null;
+    }
+
+    return $this->hydrate($array[0]);
+  }
+
+  private function hydrate(array $row): Token
+  {
+    $instance = new Token(
+      $row["token"],
+      $row["tipo"],
+      $row["contexto"],
+      $row["prazo"] ?? null,
+      $row["usuario_id"] ?? null,
+      $row["atendimento_id"] ?? null
+    );
+    $instance->setId($row["id"]);
+    $instance->setStatus($row["token_status_id"]);
+    return $instance;
+  }
+
+  public function create(Token $token)
+  {
+    $params = [
+      "token" => $token->getToken(),
+      "tipo" => $token->getType(),
+      "contexto" => $token->getContext(),
+      "prazo" => $token->getDeadEnd(),
+      "atendimento_id" => $token->getSupportId(),
+      "usuario_id" => $token->getUserId()
+    ];
+
+    try {
+      $this->sql->insert(self::TABLE, $params);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
+  }
+
+  public function saveStatus(Token $token)
+  {
+    $params = [
+      "token_status_id" => $token->getStatusId()
+    ];
+
+    try {
+      $this->sql->updateById(self::TABLE, $params, $token->getId());
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
   }
 
   /**
@@ -204,10 +141,9 @@ class TokenRepository extends DbOperations
    * 
    * @param int $usuarioId O ID do usuário
    * 
-   * @return bool Se funcionou
    */
-  public function desativarDeUsuario(int $usuarioId):bool
-  { 
+  public function disableUserTokens(int $usuarioId)
+  {
     $query = <<<SQL
       UPDATE tokens
       SET token_status_id = :token_status_id
@@ -216,10 +152,10 @@ class TokenRepository extends DbOperations
     SQL;
 
     $params = [
-      ":token_status_id" => 1,
+      ":token_status_id" => Status::STATUS_DESATIVADO,
       ":usuario_id" => $usuarioId
     ];
-    
-    return $this->executeSQL($query, $params, false);
+
+    $this->sql->execute($query, $params, false);
   }
 }

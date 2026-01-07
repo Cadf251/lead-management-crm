@@ -42,6 +42,8 @@ class InfoBox
 
   public function render()
   {
+    $color = "";
+    $icon = "";
     switch($this->type){
       case self::TYPE_ALERT:
         $color = "red";

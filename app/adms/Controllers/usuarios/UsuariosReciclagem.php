@@ -5,7 +5,10 @@ namespace App\adms\Controllers\usuarios;
 use App\adms\Core\OperationResult;
 use App\adms\Models\Usuario;
 
-/** Classe abstrata que cuida do ciclo de vida de um usuário. */
+/** 
+ * ✅ FUNCIONAL - CUMPRE V1
+ * Classe abstrata que cuida do ciclo de vida de um usuário.
+ */
 abstract class UsuariosReciclagem extends UsuariosAbstract
 {
   abstract protected function executar(Usuario $usuario) :OperationResult;

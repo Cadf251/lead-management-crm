@@ -3,7 +3,6 @@
 namespace App\adms\Controllers\dashboard;
 
 use App\adms\Helpers\CSRFHelper;
-use App\adms\Helpers\HTMLHelper;
 use App\adms\Repositories\DashboardRepository;
 use App\adms\Database\DbConnectionClient;
 use App\adms\Core\LoadView;
@@ -17,7 +16,7 @@ class Dashboard
   /** @var object|null $conexao A conexão com o banco do cliente */
   private object|null $conexao = null;
 
-  public function index(string $tempo)
+  public function index(string $tempo):void
   {
     // Recebe o período
     $this->data["form"] = filter_input_array(INPUT_POST, FILTER_DEFAULT);
@@ -30,7 +29,7 @@ class Dashboard
       $tempo = $this->tratarTempo();
 
       if ($tempo !== false)
-        $this->repository($tempo);
+        $this->repository();
     }
     $this->data["title"] = "Dashboard";
 

@@ -7,7 +7,11 @@ use App\adms\Models\Usuario;
 use Exception;
 use PDO;
 
-/** Manipula os dados de usuários no banco de dados */
+/** 
+ * ✅ FUNCIONAL - CUMPRE V1
+ * 
+ * Manipula os dados de usuários no banco de dados
+ */
 class UsuariosRepository
 {
   /** @var string $tabela é o nome da tabela no banco de dados */
@@ -150,7 +154,7 @@ class UsuariosRepository
     $params = [
       "nome" => $usuario->getNome(),
       "email" => $usuario->getEmail(),
-      "celular" => $usuario->getEmail(),
+      "celular" => $usuario->getCelular(),
       "senha" => $usuario->getSenhaHash(),
       "foto_perfil" => $usuario->getFoto(),
       "usuario_status_id" => $usuario->getStatusId(),

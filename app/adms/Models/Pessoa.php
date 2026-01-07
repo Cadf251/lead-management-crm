@@ -43,6 +43,7 @@ abstract class Pessoa
     if(!CelularFormatter::esInternacional($celular)){
       $celular = CelularFormatter::paraInternacional($celular);
     }
+    
     $this->celular = $celular;
   }
   

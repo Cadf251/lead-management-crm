@@ -5,6 +5,9 @@ namespace App\adms\Controllers\usuarios;
 use App\adms\Core\OperationResult;
 use App\adms\Models\Usuario;
 
+/**
+ * ✅ FUNCIONAL - CUMPRE V1
+ */
 class ResetarSenha extends UsuariosReciclagem
 {
   public function index(string|null $usuarioId):void {

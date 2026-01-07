@@ -6,6 +6,8 @@ use App\adms\Helpers\GenerateLog;
 use App\adms\Database\DbOperations;
 
 /**
+ * @todo precisa de revisão e aplicação do novo DbOperations
+ * 
  * Esta classe é responsável por interagir com a tabela de usuários de diferentes servidores
  * Ela herda a operação com o banco de dados e fornece métodos de encontrar o usuário com base no email e servidor.
  * 

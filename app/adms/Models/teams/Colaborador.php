@@ -3,7 +3,6 @@
 namespace App\adms\Models\teams;
 
 use DomainException;
-use Exception;
 
 /**
  * O usuário em uma equipe
@@ -14,7 +13,7 @@ class Colaborador
   private int $usuarioId;
   private string $usuarioNome;
   private ?bool $recebeLeads = null;
-  private ?EquipeFuncao $funcao = null;
+  private ?ColaboradorFuncao $funcao = null;
   private ?int $nivelId;
   private ?int $vez = 0;
 
@@ -104,7 +103,7 @@ class Colaborador
       throw new DomainException("Função de usuário não existente");
     }
 
-    $this->funcao = new EquipeFuncao($id, $nome, $descricao);
+    $this->funcao = new ColaboradorFuncao($id, $nome, $descricao);
   }
 
   public function setVez(int $vez)

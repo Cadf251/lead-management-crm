@@ -10,11 +10,9 @@ class CriarEquipe extends EquipesAbstract
   public function index()
   {
     // Seleciona as opções do banco de dados
-    $optionsArray = $this->repo->sql->selecionarOpcoes("produtos");
     $this->setData([
       "title" => "Criar Equipe",
-      "equipe" => null,
-      "produtos-options" => CreateOptions::criarOpcoes($optionsArray)
+      "equipe" => null
     ]);
 
     // Verifica se há POST antes de carregar a VIEW
@@ -26,7 +24,6 @@ class CriarEquipe extends EquipesAbstract
 
       $result = $this->service->criar(
         $equipe["nome"],
-        $equipe["produto_id"],
         $equipe["descricao"]
       );
 

@@ -4,10 +4,14 @@ namespace App\adms\Controllers\login;
 
 use App\adms\Helpers\CSRFHelper;
 use App\adms\Core\LoadView;
+use App\adms\Core\OperationResult;
 use App\adms\Helpers\GenerateLog;
 use Exception;
 
-/** Manipula a criação de novas senhas */
+/**
+ * ✅ FUNCIONAL - CUMPRE V1
+ * Manipula a criação de novas senhas
+ */
 class NovaSenha extends LoginAbstract
 {
   public function index()
@@ -28,15 +32,12 @@ class NovaSenha extends LoginAbstract
 
         unset($_SESSION["auth"]["servidor_id"]);
 
-        $_SESSION["alerta"] = [
-          $result->getStatus(),
-          $result->mensagens()
-        ];
+        $result->report();
+        
       } catch (Exception $e){
-        $_SESSION["alerta"] = [
-          $result->getStatus(),
-          $result->mensagens()
-        ];
+        $result = new OperationResult();
+        $result->falha("Algo deu errado.");
+        $result->report();
         
         GenerateLog::generateLog("error", "Não foi possível resetar uma senha no login", [
           "error" => $e->getMessage()
@@ -53,8 +54,7 @@ class NovaSenha extends LoginAbstract
   public function loadViewNovaSenha()
   {
     $loadView = new LoadView("adms/Views/login/nova-senha", [
-      "title" => "Nova Senha",
-      "css" => ["public/adms/css/login.css"]
+      "title" => "Nova Senha"
     ]);
     $loadView->loadViewLogin();
   }

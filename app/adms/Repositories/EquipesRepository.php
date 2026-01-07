@@ -5,7 +5,6 @@ namespace App\adms\Repositories;
 use App\adms\Database\DbOperationsRefactored;
 use App\adms\Models\teams\Equipe;
 use App\adms\Models\teams\Colaborador;
-use App\adms\Models\Produto;
 use App\adms\Models\UserStatus;
 use Exception;
 use PDO;
@@ -208,7 +207,6 @@ class EquipesRepository
     $params = [
       "nome" => $equipe->getNome(),
       "descricao" => $equipe->getDescricao() ?? null,
-      "produto_id" => $equipe->getProdutoId(),
       "equipe_status_id" => $equipe->getStatusId(),
       "modified" => date($_ENV["DATE_FORMAT"])
     ];
@@ -231,7 +229,6 @@ class EquipesRepository
     $params = [
       "nome" => $equipe->getNome(),
       "descricao" => $equipe->getDescricao() ?? null,
-      "produto_id" => $equipe->getProdutoId(),
       "created" => date($_ENV['DATE_FORMAT'])
     ];
     
@@ -240,38 +237,6 @@ class EquipesRepository
     } catch (Exception $e) {
       throw new Exception($e->getMessage(), $e->getCode(), $e);
     }
-  }
-
-  public function getProdutoById(int $produtoId):?Produto
-  {
-    $query = <<<SQL
-    SELECT id, nome, descricao
-    FROM produtos
-    WHERE id = :id
-    SQL;
-
-    $params = [
-      "id" => $produtoId
-    ];
-
-    try {
-      $produto = $this->sql->execute($query, $params);
-    } catch (Exception $e) {
-      throw new Exception($e->getMessage(), $e->getCode(), $e);
-    }
-
-    if (empty($produto)) return null;
-
-    return $this->hydrateProduto($produto[0]);
-  }
-
-  private function hydrateProduto(array $row):?Produto
-  {
-    return new Produto(
-      $row["id"],
-      $row["nome"],
-      $row["descricao"] ?? null
-    );
   }
 
   /**

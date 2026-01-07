@@ -9,8 +9,8 @@ class Lead extends Pessoa
 {
   private float $score = 0;
   private DateTime $created;
+  private Profile $profile;
   private array $journeys;
-  private Perfil $perfil;
 
   public function __construct(
     string $nome,
@@ -49,5 +49,10 @@ class Lead extends Pessoa
   public function setJourney(Journey $journey)
   {
     $this->journeys[] = $journey;
+  }
+
+  public function setProfile(Profile $profile)
+  {
+    $this->profile = $profile;
   }
 }

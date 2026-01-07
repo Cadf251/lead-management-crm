@@ -57,12 +57,12 @@ class PHPMailerHelper
           !is_string($img["caminho"]) ||
           !is_string($img["nome"])
       ) {
-        GenerateLog::generateLog("error", "Formato inválido para imagem", ["indice" => $idx, "esperado" => "['caminho' => string, 'nome' => string]"]);
+        GenerateLog::generateLog(GenerateLog::WARNING, "Formato inválido para imagem. em Mailer->imagens.", ["caminho" => $img["caminho"]]);
         return;
       }
 
       if (!file_exists($img["caminho"])){
-        GenerateLog::generateLog("error", "Arquivo de imagem não encontrado", ["indice" => $idx, "caminho" => $img["caminho"]]);
+        GenerateLog::generateLog(GenerateLog::INFO, "Arquivo não encontrado. em Mailer->imagens.", ["caminho" => $img["caminho"]]);
         return;
       }
 

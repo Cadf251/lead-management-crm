@@ -3,6 +3,7 @@
 namespace App\adms\Database;
 
 use App\adms\Helpers\GenerateLog;
+use DateTime;
 use Exception;
 use PDO;
 use PDOException;
@@ -35,10 +36,14 @@ class DbOperationsRefactored
     try {
       $prepare = $this->conexao->prepare($query);
     } catch (PDOException $e) {
-      throw new Exception($e->getMessage(), $e->getCode(), $e);
+      throw new Exception($e->getMessage(), 0, $e);
     }
     
     foreach ($params as $key => $valor) {
+      if ($valor instanceof DateTime){
+        $valor = $valor->format($_ENV["DATE_FORMAT"] ?? "Y-m-d H:i:s");
+      }
+
       $tipo = $this->tratarTipo($valor);
 
       if (strpos($query, $key) !== false) {
@@ -54,7 +59,7 @@ class DbOperationsRefactored
     try {
       $prepare->execute();
     } catch (PDOException $e) {
-      throw new Exception($e->getMessage(), $e->getCode(), $e);
+      throw new Exception($e->getMessage(), 0, $e);
     }
 
     if ($toArray) {

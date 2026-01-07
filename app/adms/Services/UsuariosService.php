@@ -12,8 +12,11 @@ use App\adms\Helpers\PHPMailerHelper;
 use App\adms\Models\Usuario;
 use App\adms\Repositories\TokenRepository;
 use App\adms\Repositories\UsuariosRepository;
+use App\adms\Models\Token;
+use DateTime;
 
 /**
+ * ✅ FUNCIONAL - CUMPRE V1
  * 
  * @author Cadu 
  */
@@ -266,8 +269,8 @@ class UsuariosService
     try {
       $usuario->desativar();
 
-      $tokenRepo = new TokenRepository($this->conexao);
-      $tokenRepo->desativarDeUsuario($usuario->getId());
+      $tokenService = new TokenService($this->conexao);
+      $tokenService->disableUserTokens($usuario->getId());
 
       if ($usuario->getFoto() !== null) {
         $this->apagarFoto($usuario);
@@ -317,7 +320,6 @@ class UsuariosService
         "code" => $e->getCode(),
         "file" => $e->getFile(),
         "line" => $e->getLine(),
-        "trace" => $e->getTrace(),
       ]);
       $this->result->warn("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
     }
@@ -335,7 +337,7 @@ class UsuariosService
     ini_set('file_uploads', '1');
 
     $extensoes_permitidas = [
-      'image/jpeg' => '.jpg',
+      'image/jpg' => '.jpg',
       'image/png'  => '.png',
       'image/jpeg' => '.jpeg'
     ];
@@ -402,7 +404,7 @@ class UsuariosService
     $arquivo = "$caminho.{$usuario->getFoto()}";
 
     // Verifique se o arquivo existe
-    if (!empty($arquivo) && file_exists($arquivo)) {
+    if (file_exists($arquivo)) {
       unlink($arquivo);
     }
 
@@ -440,17 +442,10 @@ class UsuariosService
   private function emailConfirmacao(Usuario $usuario): void
   {
     try {
-      // Verifica se os parâmetros estão devidamente setados
-      if (($usuario->getId() === 0) || ($usuario->getNome() === "") || ($usuario->getEmail() === "")) {
-        throw new Exception("Não foi possível enviar o email porque há parâmetros faltando.");
-      }
+      // CRIAR UM NOVO TOKEN
+      $tokenService = new TokenService($this->conexao);
 
-      // Cria devidamente o TOKEN
-      $tokenRepo = new TokenRepository($this->conexao);
-
-      // Prazo de 7 dias
-      $prazo = date($_ENV['DATE_FORMAT'], strtotime('+7 days'));
-      $token = $tokenRepo->armazenarToken("sistema", "confirmar_email_senha", $prazo, $usuario->getId());
+      $token = $tokenService->createForSystem($usuario->getId(), Token::CONTEXT_CONFIRMAR_EMAIL, new DateTime("+ 7 days"));
 
       // Cria o email de envio
       $mail = new PHPMailerHelper();
@@ -461,10 +456,11 @@ class UsuariosService
 
       $params = [
         "[NOME]" => $usuario->getNome(),
-        "[SERVIDOR_ID]" => AppContainer::getAuthUser()->getServidorId(),
-        "[TOKEN]" => $token
+        "[SERVIDOR_ID]" => AppContainer::getAuthUser()->getServidorId() ?? $_SESSION["auth"]["servidor_id"],
+        "[TOKEN]" => $token->getToken()
       ];
 
+      // @todo criar um email mais interessante
       $body = require APP_ROOT . "public/adms/emails/confirmacao.php";
 
       if ($body === false) {

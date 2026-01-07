@@ -93,6 +93,8 @@ class Button
       $icon = <<<HTML
       <i class="fa-solid fa-{$this->icon}"></i>
       HTML;
+    } else {
+      $icon = "";
     }
 
     // Se tiver href, é um link. Se não, é um botão

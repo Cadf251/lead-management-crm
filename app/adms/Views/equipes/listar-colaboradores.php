@@ -27,7 +27,6 @@ $button = Button::create("+ Novo Colaborador")
 $header = Header::create("Colaboradores | {$equipe["nome"]}")
   ->addButton($voltar)
   ->addButton($button)
-  ->addBadge($equipe["produto_badge"])
   ->addBadge($equipe["status_badge"])
   ->withDescription($equipe["descricao"])
   ->render();

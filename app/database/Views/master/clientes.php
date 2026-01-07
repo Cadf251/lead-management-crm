@@ -37,7 +37,7 @@ foreach($this->data["servidores"] as $servidor){
   $instalBtn
   HTML;
 
-  echo HTMLHelper::renderCard($content);
+  // echo HTMLHelper::renderCard($content);
 }
 ?>
 </div>

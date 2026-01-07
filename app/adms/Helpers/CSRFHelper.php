@@ -28,7 +28,6 @@ class CSRFHelper
       unset($_SESSION["csrf_tokens"][$formId]);
       return true;
     } else {
-      GenerateLog::generateLog("info", "Um CSRF falhou.", ["form" => $formId, "token" => $token]);
       return false;
     }
   }

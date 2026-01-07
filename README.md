@@ -69,3 +69,4 @@ Empurra os arquivos para o github
 
 Mensagens de erro personalizadas:
 001: Conxeão com o banco de dados
+002: Erro interno

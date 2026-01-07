@@ -24,7 +24,7 @@ $content = <<<HTML
 </div>
 HTML;
 
-$final = Card::create($content ?? "Algo deu errado!");
+$final = Card::create($content);
 
 return <<<HTML
 <div class="card--{$usuario['id']}">

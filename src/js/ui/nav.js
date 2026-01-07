@@ -1,5 +1,8 @@
 export function initNav(){
   const nav = document.querySelector(".js--nav");
+
+  if (!nav) return;
+
   const main = document.querySelector(".js--main");
   const navButton = document.querySelector(".js--nav-button");
 

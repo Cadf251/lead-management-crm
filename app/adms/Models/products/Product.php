@@ -2,7 +2,7 @@
 
 namespace App\adms\Models;
 
-class Produto
+class Product
 {
   public function __construct(
     public int $id,

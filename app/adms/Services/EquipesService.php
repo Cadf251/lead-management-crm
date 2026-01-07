@@ -23,10 +23,10 @@ class EquipesService
     $this->result = new OperationResult();
   }
 
-  public function criar(string $nome, int $produtoId, ?string $descricao = null): ?OperationResult
+  public function criar(string $nome, ?string $descricao = null): ?OperationResult
   {
     try {
-      $equipe = Equipe::novo($nome, null, $descricao);
+      $equipe = Equipe::novo($nome, $descricao);
 
       $this->repo->criarEquipe($equipe);
       $this->result->addMensagem("A equipe foi criada com sucesso.");

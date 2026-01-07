@@ -8,6 +8,9 @@ use App\adms\Models\Usuario;
 use App\adms\UI\Badge;
 use App\adms\UI\Button;
 
+/**
+ * ✅ FUNCIONAL - CUMPRE V1
+ */
 class UsuarioPresenter
 {
   public static function present(array $usuarios):array {
@@ -32,7 +35,7 @@ class UsuarioPresenter
   }
 
   private static function normalizeCelular(string $celular){
-    if(empty($celular) || !isset($celular) || $celular === null){
+    if(empty($celular)){
       return "Telefone vazio ou inválido!";
     } else {
       return CelularFormatter::paraPlaceholder($celular);
@@ -40,7 +43,7 @@ class UsuarioPresenter
   }
 
   private static function normalizeFoto(int $id, ?string $fotoPerfil){
-    if(empty($fotoPerfil) || !isset($fotoPerfil) || $fotoPerfil === null){
+    if(empty($fotoPerfil)){
       return "";
     } else {
       $servidorId = AppContainer::getAuthUser()->getServidorId();

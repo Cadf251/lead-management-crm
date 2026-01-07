@@ -4,9 +4,12 @@ namespace App\adms\Controllers\usuarios;
 
 use App\adms\Core\OperationResult;
 
+/**
+ * ✅ FUNCIONAL - CUMPRE V1
+ */
 class DesativarUsuario extends UsuariosAbstract
 {
-  public function index(string|null $usuarioId)
+  public function index(string|null $usuarioId):void
   {
     // Instancia o usuário
     $usuario = $this->repo->selecionar((int)$usuarioId);

@@ -1,0 +1,12 @@
+parameters:
+	level: 1
+	paths:
+		- app/adms
+
+	bootstrapFiles:
+		- php-stan-bootstrap.php
+
+	ignoreErrors:
+		-
+			message: '#Variable \$[a-zA-Z0-9_]+ might not be defined.#'
+			path: app/adms/Views/*

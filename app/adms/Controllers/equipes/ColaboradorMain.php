@@ -32,7 +32,7 @@ abstract class ColaboradorMain extends EquipesAbstract
       exit;
     }
 
-    $result = $this->executar($colaborador, $post ?? []);
+    $result = $this->executar($colaborador, $post);
     
     echo json_encode([
       "sucesso" => $result->sucesso(),

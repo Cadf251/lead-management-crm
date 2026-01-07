@@ -62,21 +62,6 @@ class Equipe
     return $this->status->nome;
   }
 
-  public function getProdutoId():?int
-  {
-    return $this->produto->id ?? null;
-  }
-
-  public function getProdutoNome():?string
-  {
-    return "";
-  }
-
-  public function getProdutoDescricao():?string
-  {
-    return $this->produto->descricao ?? null;
-  }
-
   public function getColaboradores():array
   {
     return $this->colaboradores ?? [];
@@ -125,7 +110,7 @@ class Equipe
       $array[0]["vez"]++;
     }
 
-    return $proximos;
+    return $proximos ?? [];
   }
 
   public function getColaboradorById(int $id): ?Colaborador
@@ -237,21 +222,6 @@ class Equipe
     }
 
     $this->status = Status::fromId($id);
-  }
-
-  public function setProduto(?Produto $produto): void
-  {
-    return;
-  }
-
-  /**
-   * Seta o Produto com um array associativo.
-   * 
-   * @param array $produto Chaves: int id, string nome, ?string descricao
-   */
-  public function setProdutoByArray(?array $produto): void
-  {
-    return;
   }
 
   /**

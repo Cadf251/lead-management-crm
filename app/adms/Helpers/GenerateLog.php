@@ -86,9 +86,7 @@ class GenerateLog
   // MÉTODO NOVO: Recebe o objeto de erro diretamente
   public static function log(\Throwable $e, $level = self::ERROR, array $info = [])
   {
-    // Extrai os dados automaticamente
     $dadosDoErro = [
-      'mensagem' => $e->getMessage(),
       'arquivo'  => $e->getFile(),
       'linha'    => $e->getLine(),
     ];

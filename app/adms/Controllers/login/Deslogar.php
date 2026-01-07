@@ -3,8 +3,10 @@
 namespace App\adms\Controllers\login;
 
 use App\adms\Core\AppContainer;
-use App\adms\Services\AuthUser;
 
+/**
+ * ✅ FUNCIONAL - CUMPRE V1
+ */
 class Deslogar
 {
   public function index()

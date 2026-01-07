@@ -2,6 +2,7 @@
 
 namespace App\adms\Models\leads;
 
+use App\adms\Models\products\Offer;
 use App\api\Controllers\Oferta;
 use Exception;
 
@@ -10,7 +11,7 @@ class Journey
   private int $id;
   private int $leadId;
   private JourneyStatus $status;
-  private Oferta $oferta;
+  private Offer $offer;
   private array $interactions;
 
   public static function new(
@@ -56,7 +57,7 @@ class Journey
 
   public function setOferta()
   {
-    $this->oferta = new Oferta();
+    $this->offer = new Offer();
   }
 
   public function setInteraction(Interaction $interaction)
@@ -94,9 +95,9 @@ class Journey
     return $this->status->getDescription();
   }
 
-  public function getOferta():Oferta
+  public function getOferta():Offer
   {
-    return $this->oferta;
+    return $this->offer;
   }
 
   public function getInteractions():array

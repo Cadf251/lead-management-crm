@@ -2,6 +2,8 @@
 
 namespace App\adms\Models;
 
+use Exception;
+
 class Status
 {
   public const STATUS_DESATIVADO = 1;
@@ -16,8 +18,11 @@ class Status
   public static function fromId(int $id): self
   {
     if ($id === 1) $nome = "Desativado";
-    if ($id === 2) $nome = "Pausado";
-    if ($id === 3) $nome = "Ativo";
+    else if ($id === 2) $nome = "Pausado";
+    else if ($id === 3) $nome = "Ativo";
+    else {
+      throw new Exception("Invalid Status ID: $id");
+    }
 
     return new self($id, $nome);
   }
