@@ -39,10 +39,8 @@ class CriarUsuario extends UsuariosAbstract
       );
 
       // Mostrar mensagem de sucesso
-      $_SESSION["alerta"] = [
-        $result->getStatus(),
-        $result->mensagens()
-      ];
+      $result->report();
+      
       $this->redirect();
     }
 

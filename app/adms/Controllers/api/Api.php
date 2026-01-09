@@ -3,6 +3,7 @@
 namespace App\adms\Controllers\api;
 
 use App\adms\Core\LoadApi;
+use App\adms\Core\OperationResult;
 use App\adms\Helpers\GenerateLog;
 use App\adms\Helpers\SlugController;
 use App\adms\Database\DbConnectionGlobal;
@@ -19,32 +20,35 @@ class Api
    * 
    * @return void
    */
-  public function index(string|null $task):void
+  public function index(string|null $task): void
   {
-    // Recebe o input
-    $post = filter_input_array(INPUT_POST, FILTER_DEFAULT);
+    $result = new OperationResult();
 
     // Permite só POST
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-      echo json_encode(["sucesso" => false, "mensagem" => "A requisição não é POST."]);
+      $result->failed("A requisição é inválida.");
+      echo json_encode($result->getForApi());
       exit;
     }
 
-    // Precisa de um TOKEN para conectar ao banco de dados
-    if (($post["api_token"] === "") || (!isset($post["api_token"]))){
-      GenerateLog::generateLog("warning", "Uma requisição ao API não tem TOKEN de acesso.", ["post" => $post]);
-      echo json_encode(["sucesso" => false, "mensagem" => "TOKEN não informado."]);
+    $post = $this->getData();
+
+    $token = $this->getApiToken();
+
+    if ($token === null) {
+      $result->failed("O TOKEN é inválido.");
+      echo json_encode($result->getForApi());
       exit;
     }
 
     $server = new DbConnectionGlobal();
     $repository = new DatabaseRepository($server->conexao);
 
-    $servidor = $repository->verificarTokenApi($post["api_token"]);
+    $client = $repository->selectClientByApiToken($token);
 
-    if ($servidor === false){
-      GenerateLog::generateLog("warning", "O TOKEN é inválido para a requisição POST.", ["post" => $post]);
-      echo json_encode(["sucesso" => false, "TOKEN inválido."]);
+    if ($client === null) {
+      $result->failed("O TOKEN é inválido.");
+      echo json_encode($result->getForApi());
       exit;
     }
 
@@ -53,6 +57,52 @@ class Api
 
     // Tenta chamar a App\api\Controllers\Class->index().
     $loadApi = new LoadApi();
-    $loadApi->loadApi($class, $servidor, $post);
+    $loadApi->loadApi($class, $client, $post);
+  }
+
+  /**
+   * Retorna um ARRAY do post ou do json input
+   */
+  private function getData(): array
+  {
+    // Primeiro tenta POST tradicional
+    $data = filter_input_array(INPUT_POST, FILTER_DEFAULT);
+
+    if (!empty($data)) {
+      return $data;
+    }
+
+    // Fallback para JSON
+    $raw = file_get_contents("php://input");
+
+    if (!$raw) {
+      return [];
+    }
+
+    $json = json_decode($raw, true);
+
+    return is_array($json) ? $json : [];
+  }
+
+  /**
+   * Pega o API TOKEN e retorna null se não existir
+   */
+  private function getApiToken(): ?string
+  {
+    $headers = getallheaders();
+
+    // Bearer token
+    if (!empty($headers['Authorization'])) {
+      if (preg_match('/Bearer\s(\S+)/', $headers['Authorization'], $matches)) {
+        return $matches[1];
+      }
+    }
+
+    // Fallback: X-API-KEY
+    if (!empty($headers['X-API-KEY'])) {
+      return $headers['X-API-KEY'];
+    }
+
+    return null;
   }
 }

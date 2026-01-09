@@ -36,7 +36,7 @@ class NovaSenha extends LoginAbstract
         
       } catch (Exception $e){
         $result = new OperationResult();
-        $result->falha("Algo deu errado.");
+        $result->failed("Algo deu errado.");
         $result->report();
         
         GenerateLog::generateLog("error", "Não foi possível resetar uma senha no login", [

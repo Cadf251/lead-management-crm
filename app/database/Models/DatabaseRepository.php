@@ -2,11 +2,23 @@
 
 namespace App\database\Models;
 
+use App\adms\Database\DbConnectionClient;
 use App\adms\Helpers\GenerateLog;
 use App\adms\Database\DbOperations;
+use App\adms\Database\DbOperationsRefactored;
+use App\api\Models\ApiClient;
+use Exception;
+use PDO;
 
 class DatabaseRepository extends DbOperations
 {
+  private DbOperationsRefactored $sql;
+
+  public function __construct($conexao)
+  {
+    $this->sql = new DbOperationsRefactored($conexao);
+  }
+  
   /**
    * Retorna uma query base
    */
@@ -74,5 +86,47 @@ class DatabaseRepository extends DbOperations
       return false;
     else
       return $result[0];
+  }
+
+  public function selectClientByApiToken(string $token): ?ApiClient
+  {
+    $query = <<<SQL
+    SELECT id, email_master, host, user, pass, `db_name`, api_token
+    FROM servidores
+    WHERE api_token = :token
+    SQL;
+
+    $params = [
+      "token" => $token
+    ];
+
+    try {
+      $result = $this->sql->execute($query, $params);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
+
+    if (empty($result)) {
+      return null;
+    }
+
+    return $this->hydrateClient($result[0]);
+  }
+
+  private function hydrateClient(array $row): ?ApiClient
+  {
+    try {
+      $conn = new DbConnectionClient($row);
+    } catch (Exception $e) {
+      GenerateLog::log($e, GenerateLog::ALERT, []);
+      return null;
+    }
+
+    return new ApiClient(
+      $row["id"],
+      $row["email_master"],
+      $row["api_token"],
+      $conn->conexao
+    );
   }
 }

@@ -34,13 +34,10 @@ class Login extends LoginAbstract
       } catch (Exception) {
         // Instancia o warning
         $result = new OperationResult();
-        $result->falha("O usuário não existe ou está desativado.");
+        $result->failed("O usuário não existe ou está desativado.");
 
         // Prepara o setWarning
-        $_SESSION["alerta"] = [
-          $result->getStatus(),
-          $result->mensagens()
-        ];
+        $result->report();
 
         $this->redirectLogin();
       }

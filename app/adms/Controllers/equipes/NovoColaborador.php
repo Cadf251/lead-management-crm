@@ -19,10 +19,7 @@ class NovoColaborador extends EquipesAbstract
       $result = $this->service->novoColaborador($equipe, $this->data["form"]);
 
       // Mostrar mensagem de sucesso
-      $_SESSION["alerta"] = [
-        $result->getStatus(),
-        $result->mensagens()
-      ];
+      $result->report();
 
       $this->redirect("listar-colaboradores/{$equipeId}");
     }

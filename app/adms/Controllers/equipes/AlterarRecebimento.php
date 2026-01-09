@@ -17,12 +17,8 @@ class AlterarRecebimento extends ColaboradorMain
   {
     if (!isset($post["recebe_leads"])) {
       $result = new OperationResult();
-      $result->falha("Algo deu errado");
-      echo json_encode([
-        "sucesso" => $result->sucesso(),
-        "alerta" => $result->getStatus(),
-        "mensagens" => $result->getMensagens(),
-      ]);
+      $result->failed("Algo deu errado");
+      echo json_encode($result->getForAjax());
       exit;
     }
 

@@ -14,7 +14,7 @@ abstract class StatusAbstract
 
   private int $id;
   private string $name;
-  private string $description;
+  private ?string $description;
 
   public function __construct(int $id)
   {

@@ -60,7 +60,11 @@ class InfoBox
     }
 
     if ($this->content !== null) {
-      $content = $this->content;
+      $content = <<<HTML
+      <div class="info-box__content">
+        <p>{$this->content}</p>
+      </div>
+      HTML;
     } else {
       $content = "";
     }
@@ -69,9 +73,7 @@ class InfoBox
     <div class="info-box info-box--{$color}">
       <h4 class="titulo titulo--3">{$this->title}</h4>
       <p><i class="fa-solid fa-{$icon}"></i> {$this->message}</p>
-      <div class="info-box__content">
-        <p>{$content}</p>
-      </div>
+      {$content}
     </div>
     HTML;
   }

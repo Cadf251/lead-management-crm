@@ -20,7 +20,7 @@ class CriarSenha extends LoginAbstract
     // Verifique o $param
     if (empty($param) && $param === null){
       $result = new OperationResult();
-      $result->warn("O TOKEN expirou.");
+      $result->warning("O TOKEN expirou.");
       $result->report();
       $this->redirectLogin();
     }
@@ -43,7 +43,7 @@ class CriarSenha extends LoginAbstract
 
       if ($valido === false) {
         $result = new OperationResult();
-        $result->warn("O TOKEN expirou.");
+        $result->warning("O TOKEN expirou.");
         $result->report();
       }
 
@@ -60,11 +60,11 @@ class CriarSenha extends LoginAbstract
 
         $operation = new OperationResult();
 
-        if($result->sucesso()){
+        if($result->hadSucceded()){
           $this->fazerLogin($usuario);
         } else {
           $operation = new OperationResult();
-          $operation->falha("Algo deu errado.");
+          $operation->failed("Algo deu errado.");
           $operation->report();
         }
         
@@ -74,7 +74,7 @@ class CriarSenha extends LoginAbstract
       GenerateLog::log($e, GenerateLog::ERROR);
 
       $operation = new OperationResult();
-      $operation->falha("Algo deu errado.");
+      $operation->failed("Algo deu errado.");
       $operation->report();
 
       $this->redirectLogin();

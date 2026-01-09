@@ -22,7 +22,7 @@ class MudarVez extends ColaboradorMain
       $result = $this->service->priorizar($colaborador);
     } else {
       $result = new OperationResult();
-      $result->falha("Post mal formado.");
+      $result->failed("Post mal formado.");
       return $result;
     }
 

@@ -17,8 +17,8 @@ abstract class EquipeMain extends EquipesAbstract
 
     if ($equipe === null) {
       $result = new OperationResult();
-      $result->falha("Essa equipe não existe.");
-      $_SESSION["alerta"] = $result->getAlerta();
+      $result->failed("Essa equipe não existe.");
+      $result->report();
       echo json_encode(["sucesso" => false]);
       exit;
     }
@@ -31,9 +31,7 @@ abstract class EquipeMain extends EquipesAbstract
     }
 
     echo json_encode([
-      "sucesso" => $result->sucesso(),
-      "alerta" => $result->getStatus(),
-      "mensagens" => $result->getMensagens(),
+      ...$result->getForAjax(),
       "html" => $html]);
     exit;
   }

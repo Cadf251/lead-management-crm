@@ -2,28 +2,19 @@
 
 namespace App\adms\Repositories;
 
-use App\adms\Database\DbOperationsRefactored;
 use App\adms\Models\Usuario;
 use Exception;
-use PDO;
 
 /** 
  * ✅ FUNCIONAL - CUMPRE V1
  * 
  * Manipula os dados de usuários no banco de dados
  */
-class UsuariosRepository
+class UsuariosRepository extends RepositoryBase
 {
   /** @var string $tabela é o nome da tabela no banco de dados */
   public string $tabela = "usuarios";
 
-  public DbOperationsRefactored $sql;
-
-  public function __construct(PDO $conexao)
-  {
-    $this->sql = new DbOperationsRefactored($conexao);
-  }
-  
   /**
    * Retorna a base de SQL para consulta de usuários
    * 

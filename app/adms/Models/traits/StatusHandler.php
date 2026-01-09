@@ -23,13 +23,18 @@ trait StatusHandler
     return $this->status->nome;
   }
 
+  public function getStatusDescription(): string
+  {
+    return $this->status->description;
+  }
+
   // |---------------|
   // |--- SETTERS ---|
   // |---------------|
   public function setStatus(int $id)
   {
     try {
-      $this->status = Status::fromId($id);
+      $this->status = new Status($id);
     } catch (Exception $e) {
       throw new Exception($e->getMessage(), $e->getCode(), $e);
     }

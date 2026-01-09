@@ -31,7 +31,7 @@ class EditarUsuario extends UsuariosAbstract
       
       $result = $this->service->editar($usuario, $this->data["form"]);
 
-      $_SESSION["alerta"] = $result->getAlerta();
+      $result->report();
 
       $this->redirect();
     }

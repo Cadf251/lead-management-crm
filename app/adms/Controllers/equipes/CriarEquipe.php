@@ -28,10 +28,8 @@ class CriarEquipe extends EquipesAbstract
       );
 
       // Mostrar mensagem de sucesso
-      $_SESSION["alerta"] = [
-        $result->getStatus(),
-        $result->mensagens()
-      ];
+      $result->report();
+      
       $this->redirect();
     }
     // Retorna a VIEW

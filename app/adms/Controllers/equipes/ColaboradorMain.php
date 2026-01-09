@@ -23,21 +23,15 @@ abstract class ColaboradorMain extends EquipesAbstract
 
     if ($colaborador === null) {
       $result = new OperationResult();
-      $result->falha("Algo deu errado");
-      echo json_encode([
-        "sucesso" => $result->sucesso(),
-        "alerta" => $result->getStatus(),
-        "mensagens" => $result->getMensagens(),
-      ]);
+      $result->failed("Algo deu errado");
+      echo json_encode($result->getForAjax());
       exit;
     }
 
     $result = $this->executar($colaborador, $post);
     
     echo json_encode([
-      "sucesso" => $result->sucesso(),
-      "alerta" => $result->getStatus(),
-      "mensagens" => $result->getMensagens(),
+      ...$result->getForAjax(),
       "fila" => $this->fila,
       "numero" => $this->numero
     ]);

@@ -29,10 +29,10 @@ class EquipesService
       $equipe = Equipe::novo($nome, $descricao);
 
       $this->repo->criarEquipe($equipe);
-      $this->result->addMensagem("A equipe foi criada com sucesso.");
+      $this->result->addMessage("A equipe foi criada com sucesso.");
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR);
-      $this->result->falha("Não foi possível criar a equipe.");
+      $this->result->failed("Não foi possível criar a equipe.");
     }
     return $this->result;
   }
@@ -42,10 +42,10 @@ class EquipesService
     try {
       $equipe->ativar();
       $this->repo->salvar($equipe);
-      $this->result->addMensagem("A equipe {$equipe->getNome()} foi ativada com sucesso.");
+      $this->result->addMessage("A equipe {$equipe->getNome()} foi ativada com sucesso.");
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR, ["equipe" => $equipe]);
-      $this->result->falha("A equipe não foi ativada.");
+      $this->result->failed("A equipe não foi ativada.");
     }
     return $this->result;
   }
@@ -55,10 +55,10 @@ class EquipesService
     try {
       $equipe->pausar();
       $this->repo->salvar($equipe);
-      $this->result->addMensagem("A equipe {$equipe->getNome()} foi pausada com sucesso.");
+      $this->result->addMessage("A equipe {$equipe->getNome()} foi pausada com sucesso.");
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR, ["equipe" => $equipe]);
-      $this->result->falha("A equipe não foi pausada.");
+      $this->result->failed("A equipe não foi pausada.");
     }
     return $this->result;
   }
@@ -68,10 +68,10 @@ class EquipesService
     try {
       $equipe->desativar();
       $this->repo->salvar($equipe);
-      $this->result->addMensagem("A equipe {$equipe->getNome()} foi desativada com sucesso.");
+      $this->result->addMessage("A equipe {$equipe->getNome()} foi desativada com sucesso.");
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR, ["equipe" => $equipe]);
-      $this->result->falha("A equipe não foi desativada.");
+      $this->result->failed("A equipe não foi desativada.");
     }
     return $this->result;
   }
@@ -82,10 +82,10 @@ class EquipesService
       $equipe->setNome($dados["nome"]);
       $equipe->setDescricao($dados["descricao"]);
       $this->repo->salvar($equipe);
-      $this->result->addMensagem("A equipe foi editada com sucesso.");
+      $this->result->addMessage("A equipe foi editada com sucesso.");
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR, ["equipe" => $equipe]);
-      $this->result->falha("A equipe não foi editada.");
+      $this->result->failed("A equipe não foi editada.");
     }
     return $this->result;
   }
@@ -93,7 +93,7 @@ class EquipesService
   public function novoColaborador(Equipe $equipe, array $dados): ?OperationResult
   {
     if ($equipe === null) {
-      $this->result->falha("Essa equipe não foi localizada.");
+      $this->result->failed("Essa equipe não foi localizada.");
       return $this->result;
     }
 
@@ -108,12 +108,12 @@ class EquipesService
       $nivelId = $this->repo->getNivel((int)$usuarioId);
 
       if ($nivelId === null) {
-        $this->result->falha("Algo ocorreu errado");
+        $this->result->failed("Algo ocorreu errado");
         return $this->result;
       }
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR, ["post" => $dados]);
-      $this->result->falha("Algo ocorreu errado");
+      $this->result->failed("Algo ocorreu errado");
       return $this->result;
     }
 
@@ -136,10 +136,10 @@ class EquipesService
       $colaborador->setVez($equipe->getVezMinima());
 
       $this->repo->criarColaborador($equipe, $colaborador);
-      $this->result->addMensagem("Usuário adicionado com sucesso à equipe.");
+      $this->result->addMessage("Usuário adicionado com sucesso à equipe.");
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR, ["post" => $dados]);
-      $this->result->falha("A equipe não foi editada.");
+      $this->result->failed("A equipe não foi editada.");
     }
 
     return $this->result;
@@ -157,13 +157,13 @@ class EquipesService
       );
 
       $this->repo->salvarColaborador($colaborador);
-      $this->result->addMensagem("Função alterada com sucesso.");
+      $this->result->addMessage("Função alterada com sucesso.");
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR, [
         "colaborador" => $colaborador,
         "funcao" => $funcaoId
       ]);
-      $this->result->falha("Não foi possível alterar a função do usuário na equipe.");
+      $this->result->failed("Não foi possível alterar a função do usuário na equipe.");
     }
 
     return $this->result;
@@ -183,13 +183,13 @@ class EquipesService
       }
 
       $this->repo->salvarColaborador($colaborador);
-      $this->result->addMensagem("Sucesso silêncioso.");
+      $this->result->addMessage("Sucesso silêncioso.");
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR, [
         "colaborador" => $colaborador,
         "set" => $set
       ]);
-      $this->result->falha("Não foi possível mudar o recebimento de leads.");
+      $this->result->failed("Não foi possível mudar o recebimento de leads.");
     }
 
     return $this->result;
@@ -200,12 +200,12 @@ class EquipesService
     try {
       $colaborador->incrementarVez();
       $this->repo->salvarColaborador($colaborador);
-      $this->result->addMensagem("");
+      $this->result->addMessage("");
     } catch (Exception $e){
       GenerateLog::log($e, GenerateLog::ERROR, [
         "colaborador" => $colaborador,
       ]);
-      $this->result->falha("Não foi possível alterar a vez do usuário.");
+      $this->result->failed("Não foi possível alterar a vez do usuário.");
     }
     return $this->result;
   }
@@ -215,12 +215,12 @@ class EquipesService
     try {
       $colaborador->diminuirVez();
       $this->repo->salvarColaborador($colaborador);
-      $this->result->addMensagem("");
+      $this->result->addMessage("");
     } catch (Exception $e){
       GenerateLog::log($e, GenerateLog::ERROR, [
         "colaborador" => $colaborador,
       ]);
-      $this->result->falha("Não foi possível alterar a vez do usuário.");
+      $this->result->failed("Não foi possível alterar a vez do usuário.");
     }
     return $this->result;
   }
@@ -229,12 +229,12 @@ class EquipesService
   {
     try {
       $this->repo->removerColaborador($colaborador);
-      $this->result->addMensagem("");
+      $this->result->addMessage("");
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR, [
         "colaborador" => $colaborador,
       ]);
-      $this->result->falha("Não foi possível remover esse usuário.");
+      $this->result->failed("Não foi possível remover esse usuário.");
     }
 
     return $this->result;

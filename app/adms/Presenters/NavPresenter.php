@@ -55,6 +55,11 @@ class NavPresenter
       $links .= NavLink::create("listar-equipes", "user-group", "Editar Equipes");
     }
 
+    if ($nivel->canEditOffers()) {
+      $links .= NavLink::create("listar-ofertas", "briefcase", "Editar Ofertas");
+      $links .= NavLink::create("listar-produtos", "basket-shopping", "Editar Produtos");
+    }
+
     $links .= NavLink::create("em-atendimento", "list", "Gerenciar Leads");
 
     /*

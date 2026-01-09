@@ -18,12 +18,11 @@ class EditarEquipe extends EquipesAbstract
     
     if ($equipe === null) {
       $result = new OperationResult();
-      $result->falha("Essa equipe não existe.");
+      $result->failed("Essa equipe não existe.");
+      
       // Mostrar mensagem de erro
-      $_SESSION["alerta"] = [
-        $result->getStatus(),
-        $result->mensagens()
-      ];
+      $result->report();
+
       $this->redirect();
     }
 
@@ -34,10 +33,8 @@ class EditarEquipe extends EquipesAbstract
       $result = $this->service->editar($equipe, $dados);
       
       // Mostrar mensagem de sucesso
-      $_SESSION["alerta"] = [
-        $result->getStatus(),
-        $result->mensagens()
-      ];
+      $result->report();
+      
       $this->redirect();
     }
 

@@ -1,0 +1,11 @@
+Planejamento de alterações necessárias:
+
+- Criar tabela ofertas
+
+- Incluir relacionamento entre ofertas e equipes
+
+Opcional|recomendado:
+
+- Excluir os status de usuários
+- Excluir os níveis de acesso
+- Excluir as permissões

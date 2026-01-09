@@ -1,3 +1,21 @@
+QUAL É O MÍNIMO PARA CUMPRIR A V1?
+
+- ✅ Receber leads.
+- Distribuir leads.
+- Vincular ofertas a equipes
+- Equipe com função comercial
+- Criar retornos
+- Criar produtos
+- Criar ofertas
+
+O QUE DEIXAR PARA A V2?
+- Recepção de interação
+- Criação de jornadas
+- Criação de perfil
+- Cálculos de score
+- Equipes com demais funções
+- Ofertas com mais contexto
+
 lead:
 - id
 - nome
@@ -43,6 +61,7 @@ atendimento:
 - descrição
 - primeiro contato
 - status (ativo, arquivado)
+- contato status
 - jornada_id
 - colaborador_id
 - perfil_id
@@ -70,7 +89,8 @@ oferta:
 - id
 - nome
 - tipo (comum, upsell, cross-sell)
-- caráter (comum, promocional)
+- preco
+- desconto
 - data_inicio
 - data fim
 - status (ativo, pausado)

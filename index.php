@@ -52,5 +52,3 @@ register_shutdown_function( function () {
 // Instanciar a classe PageController, para tratar a URL
 $url = new PageController();
 $url->loadPage();
-
-unset($_SESSION["csrf_tokens"]);

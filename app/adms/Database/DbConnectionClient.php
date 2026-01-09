@@ -5,6 +5,7 @@ namespace App\adms\Database;
 use App\adms\Core\AppContainer;
 use App\adms\Helpers\ErrorHandler;
 use App\adms\Services\AuthUser;
+use Exception;
 use PDO;
 use PDOException;
 
@@ -43,14 +44,7 @@ class DbConnectionClient
         $pass
       );
     } catch (PDOException $e) {
-      ErrorHandler::deadEndError(
-        "001. Erro ao conectar com o servidor",
-        "Algo deu errado com a conexão do servidor.",
-        "critical",
-        "Erro ao conectar com o banco de dados",
-        ["PDOException" => $e->getMessage()]
-      );
-      die();
+      throw new Exception("Não foi possível conectar ao banco $host", 0, $e);
     }
   }
 }

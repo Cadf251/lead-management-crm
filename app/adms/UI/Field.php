@@ -155,7 +155,7 @@ class Field
         <textarea
           class="$classes"
           rows="4"
-          name="descricao"
+          name="{$this->name}"
           {$attrStr}
         >$this->value</textarea>
       </div>

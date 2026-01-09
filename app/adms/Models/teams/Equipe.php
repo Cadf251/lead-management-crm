@@ -54,12 +54,12 @@ class Equipe
 
   public function getStatusId():int
   {
-    return $this->status->id;
+    return $this->status->getId();
   }
 
   public function getStatusNome():string
   {
-    return $this->status->nome;
+    return $this->status->getName();
   }
 
   public function getColaboradores():array
@@ -152,7 +152,7 @@ class Equipe
    */
   public function desativar(): void
   {
-    if ($this->status->id === self::STATUS_DESATIVADO) {
+    if ($this->status->getId() === self::STATUS_DESATIVADO) {
       throw new DomainException("Essa equipe já está desativada.");
     }
 
@@ -165,7 +165,7 @@ class Equipe
    */
   public function pausar(): void
   {
-    if ($this->status->id === self::STATUS_PAUSADO) {
+    if ($this->status->getId() === self::STATUS_PAUSADO) {
       throw new DomainException("Essa equipe já está pausada.");
     }
 
@@ -221,7 +221,7 @@ class Equipe
       throw new Exception("Status inválido.");
     }
 
-    $this->status = Status::fromId($id);
+    $this->status = new Status($id);
   }
 
   /**

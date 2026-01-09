@@ -38,9 +38,9 @@ class DbOperationsRefactored
     } catch (PDOException $e) {
       throw new Exception($e->getMessage(), 0, $e);
     }
-    
+
     foreach ($params as $key => $valor) {
-      if ($valor instanceof DateTime){
+      if ($valor instanceof DateTime) {
         $valor = $valor->format($_ENV["DATE_FORMAT"] ?? "Y-m-d H:i:s");
       }
 
@@ -128,6 +128,54 @@ class DbOperationsRefactored
     }
 
     return implode(" AND ", $conditions);
+  }
+
+  /**
+   * Faz o fluxo padrão do select
+   */
+  public function selectOne(
+    string $query,
+    callable $hydrator,
+    array $params = [],
+  ) :?object {
+    try {
+      $result = $this->execute($query, $params);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
+
+    if (empty($result)) {
+      return null;
+    }
+
+    return $hydrator($result[0]);
+  }
+
+  /**
+   * Faz o fluxo padrão do select
+   */
+  public function selectMultiple(
+    string $query,
+    callable $hydrator,
+    array $params = [],
+  ) :?array {
+    try {
+      $result = $this->execute($query, $params);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
+
+    if (empty($result)) {
+      return null;
+    }
+
+    $final = [];
+
+    foreach ($result as $row) {
+      $final[] = $hydrator($row);
+    }
+
+    return $final;
   }
 
   /**
@@ -263,7 +311,7 @@ class DbOperationsRefactored
    * 
    * @return void
    */
-  public function deleteByIdSQL(string $tabela, int $id): void
+  public function deleteById(string $tabela, int $id): void
   {
     $query = <<<SQL
     DELETE FROM {$tabela}

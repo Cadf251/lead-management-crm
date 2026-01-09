@@ -97,4 +97,9 @@ class NivelSistema
   {
     return $this->id === 2;
   }
+
+  public function canEditOffers(): bool
+  {
+    return $this->id === self::NIVEL_ADM;
+  }
 }

@@ -20,8 +20,8 @@ abstract class UsuariosReciclagem extends UsuariosAbstract
 
     if($usuario === null){
       $result = new OperationResult();
-      $result->falha("Esse usuário não existe.");
-      $_SESSION["alerta"] = $result->getAlerta();
+      $result->failed("Esse usuário não existe.");
+      $result->report();
       echo json_encode(["sucesso" => false]);
       exit;
     }
@@ -29,9 +29,7 @@ abstract class UsuariosReciclagem extends UsuariosAbstract
     $result = $this->executar($usuario);
 
     echo json_encode([
-      "sucesso" => $result->sucesso(),
-      "alerta" => $result->getStatus(),
-      "mensagens" => $result->getMensagens(),
+      ...$result->getForAjax(),
       "html" => $this->renderizarCard($usuario)]);
     exit;
   }

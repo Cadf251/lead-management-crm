@@ -2,7 +2,7 @@
 
 namespace App\adms\Models\leads;
 
-use App\adms\Models\products\Offer;
+use App\adms\Models\sales\Offer;
 use App\api\Controllers\Oferta;
 use Exception;
 

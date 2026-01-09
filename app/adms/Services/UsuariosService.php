@@ -16,7 +16,7 @@ use App\adms\Models\Token;
 use DateTime;
 
 /**
- * ✅ FUNCIONAL - CUMPRE V1
+ * @complete V1
  * 
  * @author Cadu 
  */
@@ -49,26 +49,26 @@ class UsuariosService
   {
     // Verifica se o usuário já existe
     if ($this->repository->existe($email)) {
-      $this->result->warn("O email já está sendo usado por outro usuário.");
+      $this->result->warning("O email já está sendo usado por outro usuário.");
       return $this->result;
     }
 
     try {
       $usuario = Usuario::novo($nome, $email, $celular, $nivId);
       $usuario->setId($this->repository->criar($usuario));
-      $this->result->addMensagem("O usuário foi criado com sucesso.");
+      $this->result->addMessage("O usuário foi criado com sucesso.");
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR);
-      $this->result->falha("Não foi possível criar o usuário.");
+      $this->result->failed("Não foi possível criar o usuário.");
       return $this->result;
     }
 
     try {
       $this->emailConfirmacao($usuario);
-      $this->result->addMensagem("Peça que o usuário verifique o email $email para criar uma senha.");
+      $this->result->addMessage("Peça que o usuário verifique o email $email para criar uma senha.");
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR);
-      $this->result->warn("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
+      $this->result->warning("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
     }
 
     if ($_FILES["foto"]["tmp_name"] != '') {
@@ -77,7 +77,7 @@ class UsuariosService
         $this->repository->salvar($usuario);
       } catch (Exception $e) {
         GenerateLog::generateLog("error", "não foi possível armazenar um foto de usuário", ["error" => $e->getMessage()]);
-        $this->result->addMensagem("Não foi possível armazenar a foto.");
+        $this->result->addMessage("Não foi possível armazenar a foto.");
       }
     }
 
@@ -106,7 +106,7 @@ class UsuariosService
     if (!empty($_FILES["foto"]["name"])) {
       try {
         $this->trocarFoto($usuario);
-        $this->result->addMensagem("A foto foi armazenada com sucesso.");
+        $this->result->addMessage("A foto foi armazenada com sucesso.");
         $substituida = true;
       } catch (Exception $e) {
         GenerateLog::generateLog("error", $e->getMessage(), [
@@ -115,14 +115,14 @@ class UsuariosService
           "line" => $e->getLine(),
           "trace" => $e->getTrace(),
         ]);
-        $this->result->warn("Não foi possível armazenar a foto do usuário.");
+        $this->result->warning("Não foi possível armazenar a foto do usuário.");
       }
     }
     
     if ((!$substituida) && ($dados["apagar-foto"] === "on")) {
       try {
         $this->apagarFoto($usuario);
-        $this->result->addMensagem("A foto foi apagada com sucesso.");
+        $this->result->addMessage("A foto foi apagada com sucesso.");
       } catch (Exception $e) {
         GenerateLog::generateLog("error", $e->getMessage(), [
           "code" => $e->getCode(),
@@ -130,12 +130,12 @@ class UsuariosService
           "line" => $e->getLine(),
           "trace" => $e->getTrace(),
         ]);
-        $this->result->warn("Não foi possível apagar a foto do usuário.");
+        $this->result->warning("Não foi possível apagar a foto do usuário.");
       }
     }
 
     $this->repository->salvar($usuario);
-    $this->result->addMensagem("O usuário foi editado com sucesso.");
+    $this->result->addMessage("O usuário foi editado com sucesso.");
     return $this->result;
   }
 
@@ -153,17 +153,17 @@ class UsuariosService
   {
     $emailAntigo = $usuario->getEmail();
 
-    $this->result->addMensagem("O email é diferente do antigo, portanto, deve-se confirmar o novo email.");
+    $this->result->addMessage("O email é diferente do antigo, portanto, deve-se confirmar o novo email.");
 
     if ($this->repository->existe($email)) {
-      $this->result->warn("O email não foi substituído porque já está sendo usado por outro usuário.");
+      $this->result->warning("O email não foi substituído porque já está sendo usado por outro usuário.");
       return;
     }
 
     try {
       $usuario->setEmail($email);
     } catch (Exception $e) {
-      $this->result->warn("O novo email é inválido.");
+      $this->result->warning("O novo email é inválido.");
       $usuario->setEmail($emailAntigo);
       return;
     }
@@ -171,17 +171,17 @@ class UsuariosService
     try {
       $usuario->resetarSenha();
     } catch (Exception) {
-      $this->result->warn("O email não foi substituído devido a um erro.");
+      $this->result->warning("O email não foi substituído devido a um erro.");
       $usuario->setEmail($emailAntigo);
       return;
     }
 
     try {
       $this->emailConfirmacao($usuario);
-      $this->result->addMensagem("Peça que o usuário verifique o email {$usuario->getEmail()} para criar uma senha.");
+      $this->result->addMessage("Peça que o usuário verifique o email {$usuario->getEmail()} para criar uma senha.");
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR);
-      $this->result->warn("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
+      $this->result->warning("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
       $usuario->setEmail($emailAntigo);
     }
   }
@@ -201,23 +201,23 @@ class UsuariosService
 
       $this->repository->salvar($usuario);
 
-      $this->result->addMensagem("Usuário foi reativado com sucesso.");
+      $this->result->addMessage("Usuário foi reativado com sucesso.");
     } catch (DomainException $e) {
       GenerateLog::generateLog("error", "Não foi possível ativar um usuário.", [
         "error" => $e->getMessage()
       ]);
 
-      $this->result->falha("Não foi possível reativar o usuário");
+      $this->result->failed("Não foi possível reativar o usuário");
       return $this->result;
     }
 
     // Envia o email para nova senha
     try {
       $this->emailConfirmacao($usuario);
-      $this->result->addMensagem("Peça que o usuário verifique o email {$usuario->getEmail()} para criar uma senha.");
+      $this->result->addMessage("Peça que o usuário verifique o email {$usuario->getEmail()} para criar uma senha.");
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR);
-      $this->result->warn("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
+      $this->result->warning("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
     }
 
     return $this->result;
@@ -238,27 +238,27 @@ class UsuariosService
 
       $this->repository->salvar($usuario);
 
-      $this->result->addMensagem("A senha foi resetada com sucesso.");
+      $this->result->addMessage("A senha foi resetada com sucesso.");
     } catch (DomainException $e) {
       GenerateLog::generateLog("error", "Não foi possível resetar a senha de um usuário.", [
         "error" => $e->getMessage()
       ]);
 
-      $this->result->falha("Não foi possível resetar a senha.");
+      $this->result->failed("Não foi possível resetar a senha.");
       return $this->result;
     }
 
     // Envia o email para nova senha
     try {
       $this->emailConfirmacao($usuario);
-      $this->result->addMensagem("Peça que o usuário verifique o email {$usuario->getEmail()} para criar uma senha.");
+      $this->result->addMessage("Peça que o usuário verifique o email {$usuario->getEmail()} para criar uma senha.");
     } catch (Exception $e) {
       GenerateLog::generateLog("error", $e->getMessage(), [
         "code" => $e->getCode(),
         "file" => $e->getFile(),
         "line" => $e->getLine()
       ]);
-      $this->result->warn("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
+      $this->result->warning("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
     }
 
     return $this->result;
@@ -277,9 +277,9 @@ class UsuariosService
       }
 
       $this->repository->salvar($usuario);
-      $this->result->addMensagem("O usuário {$usuario->getNome()} foi desativado.");
+      $this->result->addMessage("O usuário {$usuario->getNome()} foi desativado.");
     } catch (Exception) {
-      $this->result->falha("Não foi possível desativar o usuário.");
+      $this->result->failed("Não foi possível desativar o usuário.");
     }
     return $this->result;
   }
@@ -291,12 +291,12 @@ class UsuariosService
 
       $this->repository->salvar($usuario);
 
-      $this->result->addMensagem("A senha foi criada com sucesso");
+      $this->result->addMessage("A senha foi criada com sucesso");
     } catch (Exception $e) {
       GenerateLog::generateLog("error", "Um usuário não pode ser ativado", [
         "error" => $e->getMessage()
       ]);
-      $this->result->falha("A senha não foi criada com sucesso");
+      $this->result->failed("A senha não foi criada com sucesso");
 
       return $this->result;
     }
@@ -307,21 +307,21 @@ class UsuariosService
   public function reenviarEmail(Usuario $usuario): OperationResult
   {
     if (!$usuario->estaAguardandoConfirmacao()) {
-      $this->result->falha("Esse usuário não tem nenhum token ativo.");
+      $this->result->failed("Esse usuário não tem nenhum token ativo.");
       return $this->result;
     }
 
     // Envia o email para nova senha
     try {
       $this->emailConfirmacao($usuario);
-      $this->result->addMensagem("Peça que o usuário verifique o email {$usuario->getEmail()} para criar uma senha.");
+      $this->result->addMessage("Peça que o usuário verifique o email {$usuario->getEmail()} para criar uma senha.");
     } catch (Exception $e) {
       GenerateLog::generateLog("error", $e->getMessage(), [
         "code" => $e->getCode(),
         "file" => $e->getFile(),
         "line" => $e->getLine(),
       ]);
-      $this->result->warn("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
+      $this->result->warning("O email de redefinição se senha não foi enviado, tente novamente ou entre em contato com o suporte.");
     }
 
     return $this->result;

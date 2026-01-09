@@ -20,7 +20,7 @@ class LoadPage
   private array $listPackages = ["adms", "database"];
 
   /** @var array $listDirectory Lista de diretório das classes */
-  private array $listDirectory = ["login", "dashboard", "usuarios", "equipes", "atendimentos", "erro", "master", "api"];
+  private array $listDirectory = ["login", "dashboard", "usuarios", "equipes", "atendimentos", "ofertas", "produtos", "erro", "master", "api"];
 
   /** @var array $listPgPublic Lista de páginas públicas */
   private array $listPgPublic = ["Login", "NovaSenha", "CriarSenha", "Erro", "Api"];
@@ -34,7 +34,9 @@ class LoadPage
     "ListarUsuarios",
     "ListarEquipes",
     "ListarColaboradores",
-    "EmAtendimento"
+    "EmAtendimento",
+    "ListarOfertas",
+    "ListarProdutos"
   ];
 
   private array $listPost = [
@@ -53,7 +55,10 @@ class LoadPage
     "AlterarFuncao",
     "AlterarRecebimento",
     "MudarVez",
-    "RemoverColaborador"
+    "RemoverColaborador",
+    "CriarProduto",
+    "EditarProduto",
+    "DeletarProduto"
   ];
 
   /** @var array $listPgDev Páginas que só podem ser acessadas por DEVs */

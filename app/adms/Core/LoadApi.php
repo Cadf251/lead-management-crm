@@ -3,6 +3,8 @@
 namespace App\adms\Core;
 
 use App\adms\Helpers\GenerateLog;
+use App\api\Models\ApiClient;
+use PDO;
 
 /**
  * Tem um funcionamento parecido com LoadPage e verifica as classes e métodos e se é válido.
@@ -22,10 +24,10 @@ class LoadApi
    * Carrega o método e repassa os credenciais para conexão e os dados de POST
    * 
    * @param string $className A Class já tratada com slug
-   * @param array $credenciais As credenciais do TOKEN validado 
+   * @param ApiClient $client O cliente validado 
    * @param array $post O Array sem tratamento. Cuidado para não receber valores indesejados.
    */
-  public function loadApi(string $className, array $credenciais, array $post):void
+  public function loadApi(string $className, ApiClient $client, array $post):void
   {
     // Verifica se está no array
     if(!in_array($className, $this->listClasses)){
@@ -51,7 +53,7 @@ class LoadApi
       echo json_encode(["sucesso" => false, "mensagem" => "O método não existe."]);
       exit;
     } else {
-      $metodo->{"index"}($credenciais, $post);
+      $metodo->{"index"}($client, $post);
     }
   }
 }

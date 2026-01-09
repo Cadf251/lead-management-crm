@@ -13,7 +13,7 @@ return [
     ->maxLength(50)
     ->required(),
 
-  Field::create("Descrição da equipe", "email")
+  Field::create("Descrição da equipe", "descricao")
     ->type(Field::TYPE_TEXTAREA)
     ->value($equipe["descricao"] ?? "")
     ->maxLength(255),

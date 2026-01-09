@@ -2,83 +2,136 @@
 
 namespace App\adms\Core;
 
-use App\adms\Helpers\GenerateLog;
-
 /**
- * @todo remover atributo status
+ * @complete V1
  */
 class OperationResult
 {
-  private bool $sucesso = true;
-  private array $mensagens = [];
+  private array $messages = [];
   private int $status = self::STATUS_SUCESSO;
 
   const STATUS_SUCESSO = 3;
   const STATUS_AVISO = 2;
   const STATUS_ERRO = 1;
 
-  public function addMensagem(string $msg): void
+  /**
+   * Inclui uma nova mensagem
+   */
+  public function addMessage(string $msg): void
   {
-    $this->mensagens[] = $msg;
+    $this->messages[] = $msg;
   }
 
-  public function warn(string $msg):void
+  /**
+   * Coloca a operação como warning e inclui uma mensagem
+   */
+  public function warning(string $msg): void
   {
     $this->status = self::STATUS_AVISO;
-    $this->addMensagem($msg);
+    $this->addMessage($msg);
   }
 
   /**
-   * @todo Remover a linha sucesso
+   * Atualiza o status e adiciona uma mensagem
    */
-  public function falha(string $msg): void
+  public function failed(string $msg): void
   {
-    $this->sucesso = false;
     $this->status = self::STATUS_ERRO;
-    $this->addMensagem($msg);
+    $this->addMessage($msg);
   }
 
   /**
-   * Retorna o status em forma de mensagem para o aviso.
+   * Retorna as mensagens
    */
-  public function getStatus():string
+  public function getMessages(): array
   {
-    if ($this->status === 1) return "❌ Erro!";
-    else if ($this->status === 2) return "ℹ️ Atenção!";
-    else if ($this->status === 3) return "✅ Sucesso!";
-    else return "ℹ️ Atenção!";
+    return $this->messages;
   }
 
   /**
-   * Formatado para $_SESSION["alerta"]
+   * Retorna como HTML com separador <br>
    */
-  public function getAlerta():array
+  public function getMessagesAsHtml(): string
+  {
+    return implode("<br>", $this->messages);
+  }
+
+  /**
+   * Retorna como string para uso em alertas
+   */
+  public function getStatusAsString(): string
+  {
+    $status = [
+      1 => "❌ Erro!",
+      2 => "ℹ️ Atenção!",
+      3 => "✅ Sucesso!"
+    ];
+
+    return isset($status[$this->status])
+      ? $status[$this->status]
+      : "ℹ️ Atenção!";
+  }
+
+  /**
+   * Retorna se falhou ou não
+   */
+  public function hadFailed(): bool
+  {
+    return $this->status === self::STATUS_ERRO;
+  }
+
+  /**
+   * Retorna se teve sucesso. Warning também é considerado sucesso.
+   */
+  public function hadSucceded(): bool
+  {
+    return !$this->hadFailed();
+  }
+
+  /**
+   * Pega o alerta no formado para a session
+   */
+  public function getAlert(): array
   {
     return [
-      $this->getStatus(),
-      $this->mensagens()
+      $this->getStatusAsString(),
+      $this->getMessages()
     ];
   }
 
-  public function report()
+  /**
+   * Retorna o status no formato acetável para AJAX
+   * 
+   * retorna em PT
+   */
+  public function getForAjax()
   {
-    $_SESSION["alerta"] = $this->getAlerta();
-  }
-
-  public function getMensagens(){
-    return implode("<br>", $this->mensagens());
-  }
-
-  public function sucesso(): bool
-  {
-    return $this->status !== 1;
+    return [
+      "sucesso" => $this->hadSucceded(),
+      "alerta" => $this->getStatusAsString(),
+      "mensagens" => $this->getMessagesAsHtml()
+    ];
   }
 
   /**
-   * Retorna as mensagens em forma de array.
+   * Retorna o status no formato para API
+   * 
+   * retorna em EN
    */
-  public function mensagens(): array
+  public function getForApi()
   {
-    return $this->mensagens;
+    return [
+      "success" => $this->hadSucceded(),
+      "messages" => $this->getMessages()
+    ];
+  }
+
+  /**
+   * Reporta o alerta para a session
+   */
+  public function report()
+  {
+    $_SESSION["alerta"] = $this->getAlert();
   }
 }
+

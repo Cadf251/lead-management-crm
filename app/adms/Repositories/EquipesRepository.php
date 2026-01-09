@@ -10,16 +10,10 @@ use Exception;
 use PDO;
 
 /** Repositório de equipes */
-class EquipesRepository
+class EquipesRepository extends RepositoryBase
 {
   /** @var string $tabela O nome da tabela no banco de dados */
   private string $tabela = "equipes";
-  public DbOperationsRefactored $sql;
-  
-  public function __construct(PDO $conexao)
-  {
-    $this->sql = new DbOperationsRefactored($conexao);
-  }
 
   /**
    * Retorna a query base para fazer consultas de equipes e trata as permissões também.
@@ -369,5 +363,15 @@ class EquipesRepository
     } catch (Exception $e) {
       throw new Exception("Não foi possível salvar um colaborador no banco de dados.", $e->getCode(), $e);
     }
+  }
+
+  public function selectByOffer(int $offerId)
+  {
+    $query = <<<SQL
+    SELECT 
+    FROM equipes_ofertas eo
+    INNER JOIN equipes e ON e.id = eo.equipe_id
+    WHERE oferta_id = :offer_id
+    SQL;
   }
 }

@@ -3,27 +3,37 @@
 namespace App\adms\Models;
 
 use Exception;
+use InvalidArgumentException;
 
-class Status
+class Status extends StatusAbstract
 {
   public const STATUS_DESATIVADO = 1;
   public const STATUS_PAUSADO = 2;
   public const STATUS_ATIVADO = 3;
 
-  public function __construct(
-    public int $id,
-    public string $nome
-  ) {}
-
-  public static function fromId(int $id): self
+  protected function getMap(int $id): array
   {
-    if ($id === 1) $nome = "Desativado";
-    else if ($id === 2) $nome = "Pausado";
-    else if ($id === 3) $nome = "Ativo";
-    else {
-      throw new Exception("Invalid Status ID: $id");
+    if (!in_array($id, [
+      self::STATUS_ATIVADO,
+      self::STATUS_PAUSADO,
+      self::STATUS_DESATIVADO
+    ])) {
+      throw new InvalidArgumentException("Invalid Status: $id");
     }
 
-    return new self($id, $nome);
+    return match ($id) {
+      self::STATUS_ATIVADO => [
+        'name' => "Ativo",
+        "description" => null
+      ],
+      self::STATUS_PAUSADO => [
+        'name' => "Pausado",
+        "description" => null
+      ],
+      self::STATUS_DESATIVADO => [
+        'name' => "Desativado",
+        'description' => null
+      ]
+    };
   }
 }
