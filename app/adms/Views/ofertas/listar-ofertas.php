@@ -10,7 +10,7 @@ echo Header::create("Gerenciar Ofertas")
     Button::create("+ Criar")
       ->color("black")
       ->data([
-        "action" => "oferta:criar"
+        "action" => "offer:create"
       ])
   );
 

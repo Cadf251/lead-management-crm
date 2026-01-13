@@ -1,5 +1,4 @@
 import { postRequest } from "../../ajax/request";
-import { setWarning } from "../../ui/warning";
 
 export function priorizar(btn, dataset) {
   var colaboradorId = dataset.colaboradorId;

@@ -82,8 +82,7 @@ class CriarSenha extends LoginAbstract
     
     // Carrega a VIEW se não tiver nenhum $_POST válido.
     $loadView = new LoadView("adms/Views/login/confirmar", [
-      "title" => "Nova Senha",
-      "css" => ["public/adms/css/login.css"]
+      "title" => "Nova Senha"
     ]);
     $loadView->loadViewLogin();
   }

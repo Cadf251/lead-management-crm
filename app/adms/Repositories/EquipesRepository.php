@@ -2,12 +2,10 @@
 
 namespace App\adms\Repositories;
 
-use App\adms\Database\DbOperationsRefactored;
 use App\adms\Models\teams\Equipe;
 use App\adms\Models\teams\Colaborador;
 use App\adms\Models\UserStatus;
 use Exception;
-use PDO;
 
 /** Repositório de equipes */
 class EquipesRepository extends RepositoryBase
@@ -344,7 +342,7 @@ class EquipesRepository extends RepositoryBase
   public function removerColaborador(Colaborador $colaborador):void
   {
     try {
-      $this->sql->deleteByIdSQL("equipes_usuarios", $colaborador->getId());
+      $this->sql->deleteById("equipes_usuarios", $colaborador->getId());
     } catch (Exception $e){
       throw new Exception("Não foi possível deletar um colaborador no banco de dados.", $e->getCode(), $e);
     }

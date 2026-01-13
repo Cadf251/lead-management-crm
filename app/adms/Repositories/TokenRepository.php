@@ -141,6 +141,7 @@ class TokenRepository
    * 
    * @param int $usuarioId O ID do usuário
    * 
+   * @todo Isso aqui poderia ser um simples trigger no SQL
    */
   public function disableUserTokens(int $usuarioId)
   {

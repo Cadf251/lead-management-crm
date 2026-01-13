@@ -1,0 +1,37 @@
+.hamburguer {
+  position: relative;
+
+  &__controller {
+    transition: background .5s ease;
+    padding: 8px 14px;
+    border-radius: 8px;
+
+    &.is-active, &:hover, &:focus {
+      background-color: var(--white-brand);
+    }
+  }
+
+  &__content {
+    display: grid;
+    gap: 8px;
+    position: absolute;
+    pointer-events: none;
+    opacity: 0;
+    right: 0;
+    transform: translateY(-50%);
+    top: 0;
+    transition: transform .5s ease, opacity .5s ease;
+
+    &>* {
+      box-shadow: 0px 0px 20px var(--shadow);
+    }
+
+    &.is-active {
+      pointer-events: all;
+      opacity: 1;
+      right: 0;
+      top: 0;
+      transform: translate(-75%, -50%);
+    }
+  }
+}

@@ -2,8 +2,11 @@
 
 namespace App\adms\Controllers\usuarios;
 
+use App\adms\Controllers\base\CriarBase;
+use App\adms\Core\AppContainer;
 use App\adms\Helpers\CSRFHelper;
 use App\adms\Models\NivelSistema;
+use App\adms\Services\UsuariosService;
 
 /** 
  * ✅ FUNCIONAL - CUMPRE V1
@@ -12,6 +15,10 @@ use App\adms\Models\NivelSistema;
  */
 class CriarUsuario extends UsuariosAbstract
 {
+  protected string $viewFolder = "usuarios"; // Aqui você recuperou o "UsuarioAbstract"
+  protected string $viewFile = "criar-usuario";
+  protected string $csrfKey = "form_usuario";
+  
   /** Verifica se deve mostrar a VIEW do formulário ou apura os dados do $_POST */
   public function index(): void
   {
@@ -30,8 +37,10 @@ class CriarUsuario extends UsuariosAbstract
     if (isset($this->data["form"]["csrf_token"]) && CSRFHelper::validateCSRFToken("form_usuario", $this->data["form"]["csrf_token"])) {
       // Resume o array para facilitar
       $usuario = $this->data["form"];
-      
-      $result = $this->service->criar(
+
+      $service = new UsuariosService(AppContainer::getClientConn());
+
+      $result = $service->criar(
         $usuario["nome"],
         $usuario["email"],
         $usuario["celular"],
@@ -40,16 +49,17 @@ class CriarUsuario extends UsuariosAbstract
 
       // Mostrar mensagem de sucesso
       $result->report();
-      
+
       $this->redirect();
     }
 
     // Retorna a VIEW
-    $content = require APP_ROOT."app/adms/Views/usuarios/criar-usuario.php";
+    $content = require APP_ROOT . "app/adms/Views/usuarios/criar-usuario.php";
 
     echo json_encode([
       "sucesso" => true,
-      "html" => $content]);
+      "html" => $content
+    ]);
     exit;
   }
 }

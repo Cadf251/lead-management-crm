@@ -1,7 +1,6 @@
 <?php
 
 use App\adms\Controllers\erro\Erro;
-use App\adms\Controllers\usuarios\AtivarUsuarioRefactored;
 use App\adms\Core\AppContainer;
 use App\adms\Core\PageController;
 use App\adms\Helpers\GenerateLog;

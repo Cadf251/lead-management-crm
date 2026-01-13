@@ -47,7 +47,7 @@ class OfferRepository extends RepositoryBase
     ];
 
     try {
-      return $this->sql->selectMultiple(
+      return $this->sql->selectOne(
         $query,
         fn(array $row) => $this->hydrateOffer($row),
         $params

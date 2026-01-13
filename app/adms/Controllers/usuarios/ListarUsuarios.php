@@ -21,7 +21,6 @@ class ListarUsuarios extends UsuariosAbstract
     ]);
 
     // Carregar a VIEW
-    $view = "adms/Views/usuarios/listar-usuarios";
-    $this->render($view);
+    $this->render();
   }
 }

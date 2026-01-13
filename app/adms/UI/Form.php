@@ -11,7 +11,11 @@ class Form
   private string $action = '';
   private string $content = "";
   private string $cta = 'Enviar';
+  private string $type = self::TYPE_SUBMIT;
   private bool $hasFiles = false;
+
+  public const TYPE_SUBMIT = "sumit";
+  public const TYPE_AJAX = "ajax";
 
   public static function create(string $action = ''): self
   {

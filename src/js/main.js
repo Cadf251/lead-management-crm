@@ -6,6 +6,7 @@ import { initFormUi } from "./ui/form";
 import { initColaboradorForm } from "./ui/novo-colaborador-form";
 import { initTooltip } from "./ui/tooltips";
 import { initColaboradores } from "./ui/listar-colaboradores";
+import { initHamburguer } from "./ui/hamburguer";
 
 initNav();
 initOverlay();
@@ -14,3 +15,4 @@ initEventDelegation();
 initFormUi();
 initTooltip();
 initColaboradores();
+initHamburguer();

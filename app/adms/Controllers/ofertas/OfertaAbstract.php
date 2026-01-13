@@ -3,7 +3,9 @@
 namespace App\adms\Controllers\ofertas;
 
 use App\adms\Core\LoadView;
+use App\adms\Core\OperationResult;
 use App\adms\Database\DbConnectionClient;
+use App\adms\Models\sales\Offer;
 use App\adms\Repositories\OfferRepository;
 
 abstract class OfertaAbstract
@@ -28,6 +30,20 @@ abstract class OfertaAbstract
   protected function getData(): array
   {
     return $this->data;
+  }
+
+  protected function select(string|int $offerId): Offer|OperationResult
+  {
+    $result = new OperationResult();
+
+    $offer = $this->repository->select((int)$offerId);
+
+    if ($offer === null) {
+      $result->failed("Oferta não encontrada.");
+      return $result;
+    } else {
+      return $offer;
+    }
   }
 
   protected function render(string $viewPath = "listar-ofertas"): void

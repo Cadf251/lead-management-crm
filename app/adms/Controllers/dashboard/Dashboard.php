@@ -34,7 +34,7 @@ class Dashboard
     $this->data["title"] = "Dashboard";
 
     // Carrega a VIEW
-    $loadView = new LoadView("adms/Views/dashboard/index", $this->data);
+    $loadView = new LoadView("adms/Views/dashboard/provisorio", $this->data);
     $loadView->loadView();
   }
 

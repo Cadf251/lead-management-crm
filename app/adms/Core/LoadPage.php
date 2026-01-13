@@ -4,6 +4,7 @@ namespace App\adms\Core;
 
 use App\adms\Helpers\GenerateLog;
 use App\adms\Services\AuthUser;
+use App\adms\UI\FloatingAction;
 
 class LoadPage
 {
@@ -20,7 +21,7 @@ class LoadPage
   private array $listPackages = ["adms", "database"];
 
   /** @var array $listDirectory Lista de diretório das classes */
-  private array $listDirectory = ["login", "dashboard", "usuarios", "equipes", "atendimentos", "ofertas", "produtos", "erro", "master", "api"];
+  private array $listDirectory = ["login", "dashboard", "usuarios", "equipes", "atendimentos", "ofertas", "produtos", "floating", "erro", "master", "api"];
 
   /** @var array $listPgPublic Lista de páginas públicas */
   private array $listPgPublic = ["Login", "NovaSenha", "CriarSenha", "Erro", "Api"];
@@ -58,7 +59,9 @@ class LoadPage
     "RemoverColaborador",
     "CriarProduto",
     "EditarProduto",
-    "DeletarProduto"
+    "DeletarProduto",
+    "CriarOferta",
+    "FloatingAction"
   ];
 
   /** @var array $listPgDev Páginas que só podem ser acessadas por DEVs */

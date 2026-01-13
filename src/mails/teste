@@ -1,0 +1,54 @@
+<mjml>
+  <mj-head>
+    <mj-title>Newsletter Profissional</mj-title>
+    <mj-attributes>
+      <mj-all font-family="Arial, sans-serif" />
+      <mj-text font-size="16px" color="#333333" line-height="24px" />
+      <mj-section padding="20px" />
+    </mj-attributes>
+    <mj-style>
+      .link-footer { color: #999999; text-decoration: underline; }
+    </mj-style>
+  </mj-head>
+  <mj-body background-color="#f4f4f4">
+    
+    <mj-section background-color="#ffffff" padding-bottom="0px">
+      <mj-column width="100%">
+        <mj-image src="https://via.placeholder.com/150x50" alt="Logo" width="150px" align="center" />
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff">
+      <mj-column width="100%">
+        <mj-image src="https://via.placeholder.com/600x300" alt="Banner" padding="0px" />
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff">
+      <mj-column width="100%">
+        <mj-text font-weight="bold" font-size="24px" align="center">
+          Olá, Cadu Prado!
+        </mj-text>
+        <mj-text>
+          Crie uma nova <strong>senha</strong> para acessar o sistema.
+        </mj-text>
+        <mj-text>
+          Use o código de empresa <b>3</b> para acessar.
+        </mj-text>
+        <mj-button background-color="#007bff" color="white" href="https://google.com">
+          Acessar Conteúdo
+        </mj-button>
+      </mj-column>
+    </mj-section>
+
+    <mj-section padding-top="20px">
+      <mj-column width="100%">
+        <mj-text font-size="12px" color="#999999" align="center">
+          © 2024 Sua Empresa. Todos os direitos reservados.<br/>
+          Se deseja parar de receber, <a href="#" class="link-footer">clique aqui</a>.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+  </mj-body>
+</mjml>

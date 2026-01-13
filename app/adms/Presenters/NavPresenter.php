@@ -56,7 +56,7 @@ class NavPresenter
     }
 
     if ($nivel->canEditOffers()) {
-      $links .= NavLink::create("listar-ofertas", "briefcase", "Editar Ofertas");
+      $links .= NavLink::create("listar-ofertas", "tag", "Editar Ofertas");
       $links .= NavLink::create("listar-produtos", "basket-shopping", "Editar Produtos");
     }
 

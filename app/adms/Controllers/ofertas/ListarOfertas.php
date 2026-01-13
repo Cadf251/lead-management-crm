@@ -20,7 +20,7 @@ use App\adms\Presenters\OfferPresenter;
  */
 class ListarOfertas extends OfertaAbstract
 {
-  public function index($a)
+  public function index()
   {
     $this->setData([
       "ofertas" => OfferPresenter::present($this->repository->list())

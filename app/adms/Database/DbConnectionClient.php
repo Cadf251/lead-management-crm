@@ -23,12 +23,8 @@ use PDOException;
 class DbConnectionClient
 {
   public ?PDO $conexao = null;
-  private string $host;
-  private string $db_name;
-  private string $user;
-  private string $pass;
 
-  public function __construct(array|null $credenciais)
+  public function __construct(array|null $credenciais = null)
   {
     $array = $credenciais ?? AppContainer::getAuthUser()->getCredenciais();
 

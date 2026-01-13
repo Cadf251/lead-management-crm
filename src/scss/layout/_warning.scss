@@ -8,8 +8,6 @@
   padding: 20px;
   top: 16px;
   box-shadow: var(--shadow) 3px 3px 15px;
-  // border: var(--red) solid;
-  // border-width: 3px 3px 8px 3px;
   justify-self: center;
   border-radius: 8px;
   transition: opacity .5s ease, transform .5s ease;
@@ -18,5 +16,9 @@
     opacity: 1;
     user-select: all;
     pointer-events: all;
+  }
+
+  &__buttons {
+    text-align: center;
   }
 }

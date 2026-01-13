@@ -1,0 +1,43 @@
+.floating-action {
+  position: fixed;
+  z-index: 9999;
+  display: none;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px var(--shadow);
+  min-width: 220px;
+  max-width: 350px;
+  min-height: 120px;
+  overflow: hidden;
+
+  &__content {
+    padding: 16px;
+    display: grid;
+    gap: 8px;
+
+    > * {
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  &.is-active {
+    display: block;
+  }
+
+  &.is-loading {
+    animation: loading 3s infinite;
+  }
+}
+
+@keyframes loading {
+  0% {
+    background-color: var(--gray-light);
+  }
+  50% {
+    background-color: color-mix(in srgb, var(--gray-light) 50%, var(--gray-dark) 50%);
+  }
+  100% {
+    background-color: var(--gray-light);
+  }
+}

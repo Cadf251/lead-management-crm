@@ -1,11 +1,5 @@
 <?php
 
-use App\adms\Models\Status;
-use App\adms\Models\teams\Equipe;
-use App\adms\Models\teams\EquipeUsuario;
-use App\adms\UI\Field;
-use Dom\Text;
-
 // Carregar o composer
 require_once "vendor/autoload.php";
 
@@ -25,4 +19,6 @@ if ($_SERVER["HTTP_HOST"] === "crm.local") {
   $_ENV["HOST_BASE"] = "http://crm.local/";
 }
 
-var_dump($_SESSION);
+
+?>
+

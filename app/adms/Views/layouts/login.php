@@ -10,7 +10,7 @@ include_once "app/adms/Views/partials/head.php";
   <main class="main--login">
     <div class="container">
       <header class="center w7">
-        <img width="65%" src="<?php echo $_ENV['HOST_BASE'] ?>public/adms/img/logo.png" class="login-logo" alt="Logo">
+        <img width="65%" src="<?php echo $_ENV['HOST_BASE'] ?>public/img/logo.webp" class="login-logo" alt="Logo">
       </header>
       <div class="card-main w5">
         <?php

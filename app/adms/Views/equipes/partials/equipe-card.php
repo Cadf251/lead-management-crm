@@ -2,12 +2,15 @@
 
 use App\adms\UI\Badge;
 use App\adms\UI\Card;
+use App\adms\UI\Hamburguer;
 
 $btns = "";
 
 foreach($equipe["buttons"] as $button){
   $btns .= $button->render();
 }
+
+$hamburguer = Hamburguer::create($btns);
 
 $badge3 = $equipe["fila"]["badge"];
 
@@ -26,7 +29,8 @@ $content = <<<HTML
   $badge3
 </div>
 <div class="card__inline-items">
-  $btns
+  <!-- $btns -->
+   $hamburguer
 </div>
 HTML;
 

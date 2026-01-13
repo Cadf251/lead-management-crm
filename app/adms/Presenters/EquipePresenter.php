@@ -102,7 +102,15 @@ class EquipePresenter
           "equipe-nome" => $equipeNome
         ])
         ->tooltip("Desativar equipe")
-        ->withIcon("trash-can")
+        ->withIcon("trash-can"),
+      "nova-oferta" => 
+        Button::create("")
+          ->color("green")
+          ->data([
+            "action" => "floating:offer-team"
+          ])
+          ->tooltip("Atribuir oferta")
+          ->withIcon("tag")
     ];
 
     return match ($statusId) {
@@ -111,15 +119,17 @@ class EquipePresenter
       ],
       2 => [
         $btns["colaboradores"],
+        $btns["nova-oferta"],
         $btns["editar"],
         $btns["ativar"],
-        $btns["desativar"]
+        $btns["desativar"],
       ],
       3 => [
         $btns["colaboradores"],
+        $btns["nova-oferta"],
         $btns["editar"],
         $btns["pausar"],
-        $btns["desativar"]
+        $btns["desativar"],
       ]
     };
   }

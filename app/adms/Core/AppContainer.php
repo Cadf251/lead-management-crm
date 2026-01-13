@@ -2,26 +2,18 @@
 
 namespace App\adms\Core;
 
+use App\adms\Database\DbConnectionClient;
 use App\adms\Services\AuthUser;
+use PDO;
 
 class AppContainer
 {
-  private static array $instances = [];
   private static ?AuthUser $authUser = null;
-
-  public static function set(string $key, mixed $value): void
-  {
-    self::$instances[$key] = $value;
-  }
+  private static ?DbConnectionClient $conn = null;
 
   public static function setAuthUser(AuthUser $instance): void
   {
     self::$authUser = $instance;
-  }
-
-  public static function get(string $key): mixed
-  {
-    return self::$instances[$key] ?? null;
   }
 
   public static function getAuthUser():AuthUser
@@ -31,5 +23,19 @@ class AppContainer
     }
     
     return self::$authUser;
+  }
+
+  public static function setClientConn(DbConnectionClient $conn): void
+  {
+    self::$conn = $conn;
+  }
+
+  public static function getClientConn(): PDO
+  {
+    if (self::$conn->conexao === null) {
+      self::setClientConn(new DbConnectionClient());
+    }
+
+    return self::$conn->conexao;
   }
 }
