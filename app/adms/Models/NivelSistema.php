@@ -34,7 +34,7 @@ class NivelSistema
   public function setById(int $id)
   {
     if (!isset(self::MAP[$id])) {
-      throw new InvalidArgumentException('Nível inválido.');
+      throw new InvalidArgumentException("Nível inválido: $id");
     }
 
     $this->id = $id;

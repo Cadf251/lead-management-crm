@@ -46,7 +46,7 @@ class GenerateLog
 
     $nameFileLog = date("dmY") . ".log";
 
-    $pasta = AppContainer::getAuthUser()->getServidorId() ?? "limbo";
+    $pasta = AppContainer::getAuthUser()->getServerId() ?? "limbo";
 
     // Cria o diretório
     $path = APP_ROOT . "files/logs/$pasta";
@@ -72,10 +72,10 @@ class GenerateLog
 
     $log->pushHandler(new StreamHandler($filePath), Level::Debug);
 
-    if (AppContainer::getAuthUser()->estaLogado()) {
+    if (AppContainer::getAuthUser()->isLoggedIn()) {
       $content["sessao"] = [
-        "usuario_id" =>  AppContainer::getAuthUser()->getUsuarioId() ?? null,
-        "servidor_id" => AppContainer::getAuthUser()->getServidorId() ?? null
+        "usuario_id" =>  AppContainer::getAuthUser()->getUserId() ?? null,
+        "servidor_id" => AppContainer::getAuthUser()->getServerId() ?? null
       ];
     }
 

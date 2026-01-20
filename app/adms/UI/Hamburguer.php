@@ -22,7 +22,7 @@ class Hamburguer
   {
     return <<<HTML
     <div class="hamburguer">
-      <div class="hamburguer__controller js--hamb-controll">
+      <div class="hamburguer__controller js--hamb-controll" data-action="ui:hamburguer-controller">
         <i class="fa-solid fa-ellipsis-vertical"></i>
       </div>
       <div class="hamburguer__content js--hamb-content">

@@ -35,3 +35,14 @@ export function overlayContent(content) {
 
   overlay.innerHTML = content;
 }
+
+export function closeOverlay() {
+  const overlay = document.querySelector(".js--overlay");
+  const body = document.querySelector(".js--body");
+  
+  overlay.classList.add("overlay--oculto");
+  body.classList.remove("congelado");
+
+  const content = document.querySelector(".js--overlay-content");
+  content.innerHTML = "";
+}

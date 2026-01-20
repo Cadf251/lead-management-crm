@@ -6,7 +6,7 @@ use App\adms\Core\LoadView;
 
 class Erro
 {
-  public function index(array|string|null $type) : void 
+  public function index(?string $type) : void 
   {
     // Recebe qual é parametro de erro
     switch ($type){
@@ -18,6 +18,9 @@ class Erro
         break;
       case "fatal":
         $this->fatal();
+        break;
+      default:
+        $this->erro500();
         break;
     }
   }

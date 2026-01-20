@@ -8,7 +8,7 @@ include_once "./app/adms/Views/partials/head.php";
 ?>
 <body class="js--body">
   <?php
-  if (AppContainer::getAuthUser()->estaLogado())
+  if (AppContainer::getAuthUser()->isLoggedIn())
     include_once "./app/adms/Views/partials/nav.php";
   else
     $class = "main--external-error";

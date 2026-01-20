@@ -3,8 +3,9 @@
 namespace App\adms\Presenters;
 
 use App\adms\Helpers\CreateOptions;
-use App\adms\Models\teams\Equipe;
-use App\adms\Models\teams\Colaborador;
+use App\adms\Models\teams\Team;
+use App\adms\Models\teams\TeamUser;
+use App\adms\Models\teams\TeamUserFunction;
 use App\adms\UI\Badge;
 use App\adms\UI\Button;
 use App\adms\UI\Field;
@@ -18,32 +19,33 @@ class EquipePresenter
   public static function present(array $equipes, array $funcoes = []): array
   {
     $final = [];
-    /** @var Equipe $equipe */
+    /** @var Team $equipe */
     foreach ($equipes as $equipe) {
       $final[] = [
         "id" => $equipe->getId() ?? "",
-        "nome" => $equipe->getNome() ?? "Sem nome",
-        "descricao" => $equipe->getDescricao() ?? "",
+        "nome" => $equipe->getName() ?? "Sem nome",
+        "descricao" => $equipe->getDescription() ?? "",
         "status_badge" => self::getStatusBadge($equipe),
         "numero_badge" => self::getNumeroBadge($equipe),
-        "buttons" => self::buttons($equipe->getId(), $equipe->getNome(), $equipe->getStatusId()),
+        "buttons" => self::buttons($equipe->getId(), $equipe->getName(), $equipe->getStatusId()),
         "proximos" => self::proximos($equipe),
         "fila" => self::fila($equipe),
-        "colaboradores" => self::colaboradores($equipe, $funcoes),
+        "colaboradores" => self::colaboradores($equipe, TeamUserFunction::getSelectOptions()),
       ];
     }
+    
     return $final;
   }
 
-  private static function getStatusBadge(Equipe $equipe)
+  private static function getStatusBadge(Team $equipe)
   {
     $class = UtilPresenter::getStatusClass($equipe->getStatusId());
-    return Badge::create($equipe->getStatusNome(), $class);
+    return Badge::create($equipe->getStatusName(), $class);
   }
 
-  private static function getNumeroBadge(Equipe $equipe)
+  private static function getNumeroBadge(Team $equipe)
   {
-    $count = $equipe->countColaboradores();
+    $count = $equipe->countUsers();
 
     return Badge::create(
       <<<HTML
@@ -59,15 +61,16 @@ class EquipePresenter
       Button::create()
         ->color("green")
         ->withIcon("user")
-        ->link("listar-colaboradores/$equipeId")
+        ->link("colaboradores/$equipeId")
         ->tooltip("Listar Colaboradores"),
 
       "editar" =>
       Button::create("")
         ->color("blue")
         ->data([
-          "action" => "equipe:editar",
-          "equipe-id" => $equipeId
+          "action" => "action:core",
+          "url" => "equipes/editar/$equipeId",
+          "action-type" => "overlay"
         ])
         ->tooltip("Editar equipe")
         ->withIcon("pencil"),
@@ -76,8 +79,9 @@ class EquipePresenter
       Button::create("")
         ->color("gray")
         ->data([
-          "action" => "equipe:pausar",
-          "equipe-id" => $equipeId
+          "action" => "action:core",
+          "url" => "equipes/pausar/$equipeId",
+          "target" => ".card--$equipeId"
         ])
         ->tooltip("Pausar equipe")
         ->withIcon("pause"),
@@ -86,9 +90,9 @@ class EquipePresenter
       Button::create("")
         ->color("green")
         ->data([
-          "action" => "equipe:ativar",
-          "equipe-id" => $equipeId,
-          "equipe-nome" => $equipeNome
+          "action" => "action:core",
+          "url" => "equipes/ativar/$equipeId",
+          "target" => ".card--$equipeId"
         ])
         ->tooltip("Ativar equipe")
         ->withIcon("play"),
@@ -97,12 +101,16 @@ class EquipePresenter
       Button::create("")
         ->color("red")
         ->data([
-          "action" => "equipe:desativar",
-          "equipe-id" => $equipeId,
-          "equipe-nome" => $equipeNome
+          "action" => "action:core",
+          "url" => "equipes/desativar/$equipeId",
+          "remove" => ".card--$equipeId",
+          "confirm" => true,
+          "confirm-title" => "Deseja excluir a equipe $equipeNome?",
+          "confirm-text" => "Essa ação é irreversível.",
         ])
         ->tooltip("Desativar equipe")
         ->withIcon("trash-can"),
+
       "nova-oferta" => 
         Button::create("")
           ->color("green")
@@ -134,20 +142,20 @@ class EquipePresenter
     };
   }
 
-  private static function proximos(Equipe $equipe)
+  private static function proximos(Team $equipe)
   {
-    $proximos = $equipe->getProximos();
+    $proximos = $equipe->getNexts();
 
     if (empty($proximos)) return null;
 
     $simplified = [];
 
-    /** @var Colaborador $proximo */
+    /** @var TeamUser $proximo */
     foreach ($proximos as $proximo) {
       $simplified[] = [
         "id" => $proximo->getId(),
-        "nome" => $proximo->getUsuarioNome(),
-        "vez" => $proximo->getVez()
+        "nome" => $proximo->getUserName(),
+        "vez" => $proximo->getTime()
       ];
     }
 
@@ -206,9 +214,9 @@ class EquipePresenter
     return ['primeiro', 'segundo', 'terceiro'][$pos - 1];
   }
 
-  public static function fila(Equipe $equipe): array
+  public static function fila(Team $equipe): array
   {
-    $recebem = $equipe->getRecebemLeads();
+    $recebem = $equipe->getAbleUsers();
 
     $proximos = self::proximos($equipe);
 
@@ -255,17 +263,17 @@ class EquipePresenter
     }
   }
 
-  private static function colaboradores(Equipe $equipe, $funcoes)
+  public static function colaboradores(Team $equipe, $funcoes)
   {
-    if (empty($equipe->getColaboradores())) return [];
+    if (empty($equipe->getUsers())) return [];
 
     $final = [];
-    /** @var Colaborador $colaborador */
-    foreach ($equipe->getColaboradores() as $colaborador) {
+    /** @var TeamUser $colaborador */
+    foreach ($equipe->getUsers() as $colaborador) {
       $final[] = [
         "id" => $colaborador->getId() ?? "",
-        "usuario_id" => $colaborador->getUsuarioId() ?? "",
-        "usuario_nome" => $colaborador->getUsuarioNome() ?? "",
+        "usuario_id" => $colaborador->getUserId() ?? "",
+        "usuario_nome" => $colaborador->getUserName() ?? "",
         "recebe_leads_switch" => self::recebeLeads($colaborador, $equipe->getId()),
         "funcao_select" => self::funcao($colaborador, $funcoes),
         "vez_buttons" => self::vez($colaborador, $equipe->getId()),
@@ -275,9 +283,9 @@ class EquipePresenter
     return $final;
   }
 
-  private static function recebeLeads(Colaborador $colab, $equipeId)
+  private static function recebeLeads(TeamUser $colab, $equipeId)
   {
-    if ($colab->podeReceberLeads()) {
+    if ($colab->canReceiveLeads()) {
       $label = "Sim";
       $active = true;
     } else {
@@ -297,43 +305,36 @@ class EquipePresenter
       ->render();
   }
 
-  private static function funcao(Colaborador $colab, $funcoes)
+  private static function funcao(TeamUser $colab, $funcoes)
   {
-    if ($colab->podeSerGerente()) {
-      $button = Button::create("")
-        ->color("blue")
-        ->data([
-          "action" => "colaborador:alterar-funcao",
-          "colaborador-id" => $colab->getId(),
-          "original-value" => $colab->getFuncaoId()
-        ])
-        ->setDisabled()
-        ->tooltip("Salvar")
-        ->withIcon("floppy-disk");
+    $button = Button::create("")
+      ->color("blue")
+      ->data([
+        "action" => "colaborador:alterar-funcao",
+        "colaborador-id" => $colab->getId(),
+        "original-value" => $colab->getFunctionId()
+      ])
+      ->setDisabled()
+      ->tooltip("Salvar")
+      ->withIcon("floppy-disk");
 
-      $select = Field::create("", "funcao")
-        ->type(Field::TYPE_SELECT)
-        ->addClass("js--usuario-funcao")
-        ->inputOnly()
-        ->withoutDefaultOption()
-        ->options(CreateOptions::criarOpcoes($funcoes, $colab->getFuncaoId()));
+    $select = Field::create("", "funcao")
+      ->type(Field::TYPE_SELECT)
+      ->addClass("js--usuario-funcao")
+      ->inputOnly()
+      ->withoutDefaultOption()
+      ->options(CreateOptions::criarOpcoes($funcoes, $colab->getFunctionId()));
 
-      return <<<HTML
-      <div class="cell-aligned">
-        {$select->render()}
-        {$button->render()}
-      </div>
-      HTML;
-    } else {
-      return <<<HTML
-      <div class="cell-aligned">
-        {$colab->getFuncaoNome()}
-      </div>
-      HTML;
-    }
+    return <<<HTML
+    <div class="cell-aligned">
+      {$select->render()}
+      {$button->render()}
+    </div>
+    HTML;
+
   }
 
-  private static function vez(Colaborador $colab, $equipeId)
+  private static function vez(TeamUser $colab, $equipeId)
   {
     $btn1 = Button::create()
       ->color("gray")
@@ -353,7 +354,7 @@ class EquipePresenter
       ])
       ->withIcon("plus");
 
-    if (!$colab->podeReceberLeads()) {
+    if (!$colab->canReceiveLeads()) {
       $btn1->setDisabled();
       $btn2->setDisabled();
     }
@@ -361,7 +362,7 @@ class EquipePresenter
     return "{$btn1} {$btn2}";
   }
 
-  private static function remover(Colaborador $colab, $equipeId)
+  private static function remover(TeamUser $colab, $equipeId)
   {
     return Button::create("")
       ->color("red")
@@ -376,12 +377,12 @@ class EquipePresenter
   public static function presentNovoColaborador(array $colaboradores)
   {
     $final = [];
-    /** @var Colaborador $colaborador */
+    /** @var TeamUser $colaborador */
     foreach ($colaboradores as $colaborador) {
       $final[] = [
-        "usuario_id" => $colaborador->getUsuarioId(),
-        "usuario_nome" => $colaborador->getUsuarioNome(),
-        "nivel_acesso_id" => $colaborador->getNivelAcessoId()
+        "usuario_id" => $colaborador->getUserId(),
+        "usuario_nome" => $colaborador->getUserName(),
+        "nivel_acesso_id" => $colaborador->getLevelId()
       ];
     }
 

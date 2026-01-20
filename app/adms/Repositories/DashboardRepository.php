@@ -147,7 +147,7 @@ class DashboardRepository extends DbOperations
     $query = $this->leadsQuery($whereFinal, $metodo);
 
     $params = [
-      ":usuario_id" => AppContainer::getAuthUser()->getUsuarioId(),
+      ":usuario_id" => AppContainer::getAuthUser()->getUserId(),
       "acesso_equipes" => ""
     ];
 

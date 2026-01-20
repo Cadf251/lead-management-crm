@@ -26,7 +26,7 @@ class DbConnectionClient
 
   public function __construct(array|null $credenciais = null)
   {
-    $array = $credenciais ?? AppContainer::getAuthUser()->getCredenciais();
+    $array = $credenciais ?? AppContainer::getAuthUser()->getCredentials();
 
     $host   = $array['host'];
     $db_name = $array['db_name'];

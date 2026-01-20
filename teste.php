@@ -1,6 +1,11 @@
 <?php
 
 // Carregar o composer
+
+use App\adms\Core\AppContainer;
+use App\adms\Services\AuthUser;
+use App\adms\Services\TeamsService;
+
 require_once "vendor/autoload.php";
 
 session_start();
@@ -19,6 +24,14 @@ if ($_SERVER["HTTP_HOST"] === "crm.local") {
   $_ENV["HOST_BASE"] = "http://crm.local/";
 }
 
+// Instancia o AuthUser
+$auth = AuthUser::create();
 
-?>
+AppContainer::setAuthUser($auth);
 
+$service = new TeamsService();
+
+/** @var Team $gay */
+foreach ($service->list() as $gay) {
+  var_dump($gay->getUsers());
+}

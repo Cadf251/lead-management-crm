@@ -9,6 +9,18 @@ class OperationResult
 {
   private array $messages = [];
   private int $status = self::STATUS_SUCESSO;
+  private bool $reported = false;
+  private ?string $redirect = null;
+  private array $updates = [];
+
+  private ?string $target = null;
+  private ?string $append = null;
+  private ?string $html = null;
+  private ?string $csrf_token = null;
+  private ?string $remove = null;
+  private bool $close_overlay = false;
+
+  private array $savedInstance = [];
 
   const STATUS_SUCESSO = 3;
   const STATUS_AVISO = 2;
@@ -51,8 +63,9 @@ class OperationResult
   /**
    * Retorna como HTML com separador <br>
    */
-  public function getMessagesAsHtml(): string
+  public function getMessagesAsHtml(): ?string
   {
+    if (empty($this->messages)) return null;
     return implode("<br>", $this->messages);
   }
 
@@ -89,6 +102,93 @@ class OperationResult
   }
 
   /**
+   * Salva uma instância na operação para uso posterior.
+   * 
+   */
+  public function saveInstance(string $key, mixed $instance)
+  {
+    $this->savedInstance[$key] = $instance;
+  }
+
+  public function getInstance(string $key): mixed
+  {
+    return $this->savedInstance[$key] ?? null;
+  }
+
+  /**
+   * Adiciona um destino caso a operação seja concluída com sucesso
+   */
+  public function redirect(string $to): void
+  {
+    $this->redirect = $to;
+  }
+
+  public function setUpdate(string $target, string $html): void
+  {
+    $this->updates[] = [
+      "type" => "update",
+      "target" => $target,
+      "html" => $html
+    ];
+  }
+
+  /**
+   * Adiciona um container para que um novo card seja criado
+   */
+  public function setAppend(string $target, string $html): void
+  {
+    // $this->append = $append;
+    $this->updates[] = [
+      "type" => "append",
+      "target" => $target,
+      "html" => $html,
+    ];
+  }
+
+  public function setRemove(string $target)
+  {
+    // $this->remove = $remove;
+    $this->updates[] = [
+      "type" => "remove",
+      "target" => $target
+    ];
+  }
+
+  public function setOverlay(string $html): void
+  {
+    $this->updates[] = [
+      "type" => "overlay",
+      "html" => $html
+    ];
+  }
+
+  public function setCsrfToken(string $token)
+  {
+    $this->csrf_token = $token;
+  }
+
+  public function closeOverlay()
+  {
+    $this->close_overlay = true;
+  }
+
+  /**
+   * Adiciona um HTML na resposta
+   */
+  public function setHtml(string $html): void
+  {
+    $this->html = $html;
+  }
+
+  /**
+   * Adiciona um card como target para ser manipulado pelo JS
+   */
+  public function setTarget(string $target)
+  {
+    $this->target = $target;
+  }
+
+  /**
    * Pega o alerta no formado para a session
    */
   public function getAlert(): array
@@ -102,15 +202,28 @@ class OperationResult
   /**
    * Retorna o status no formato acetável para AJAX
    * 
-   * retorna em PT
+   * retorna em PT|EN
    */
   public function getForAjax()
   {
-    return [
-      "sucesso" => $this->hadSucceded(),
-      "alerta" => $this->getStatusAsString(),
-      "mensagens" => $this->getMessagesAsHtml()
+    $response = [
+      "success"   => $this->hadSucceded(),
+      "redirect"  => $this->redirect ?? null,
+      "csrf_token" => $this->csrf_token ?? null,
+      "close_overlay" => $this->close_overlay ?? false,
     ];
+
+    // Só adiciona os textos se NÃO foi reportado para a sessão
+    if (!$this->reported) {
+      $response["alert"]    = $this->getStatusAsString();
+      $response["messages"] = $this->getMessagesAsHtml();
+    }
+
+    if (!empty($this->updates)) {
+      $response["updates"] = $this->updates;
+    }
+
+    return $response;
   }
 
   /**
@@ -132,6 +245,7 @@ class OperationResult
   public function report()
   {
     $_SESSION["alerta"] = $this->getAlert();
+
+    $this->reported = true;
   }
 }
-

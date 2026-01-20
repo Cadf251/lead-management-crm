@@ -4,6 +4,7 @@ namespace App\adms\Presenters;
 
 use App\adms\Core\AppContainer;
 use App\adms\Models\NivelSistema;
+use App\adms\Models\SystemLevel;
 use App\adms\UI\NavLink;
 
 /**
@@ -13,11 +14,11 @@ class NavPresenter
 {
   public static function present()
   {
-    $servidorId = AppContainer::getAuthUser()->getServidorId();
-    $usuarioId = AppContainer::getAuthUser()->getUsuarioId();
-    $usuarioNome = AppContainer::getAuthUser()->getUsuarioNome();
-    $usuarioFoto = AppContainer::getAuthUser()->getUsuarioFoto();
-    $nivelAcessoNome = AppContainer::getAuthUser()->nivelSistema->getNome();
+    $servidorId = AppContainer::getAuthUser()->getServerId();
+    $usuarioId = AppContainer::getAuthUser()->getUserId();
+    $usuarioNome = AppContainer::getAuthUser()->getUserName();
+    $usuarioFoto = AppContainer::getAuthUser()->getUserProfilePicture();
+    $nivelAcessoNome = AppContainer::getAuthUser()->systemLevel->getName();
 
     return [
       "servidor_id" => $servidorId ?? "",
@@ -28,7 +29,7 @@ class NavPresenter
         $usuarioId,
         $usuarioFoto
       ),
-      "links" => self::links(AppContainer::getAuthUser()->nivelSistema)
+      "links" => self::links(AppContainer::getAuthUser()->systemLevel)
     ];
   }
 
@@ -43,27 +44,27 @@ class NavPresenter
     }
   }
 
-  private static function links(NivelSistema $nivel)
+  private static function links(SystemLevel $nivel)
   {
     $links = NavLink::create("dashboard", "house", "Início");
 
     if ($nivel->podeEditarUsuarios()) {
-      $links .= NavLink::create("listar-usuarios", "user", "Editar Usuários");
+      $links .= NavLink::create("usuarios", "user", "Editar Usuários");
     }
 
     if ($nivel->podeEditarEquipes()) {
-      $links .= NavLink::create("listar-equipes", "user-group", "Editar Equipes");
+      $links .= NavLink::create("equipes", "user-group", "Editar Equipes");
     }
 
     if ($nivel->canEditOffers()) {
-      $links .= NavLink::create("listar-ofertas", "tag", "Editar Ofertas");
-      $links .= NavLink::create("listar-produtos", "basket-shopping", "Editar Produtos");
+      $links .= NavLink::create("ofertas", "tag", "Editar Ofertas");
+      $links .= NavLink::create("produtos", "basket-shopping", "Editar Produtos");
     }
 
     $links .= NavLink::create("em-atendimento", "list", "Gerenciar Leads");
 
     /*
-        echo HTMLHelper::renderNavLink("em-atendimento", "list", "Gerenciar Leads");
+    echo HTMLHelper::renderNavLink("em-atendimento", "list", "Gerenciar Leads");
     echo HTMLHelper::renderNavLink("recursos", "toolbox", "Meus Recursos");
     echo HTMLHelper::renderNavLink("carteira-clientes", "wallet", "Carteira de Clientes");
     echo HTMLHelper::renderNavLink("publicos", "chart-simple", "Públicos");

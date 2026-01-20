@@ -71,7 +71,6 @@ class Token
     ?int $supportId = null
   ):self
   {
-    GenerateLog::generateLog("debug", "user", [$userId]);
     return new self(
       self::createToken(),
       $type,
@@ -176,13 +175,18 @@ class Token
     return $this->supportId;
   }
 
+  public function disable()
+  {
+    $this->status = new Status(Status::STATUS_DESATIVADO);
+  }
+
   // |-----------------|
   // |--- VERIFIERS ---|
   // |-----------------|
   public function isValid()
   {
     return
-      ($this->status->id === Status::STATUS_ATIVADO)
+      ($this->status->getId() === Status::STATUS_ATIVADO)
       && ($this->deadend === null || $this->deadend >= new DateTime("now"));
   }
 }

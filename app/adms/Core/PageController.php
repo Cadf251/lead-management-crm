@@ -5,68 +5,48 @@ namespace App\adms\Core;
 use App\adms\Helpers\ClearUrl;
 use App\adms\Helpers\SlugController;
 
-/**
- * Recebe a URL e direciona para outros Controllers
- * 
- * @author Cadu Prado cadu.devmarketing@gmail.com
- */
 class PageController
 {
-  /** @var string $url Recebe a URL do .htaccess */
-  private string $url;
-
-  /** @var array $urlArray Recebe a URL convertida em array */
+  private string $url = "";
   private array $urlArray = [];
-
-  /** @var string $urlController Recebe da URL o nome da controller */
   private string $urlController = "";
+  private string $urlMethod = "";
+  private ?string $urlParameter = null;
 
-  /** @var string $urlController Recebe da URL o parâmetro */
-  private string $urlParameter = "";
-
-  /** Recebe a URL do .htaccess */
+  /**
+   * Lembrando que o PageController não sabe inglês. Ele tem que reparar a url em pt.
+   */
   public function __construct()
   {
-    // Verifica se tem valor da $url
     $url = filter_input(INPUT_GET, "url", FILTER_DEFAULT);
 
-    if (!empty($url)){
-      // Recebe o valor
-      $this->url = $url;
-      
-      // Chama o helper para limpar a URL
-      $this->url = ClearUrl::clearUrl($this->url);
-
-      // Converte a url em array
+    if (!empty($url)) {
+      $this->url = ClearUrl::clearUrl($url);
       $this->urlArray = explode("/", $this->url);
 
-      // Verifica se existe a controller da URL
-      if (isset($this->urlArray[0])){
-        $this->urlController = SlugController::slugController($this->urlArray[0]);
-      } else {
-        $this->urlController = SlugController::slugController("Login");
+      // 1. Define o Controller
+      $this->urlController = $this->urlArray[0] ?? "login";
+
+      // 2. Define o Método (Ação) - Se não existir, deixamos vazio
+      if (isset($this->urlArray[1])) {
+        $this->urlMethod = $this->urlArray[1];
       }
 
-      // Verifique se existe o parâmetro da URL
-      if (isset($this->urlArray[1])){
-        $this->urlParameter = $this->urlArray[1];
-      }
-
+      // 3. Define o Parâmetro (ID)
+      $this->urlParameter = isset($this->urlArray[2])
+        ? $this->urlArray[2]
+        : null;
     } else {
-      $this->urlController = SlugController::slugController("Login");
+      $this->urlController = "login";
     }
   }
 
-  /**
-   * Carregar página/controller 
-   * Instanciar a classe para validar e carregar página/controller 
-   *
-   * @return void
-   */
-  public function loadPage() :void
+  public function loadPage(): void
   {
     $loadPage = new LoadPage();
-    
-    $loadPage->loadPage($this->urlController, $this->urlParameter);
+
+    // Agora passamos os 3 argumentos para o LoadPage
+    // Se o seu LoadPage ainda recebe apenas 2, precisaremos ajustar a assinatura dele também!
+    $loadPage->loadPage($this->urlController, $this->urlMethod, $this->urlParameter);
   }
 }

@@ -1,33 +1,38 @@
 <?php
 
 use App\adms\UI\Card;
+use App\adms\UI\Hamburguer;
+
+$hamb = Hamburguer::create(
+  $user["button"]
+);
 
 $content = <<<HTML
 <div class="card__header center">
   <div class="foto">
-    {$usuario["foto_perfil"]}
+    {$user["foto_perfil"]}
   </div>
   <div class="card__header__info">
-    <strong>{$usuario['nome']}</strong>
+    <strong>{$user['nome']}</strong>
     <div class="subinfo">
-      <span>{$usuario['email']}</span>
-      <span>{$usuario['celular']}</span>
+      <span>{$user['email']}</span>
+      <span>{$user['celular']}</span>
     </div>
   </div>
 </div>
 <div class="card__inline-items">
-  {$usuario["nivel_badge"]}
-  {$usuario["status_badge"]}
+  {$user["nivel_badge"]}
+  {$user["status_badge"]}
 </div>
 <div class="card__inline-items">
-  {$usuario["button"]}
+  $hamb
 </div>
 HTML;
 
 $final = Card::create($content);
 
 return <<<HTML
-<div class="card--{$usuario['id']}">
+<div class="card--{$user['id']}">
   $final
 </div>
 HTML;

@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <?php
-
-use App\adms\Helpers\SafeEcho;
 include_once "app/adms/Views/partials/head.php";
 ?>
 <body>

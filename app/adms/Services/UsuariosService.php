@@ -34,7 +34,7 @@ class UsuariosService
   }
 
   /**
-   * Cria um novo usuário, verifica se o email já estpa sendo usado, manda um email para criar senha, e armazena a foto se for enviada no formulário.
+   * Cria um novo usuário, verifica se o email já está sendo usado, manda um email para criar senha, e armazena a foto se for enviada no formulário.
    * 
    * @param string $nome
    * @param string $email
@@ -94,11 +94,17 @@ class UsuariosService
    */
   public function editar(Usuario $usuario, array $dados): OperationResult
   {
-    $usuario->setNome($dados["nome"]);
-    $usuario->setCelular($dados["celular"]);
-    $usuario->setNivel($dados["nivel_acesso_id"]);
-    if ($usuario->getEmail() !== $dados["email"]) {
-      $this->mudarEmail($usuario, $dados["email"]);
+    try {
+      $usuario->setNome($dados["nome"]);
+      $usuario->setCelular($dados["celular"]);
+      $usuario->setNivel((int)$dados["nivel_acesso_id"]);
+      if ($usuario->getEmail() !== $dados["email"]) {
+        $this->mudarEmail($usuario, $dados["email"]);
+      }
+    } catch (Exception $e) {
+      GenerateLog::log($e, GenerateLog::ERROR);
+      $this->result->failed("Ocorreu algum erro.");
+      return $this->result;
     }
 
     $substituida = false;
@@ -113,7 +119,6 @@ class UsuariosService
           "code" => $e->getCode(),
           "file" => $e->getFile(),
           "line" => $e->getLine(),
-          "trace" => $e->getTrace(),
         ]);
         $this->result->warning("Não foi possível armazenar a foto do usuário.");
       }
@@ -350,7 +355,7 @@ class UsuariosService
     }
 
     $arquivoNome = $usuario->getId() . $extensoes_permitidas[$tipo];
-    $servidorId = AppContainer::getAuthUser()->getServidorId();
+    $servidorId = AppContainer::getAuthUser()->getServerId();
     $caminho = APP_ROOT . "files/uploads/{$servidorId}/fotos-perfil/";
 
     // Tenta criar o diretório se não existir
@@ -383,7 +388,7 @@ class UsuariosService
       $usuario->setFoto($tipoFormatado);
       
       // Se o usuário for o próprio, adiciona na SESSION
-      if (AppContainer::getAuthUser()->getUsuarioId() === $usuario->getId()) {
+      if (AppContainer::getAuthUser()->getUserId() === $usuario->getId()) {
         $_SESSION["auth"]["foto_perfil_tipo"] = $usuario->getFoto();
       }
     } else {
@@ -398,7 +403,7 @@ class UsuariosService
    */
   private function apagarFoto(Usuario $usuario): void
   {
-    $servidorId = AppContainer::getAuthUser()->getServidorId();
+    $servidorId = AppContainer::getAuthUser()->getServerId();
     $caminho = APP_ROOT . "files/uploads/{$servidorId}/fotos-perfil/{$usuario->getId()}";
 
     $arquivo = "$caminho.{$usuario->getFoto()}";
@@ -452,11 +457,11 @@ class UsuariosService
 
       $mail->destinatarios([$usuario->getEmail()]);
 
-      $mail->imagens([["caminho" => APP_ROOT."public/img/logo.png", "nome" => "logo"]]);
+      $mail->imagens([["caminho" => APP_ROOT."public/img/logo.webp", "nome" => "logo"]]);
 
       $params = [
         "[NOME]" => $usuario->getNome(),
-        "[SERVIDOR_ID]" => AppContainer::getAuthUser()->getServidorId() ?? $_SESSION["auth"]["servidor_id"],
+        "[SERVIDOR_ID]" => AppContainer::getAuthUser()->getServerId() ?? $_SESSION["auth"]["servidor_id"],
         "[TOKEN]" => $token->getToken()
       ];
 

@@ -38,4 +38,9 @@ class AppContainer
 
     return self::$conn->conexao;
   }
+
+  public static function unsetClientConn(): void
+  {
+    self::$conn = null;
+  }
 }

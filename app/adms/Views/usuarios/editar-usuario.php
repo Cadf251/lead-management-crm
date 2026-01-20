@@ -23,8 +23,9 @@ HTML;
 
 $fields = require "partials/form-modelo.php";
 
-return Form::create("editar-usuario/{$usuario['id']}")
+return Form::create("usuarios/editar/{$usuario['id']}")
   ->addFields($fields)
   ->withFiles()
+  ->isAjax()
   ->withContent($content)
   ->render();

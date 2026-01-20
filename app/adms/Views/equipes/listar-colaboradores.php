@@ -14,14 +14,15 @@ $proximos = $equipe["proximos"];
 $voltar = Button::create("Voltar")
   ->color("blue")
   ->withIcon("back")
-  ->link("listar-equipes/")
+  ->link("equipes/")
   ->render();
 
 $button = Button::create("+ Novo Colaborador")
   ->color("black")
   ->data([
-    "action" => "colaborador:novo",
-    "equipe-id" => $equipe["id"]
+    "action" => "action:core",
+    "url" => "colaboradores/novo/{$equipe['id']}",
+    "action-type" => "overlay"
   ]);
 
 $header = Header::create("Colaboradores | {$equipe["nome"]}")

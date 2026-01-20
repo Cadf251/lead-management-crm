@@ -2,9 +2,10 @@
 
 namespace App\adms\Controllers\base;
 
-use App\adms\Core\AppContainer;
 use App\adms\Core\LoadView;
-use PDO;
+use App\adms\Core\OperationResult;
+use App\adms\Helpers\CSRFHelper;
+use App\adms\Helpers\GenerateLog;
 
 abstract class ControllerBase
 {
@@ -12,19 +13,6 @@ abstract class ControllerBase
   protected string $viewFolder;
   protected string $defaultView;
   protected string $redirectPath;
-
-  public function __construct()
-  {
-    $conexao = AppContainer::getClientConn();
-
-    // O filho decide quais classes instanciar
-    $this->boot($conexao);
-  }
-
-  /**
-   * Método abstrato: Cada filho deve dizer como inicia seu repo e service
-   */
-  abstract protected function boot(PDO $conexao): void;
 
   protected function setData(array $data): void
   {
@@ -48,18 +36,95 @@ abstract class ControllerBase
     exit;
   }
 
-  protected function renderPartial(string $file, array $params = [])
+  protected function renderPartial(string $file, array $presented = [])
   {
-    extract($params);
+    extract($presented);
     return require APP_ROOT . "app/adms/Views/{$this->viewFolder}/partials/{$file}.php";
   }
 
-  /**
-   * Atalho para validar CSRF
-   */
-  protected function validateCSRF(string $key): bool
-  {
-    $token = $_POST['csrf_token'] ?? null;
-    return $token && \App\adms\Helpers\CSRFHelper::validateCSRFToken($key, $token);
+  protected function formView(
+    string $folder,
+    string $file,
+    array $extraData = [],
+  ) {
+    $this->data = array_merge($this->data, $extraData);
+
+    // 1. Retorna uma View
+    $content = require APP_ROOT . "app/adms/Views/$folder/$file.php";
+
+    $result = new OperationResult();
+    $result->setOverlay($content);
+    
+    echo json_encode($result->getForAjax());
+    exit;
   }
+
+  protected function formSubmit(
+    string $csrfKey,
+    callable $action,
+  ): OperationResult {
+    $form = filter_input_array(INPUT_POST, FILTER_DEFAULT);
+
+    // 1. Tenta Processar o POST
+    if (CSRFHelper::validateCSRFToken($csrfKey, $form['csrf_token'])) {
+
+      /** @return OperationResult $result */
+      return $action($form);
+    }
+
+
+    $result = new OperationResult();
+    $result->failed("Algo deu errado");
+    return $result;
+  }
+
+  protected function processCreateSubmit(
+    OperationResult $result,
+    string $instanceKey
+  ) {
+    if ($result->hadSucceded()) {
+      $html = $this->renderCard($result->getInstance($instanceKey));
+      $result->setAppend(".js--main", $html);
+      $result->closeOverlay();
+    }
+
+    echo json_encode($result->getForAjax());
+    exit;
+  }
+
+  protected function processEditSubmit(
+    OperationResult $result,
+    string $instanceKey
+  ) {
+    if ($result->hadSucceded()) {
+      $object = $result->getInstance($instanceKey);
+      $html = $this->renderCard($object);
+      $result->setUpdate(".card--{$object->getId()}", $html);
+      $result->closeOverlay();
+    }
+
+    echo json_encode($result->getForAjax());
+    exit;
+  }
+
+  protected function identifyOr404(string $objectId, object $repository, string $message = "Registro desconhecido."): ?object
+  {
+    $object = $repository->select((int)$objectId);
+
+    if ($object === null) {
+      $result = new OperationResult();
+      $result->failed($message);
+      echo json_encode($result->getForAjax());
+      exit;
+    }
+
+    return $object;
+  }
+
+  protected function isPost(): bool
+  {
+    return $_SERVER['REQUEST_METHOD'] === "POST";
+  }
+
+  abstract protected function renderCard(object $entity): string;
 }

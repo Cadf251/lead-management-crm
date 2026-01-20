@@ -3,74 +3,57 @@
 namespace App\adms\Core;
 
 use App\adms\Helpers\GenerateLog;
-use App\adms\Services\AuthUser;
-use App\adms\UI\FloatingAction;
 
 class LoadPage
 {
-  /** @var string $urlController Recebe da URL o nome da controller */
   private string $urlController = "";
-
-  /** @var string $urlController Recebe da URL o parâmetro */
+  private string $urlMethod = "";
   private string $urlParameter = "";
 
-  /** @var string $classLoad Controller a ser carregado */
+  /** @var array $routes Transforma uma URL amigável em class */
+  private array $admsRoutes = [
+    "login"         => ["login\LoginController", "index", self::ACCESS_PUBLIC],
+    "deslogar"      => ["login\LoginController", "logout", self::ACCESS_PUBLIC],
+    "esqueci-senha" => ["login\LoginController", "forgotPass", self::ACCESS_PUBLIC],
+    "nova-senha"    => ["login\LoginController", "createPass", self::ACCESS_PUBLIC],
+
+    "dashboard"     => ["dashboard\Dashboard", "index", self::ACCESS_PRIVATE],
+
+    "usuarios"                => ["users\UsersController", "index", self::ACCESS_PRIVATE],
+    "usuarios/listar"         => ["users\UsersController", "list", self::ACCESS_PRIVATE],
+    "usuarios/editar"         => ["users\UsersController", "edit", self::ACCESS_PRIVATE, self::AJAX_ONLY],
+    "usuarios/criar"          => ["users\UsersController", "create", self::ACCESS_PRIVATE, self::AJAX_ONLY],
+    "usuarios/desativar"      => ["users\UsersController", "disable", self::ACCESS_PRIVATE, self::AJAX_ONLY],
+    "usuarios/resetar-senha"  => ["users\UsersController", "resetPassword", self::ACCESS_PRIVATE, self::AJAX_ONLY],
+    "usuarios/reativar"       => ["users\UsersController", "reactivate", self::ACCESS_PRIVATE, self::AJAX_ONLY],
+    "usuarios/reenviar-email" => ["users\UsersController", "resendMail", self::ACCESS_PRIVATE, self::AJAX_ONLY],
+
+    "erro" => ["erro\Erro", "index", self::ACCESS_PUBLIC],
+
+    "equipes"           => ["teams\TeamsController", "index", self::ACCESS_PRIVATE],
+    "equipes/criar"     => ["teams\TeamsController", "create", self::ACCESS_PRIVATE, self::AJAX_ONLY],
+    "equipes/editar"    => ["teams\TeamsController", "edit", self::ACCESS_PRIVATE, self::AJAX_ONLY],
+    "equipes/ativar"    => ["teams\TeamsController", "activate", self::ACCESS_PRIVATE, self::AJAX_ONLY],
+    "equipes/pausar"    => ["teams\TeamsController", "pause", self::ACCESS_PRIVATE, self::AJAX_ONLY],
+    "equipes/desativar" => ["teams\TeamsController", "disable", self::ACCESS_PRIVATE, self::AJAX_ONLY],
+
+    "colaboradores"                     => ["teams\TeamUsersController", "index", self::ACCESS_PRIVATE],
+    "colaboradores/novo"                => ["teams\TeamUsersController", "add", self::ACCESS_PRIVATE, self::AJAX_ONLY],
+    "colaboradores/remover"             => ["teams\TeamUsersController", "remove", self::ACCESS_PRIVATE, self::AJAX_ONLY],
+    "colaboradores/alterar-funcao"      => ["teams\TeamUsersController", "changeFunction", self::ACCESS_PRIVATE, self::AJAX_ONLY],
+    "colaboradores/alterar-recebimento" => ["teams\TeamUsersController", "changeReceiving", self::ACCESS_PRIVATE, self::AJAX_ONLY],
+    "colaboradores/alterar-vez"         => ["teams\TeamUsersController", "changeTime", self::ACCESS_PRIVATE, self::AJAX_ONLY],
+    
+    "ofertas"   => ["Offer", self::ACCESS_PRIVATE],
+    "produtos"  => ["Products", self::ACCESS_PRIVATE]
+  ];
+
+  private const ACCESS_PUBLIC = "public";
+  private const ACCESS_PRIVATE = "private";
+  private const ACCESS_DEV = "dev";
+  private const AJAX_ONLY = true;
+
   private string $classLoad;
-
-  /** @var array $listDirectory Recebe a lista de diretórios com as controllers */
-  private array $listPackages = ["adms", "database"];
-
-  /** @var array $listDirectory Lista de diretório das classes */
-  private array $listDirectory = ["login", "dashboard", "usuarios", "equipes", "atendimentos", "ofertas", "produtos", "floating", "erro", "master", "api"];
-
-  /** @var array $listPgPublic Lista de páginas públicas */
-  private array $listPgPublic = ["Login", "NovaSenha", "CriarSenha", "Erro", "Api"];
-
-  /** @var array $listPgPrivate Lista de páginas privadas */
-  private array $listPgPrivate = [
-    "Deslogar",
-    "Dashboard",
-    "DashboardUsuarios",
-    "DashboardEquipes",
-    "ListarUsuarios",
-    "ListarEquipes",
-    "ListarColaboradores",
-    "EmAtendimento",
-    "ListarOfertas",
-    "ListarProdutos"
-  ];
-
-  private array $listPost = [
-    "CriarUsuario",
-    "EditarUsuario",
-    "DesativarUsuario",
-    "ReativarUsuario",
-    "ResetarSenha",
-    "ReenviarEmail",
-    "CriarEquipe",
-    "EditarEquipe",
-    "CongelarEquipe",
-    "AtivarEquipe",
-    "DesativarEquipe",
-    "NovoColaborador",
-    "AlterarFuncao",
-    "AlterarRecebimento",
-    "MudarVez",
-    "RemoverColaborador",
-    "CriarProduto",
-    "EditarProduto",
-    "DeletarProduto",
-    "CriarOferta",
-    "FloatingAction"
-  ];
-
-  /** @var array $listPgDev Páginas que só podem ser acessadas por DEVs */
-  private array $listPgDev = [
-    "ListarServidores",
-    "InstalarServidor",
-    "AtivarServidor",
-    "AtualizarServidores"
-  ];
 
   /**
    * Verificar se existe a página com o método checkPageExists
@@ -80,110 +63,82 @@ class LoadPage
    * 
    * @return void
    */
-  public function loadPage(string|null $urlController, string|null $urlParameter): void
+  public function loadPage(string|null $urlController, ?string $urlMethod, string|null $urlParameter): void
   {
-    $this->urlController = $urlController;
-    $this->urlParameter = $urlParameter;
+    // 1. Monta a chave de busca (ex: "usuarios/editar" ou "usuarios")
+    $routeKey = $urlMethod ? "$urlController/$urlMethod" : $urlController;
 
-    // Verificar se a página existe
-    $pageExists = $this->pageExists();
-
-    if (!$pageExists[0])
-      $this->falha("002. Página não encontrada.");
-    else if ($pageExists[1] === "private") {
-      // Requer login
-      if (!AppContainer::getAuthUser()->estaLogado()) {
-        header("Location: {$_ENV['HOST_BASE']}login");
-        exit;
-      }
-    } else if ($pageExists[1] === "post") {
-      // Permite só POST
-      if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-        header("Location: {$_ENV['HOST_BASE']}dashboard");
-        exit;
-      }
-    } else if (($pageExists[1] === "dev") && ($_SERVER['HTTP_HOST'] !== "crm.local")) {
-      header("Location: {$_ENV['HOST_BASE']}login");
-      exit;
+    // 2. Se não achou a combinação, tenta apenas o controller (fallback para index)
+    if (!isset($this->admsRoutes[$routeKey])) {
+      $routeKey = $urlController;
     }
 
-    // Verifica se a class existe
-    if (!$this->controllerExists())
-      $this->falha("002. Classe não encontrada.");
-
-    // Chama o método
-    $this->loadMetodo();
-  }
-
-  /**
-   * Verificar se a página se existe e se a página é pública ou privada
-   * 
-   * @return array 0 => true ou false (se existe ou não); 1 => public ou private
-   */
-  private function pageExists(): array
-  {
-    // Verifica se a página está no array de páginas públicas
-    if (in_array($this->urlController, $this->listPgPublic))
-      return [true, "public"];
-
-    // Verifica se a página está no array de páginas privadas
-    if (in_array($this->urlController, $this->listPgPrivate))
-      return [true, "private"];
-
-    if (in_array($this->urlController, $this->listPost))
-      return [true, "post"];
-
-    // Verifica se a página está no array de devs
-    if (in_array($this->urlController, $this->listPgDev))
-      return [true, "dev"];
-
-    return [false];
-  }
-
-  /**
-   * Verificar se a classe referente a página existe
-   * 
-   * @return bool
-   */
-  private function controllerExists(): bool
-  {
-
-    foreach ($this->listPackages as $pacote) {
-
-      foreach ($this->listDirectory as $directory) {
-        $this->classLoad = "\\App\\$pacote\\Controllers\\$directory\\" . $this->urlController;
-
-        if (class_exists($this->classLoad))
-          return true;
-      }
+    if (!isset($this->admsRoutes[$routeKey])) {
+      $this->failed();
     }
 
-    return false;
+    $routerInfo = $this->admsRoutes[$routeKey];
+    $this->urlController = $routerInfo[0];
+    $this->urlMethod     = $routerInfo[1];
+    $accessLevel         = $routerInfo[2];
+
+    // 2. Controller existe?
+    if (!$this->controllerExists("adms")) {
+      $this->failed();
+    }
+
+    // 3. Verificação de Segurança
+    $this->checkSecurity($accessLevel);
+
+    $this->urlParameter = $urlParameter ?? $urlMethod;
+
+    $this->loadMethod();
   }
 
-  /**
-   * Chama o método index se existir
-   */
-  private function loadMetodo(): void
+  private function controllerExists(string $package): bool
   {
-    $classLoad = new $this->classLoad();
+    $this->classLoad = "\\App\\$package\\Controllers\\" . $this->urlController;
+    return class_exists($this->classLoad);
+  }
 
-    if (method_exists($classLoad, "index"))
-      $classLoad->{"index"}($this->urlParameter);
-    else {
-      GenerateLog::generateLog("error", "Método não encontrado.", ["pagina" => $this->urlController, "parametro" => $this->urlParameter]);
-      die("Método não encontrado");
+  private function loadMethod()
+  {
+    $classPath = $this->classLoad;
+    $controller = new $classPath();
+
+    // Se o método existe, chama. Se não, tenta o index (fallback antigo)
+    if (method_exists($controller, $this->urlMethod)) {
+      $controller->{$this->urlMethod}($this->urlParameter);
+    } elseif (method_exists($controller, 'index')) {
+      $controller->index($this->urlParameter);
+    } else {
+      $this->failed();
     }
   }
 
-  /**
-   * Direciona o cabra para a tela de falha e interrompe o código
-   * @param string $mensagem A mensagem do log de erro
-   * @param string $location O local o usuário será enviado, pode ser login ou erro 404.
-   */
-  private function falha(string $mensagem): void
+  private function checkSecurity(string $level)
   {
+    if ($level == self::ACCESS_PRIVATE) {
+      if (!AppContainer::getAuthUser()->isLoggedIn()) {
+        $this->redirectLogin();
+      }
+    } else if ($level === self::ACCESS_DEV) {
+      if ($_SERVER["HTTP_HOST"] !== "crm.local") {
+        $this->failed();
+      }
+    }
+  }
+
+  private function failed(): void
+  {
+    GenerateLog::generateLog("debug", "failed for some reason", null);
     header("Location: {$_ENV['HOST_BASE']}erro/404");
+    exit;
+  }
+
+  private function redirectLogin(): void
+  {
+    header("Location: {$_ENV['HOST_BASE']}login");
     exit;
   }
 }

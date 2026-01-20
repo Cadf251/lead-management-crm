@@ -8,7 +8,7 @@ include_once "app/adms/Views/partials/calendar.php";
 
 ?>
 
-<h1 class="titulo titulo--1">Olá, <?php echo AppContainer::getAuthUser()->getUsuarioNome() ?></h1>
+<h1 class="titulo titulo--1">Olá, <?php echo AppContainer::getAuthUser()->getUserName() ?></h1>
 <h2 class="titulo titulo--3">Selecione um período</h2>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 

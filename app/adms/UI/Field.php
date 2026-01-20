@@ -12,8 +12,8 @@ class Field
   private string $optionsHtml = ''; // Para o Select
   private bool $inputOnly = false;
   private array $classes = ["input"];
-  private array $radios = [];
   private bool $selectDefault = true;
+  private ?string $autocomplete = null;
 
   public const TYPE_TEXT = "text";
   public const TYPE_FILE = "file";
@@ -21,6 +21,9 @@ class Field
   public const TYPE_SELECT = "select";
   public const TYPE_TEXTAREA = "textarea";
   public const TYPE_RADIO = "radio";
+  public const TYPE_NUMBER = "number";
+  public const TYPE_EMAIL = "email";
+  public const TYPE_PASS = "password";
 
   public static function create(string $label, string $name): self
   {
@@ -91,6 +94,12 @@ class Field
   public function withoutDefaultOption()
   {
     $this->selectDefault = false;
+    return $this;
+  }
+
+  public function autocomplete(string $autocomplete)
+  {
+    $this->autocomplete = $autocomplete;
     return $this;
   }
 
@@ -171,11 +180,15 @@ class Field
       HTML;
     }
 
+    $auto = $this->autocomplete !== null
+      ? "autocomplete='{$this->autocomplete}'"
+      : "";
+
     // Template padrão (text, email, tel, etc)
     return <<<HTML
     <div class="form__campo">
       <label>{$this->label}</label>
-      <input class="$classes" type="{$this->type}" name="{$this->name}" value="{$this->value}" {$attrStr}>
+      <input class="$classes" $auto type="{$this->type}" name="{$this->name}" value="{$this->value}" {$attrStr}>
     </div>
     HTML;
   }

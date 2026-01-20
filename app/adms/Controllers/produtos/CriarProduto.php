@@ -32,7 +32,7 @@ class CriarProduto extends ProdutosAbstract
     $content = require APP_ROOT."app/adms/Views/produtos/criar-produto.php";
 
     echo json_encode([
-      "sucess" => true,
+      "success" => true,
       "html" => $content
     ]);
   }

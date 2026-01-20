@@ -3,17 +3,18 @@
 namespace App\adms\Services;
 
 use App\adms\Models\NivelSistema;
+use App\adms\Models\SystemLevel;
 
 /**
  * Regra de negócio criada para verificar se o usuário está logado ou não e direcionar para o login caso não esteja.
  */
 class AuthUser
 {
-  private bool $logado = false;
-  private array $usuario;
-  private int $servidorId;
-  private array $credenciais;
-  public NivelSistema $nivelSistema;
+  private bool $loggedIn = false;
+  private array $user;
+  private int $serverId;
+  private array $credentials;
+  public SystemLevel $systemLevel;
 
   public static function create():self
   {
@@ -25,35 +26,36 @@ class AuthUser
     }
 
     $instance = new self();
-    $instance->logado = true;
-    $instance->usuario = [
-      "id" => (int)$auth["usuario_id"],
-      "nome" => (string)$auth["usuario_nome"],
-      "email" => (string)$auth["usuario_email"],
-      "foto_perfil_tipo" => (string)$auth["foto_perfil_tipo"]
+    $instance->loggedIn = true;
+    $instance->user = [
+      "id" => (int)$auth["user_id"],
+      "name" => (string)$auth["user_nome"],
+      "email" => (string)$auth["user_email"],
+      "profile_picture" => (string)$auth["profile_picture"]
     ];
-    $instance->servidorId = (int)$auth["servidor_id"];
-    $instance->credenciais = (array)$auth["db_credenciais"];
-    $instance->nivelSistema = new NivelSistema(2);
+    $instance->serverId = (int)$auth["server_id"];
+    $instance->credentials = (array)$auth["db_credentials"];
+    $instance->systemLevel = new SystemLevel((int)$auth["system_level_id"]);
     return $instance;
   }
 
   public static function createFalse():self
   {
     $instance = new self();
-    $instance->logado = false;
+    $instance->loggedIn = false;
     return $instance;
   }
 
-  public function estaLogado()
+
+  public function isLoggedIn(): bool
   {
-    return $this->logado;
+    return $this->loggedIn;
   }
 
-  public function deslogar()
+  public function logout(): void
   {
     $_SESSION["auth"] = [];
-    $this->logado = false;
+    $this->loggedIn = false;
     header("Location: {$_ENV['HOST_BASE']}login");
     exit;
   }
@@ -62,58 +64,58 @@ class AuthUser
   // |--- GETTERS ---|
   // |---------------|
 
-  public function getUsuarioId():?int
+  public function getUserId():?int
   {
-    if (!$this->estaLogado()) {
+    if (!$this->isLoggedIn()) {
       return null;
     }
 
-    return $this->usuario["id"] ?? null;
+    return $this->user["id"] ?? null;
   }
 
-  public function getUsuarioNome():?string
+  public function getUserName():?string
   {
-    if (!$this->estaLogado()) {
+    if (!$this->isLoggedIn()) {
       return null;
     }
 
-    return $this->usuario["nome"] ?? null;
+    return $this->user["name"] ?? null;
   }
 
-  public function getUsuarioEmail():?string
+  public function getUserEmail():?string
   {
-    if (!$this->estaLogado()) {
+    if (!$this->isLoggedIn()) {
       return null;
     }
 
-    return $this->usuario["email"] ?? null;
+    return $this->user["email"] ?? null;
   }
 
-  public function getUsuarioFoto():?string
+  public function getUserProfilePicture():?string
   {
-    if (!$this->estaLogado()) {
+    if (!$this->isLoggedIn()) {
       return null;
     }
 
-    return $this->usuario["foto_perfil_tipo"] ?? null;
+    return $this->user["profile_picture"] ?? null;
   }
 
-  public function getCredenciais():?array
+  public function getCredentials():?array
   {
-    if (!$this->estaLogado()) {
+    if (!$this->isLoggedIn()) {
       return null;
     }
 
-    return $this->credenciais ?? null;
+    return $this->credentials ?? null;
   }
 
-  public function getServidorId():?int
+  public function getServerId():?int
   {
-    if(!$this->estaLogado()) {
+    if(!$this->isLoggedIn()) {
       return null;
     }
 
-    return $this->servidorId ?? null;
+    return $this->serverId ?? null;
   }
 
 }

@@ -25,7 +25,7 @@ $fields = [
   Field::create("Função do usuário na equipe", "funcao_id")
     ->type(Field::TYPE_SELECT)
     ->required()
-    ->options($funcoes)
+    ->options($funcoes ?? "")
     ->addClass("js--usuario-funcao"),
   
   Field::create("Poderá receber leads?", "pode_receber_leads")
@@ -39,7 +39,8 @@ $fields = [
     ->value($csrf)
 ];
 
-return Form::create("novo-colaborador/{$this->data["equipe_id"]}")
+return Form::create("novo/{$this->data["equipe_id"]}")
   ->addFields($fields)
+  ->isAjax()
   ->withTitle("Novo colaborador")
   ->render();

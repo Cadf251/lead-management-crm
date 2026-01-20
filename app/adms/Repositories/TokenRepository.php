@@ -3,8 +3,6 @@
 namespace App\adms\Repositories;
 
 use App\adms\Models\Token;
-use App\adms\Database\DbOperationsRefactored as DbOperations;
-use App\adms\Helpers\GenerateLog;
 use App\adms\Models\Status;
 use Exception;
 use PDO;
@@ -14,10 +12,8 @@ use PDO;
  * 
  * Repositório de Tokens
  */
-class TokenRepository
+class TokenRepository extends RepositoryBase
 {
-  private DbOperations $sql;
-
   private const TABLE = "tokens";
 
   private function queryBase()
@@ -27,11 +23,6 @@ class TokenRepository
     SELECT id, token, tipo, contexto, prazo, usuario_id, atendimento_id, token_status_id
     FROM $table
     SQL;
-  }
-
-  public function __construct(PDO $conn)
-  {
-    $this->sql = new DbOperations($conn);
   }
 
   public function select(string $token): ?Token

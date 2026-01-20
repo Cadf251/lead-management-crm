@@ -15,17 +15,17 @@ trait StatusHandler
   // |---------------|
   public function getStatusId():int
   {
-    return $this->status->id;
+    return $this->status->getId();
   }
 
   public function getStatusName(): string
   {
-    return $this->status->nome;
+    return $this->status->getName();
   }
 
   public function getStatusDescription(): string
   {
-    return $this->status->description;
+    return $this->status->getDescription();
   }
 
   // |---------------|
@@ -38,31 +38,5 @@ trait StatusHandler
     } catch (Exception $e) {
       throw new Exception($e->getMessage(), $e->getCode(), $e);
     }
-  }
-
-  // |----------------|
-  // |--- CHANGERS ---|
-  // |----------------|
-  public function disable()
-  {
-    $this->setStatus(Status::STATUS_DESATIVADO);
-  }
-
-  public function pause()
-  {
-    $this->setStatus(Status::STATUS_PAUSADO);
-  }
-
-  public function activate()
-  {
-    $this->setStatus(Status::STATUS_ATIVADO);
-  }
-
-  // |-----------------|
-  // |--- VERIFIERS ---|
-  // |-----------------|
-  public function isActive(): bool
-  {
-    return $this->status->id === Status::STATUS_ATIVADO;
   }
 }

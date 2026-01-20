@@ -10,7 +10,7 @@ class CriarOferta
     $content = require APP_ROOT."app/adms/Views/ofertas/criar-oferta.php";
 
     echo json_encode([
-      "sucess" => true,
+      "success" => true,
       "html" => $content
     ]);
   }

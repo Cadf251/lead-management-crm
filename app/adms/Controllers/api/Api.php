@@ -52,12 +52,9 @@ class Api
       exit;
     }
 
-    // Tranforma a task em class
-    $class = SlugController::slugController($task);
-
     // Tenta chamar a App\api\Controllers\Class->index().
     $loadApi = new LoadApi();
-    $loadApi->loadApi($class, $client, $post);
+    // $loadApi->loadApi($class, $client, $post);
   }
 
   /**

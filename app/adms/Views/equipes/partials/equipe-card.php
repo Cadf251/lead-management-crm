@@ -1,31 +1,30 @@
 <?php
 
-use App\adms\UI\Badge;
 use App\adms\UI\Card;
 use App\adms\UI\Hamburguer;
 
 $btns = "";
 
-foreach($equipe["buttons"] as $button){
+foreach($team["buttons"] as $button){
   $btns .= $button->render();
 }
 
 $hamburguer = Hamburguer::create($btns);
 
-$badge3 = $equipe["fila"]["badge"];
+$badge3 = $team["fila"]["badge"];
 
 $content = <<<HTML
 <div class="card__header center">
   <div class="card__header__info">
-    <strong>{$equipe['nome']}</strong>
+    <strong>{$team['nome']}</strong>
     <div class="subinfo">
-      <span>{$equipe['descricao']}</span>
+      <span>{$team['descricao']}</span>
     </div>
   </div>
 </div>
 <div class="card__inline-items">
-  {$equipe["numero_badge"]}
-  {$equipe["status_badge"]}
+  {$team["numero_badge"]}
+  {$team["status_badge"]}
   $badge3
 </div>
 <div class="card__inline-items">
@@ -37,7 +36,7 @@ HTML;
 $final = Card::create($content);
 
 return <<<HTML
-<div class="card--{$equipe['id']}">
+<div class="card--{$team['id']}">
   $final
 </div>
 HTML;

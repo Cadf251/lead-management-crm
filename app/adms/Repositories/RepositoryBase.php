@@ -8,6 +8,7 @@ use PDO;
 abstract class RepositoryBase
 {
   public DbOperations $sql;
+  private string $table;
 
   public function __construct(PDO $conn)
   {
