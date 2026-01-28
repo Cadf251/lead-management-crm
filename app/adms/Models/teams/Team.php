@@ -172,6 +172,11 @@ class Team
     $this->users = $colaboradores ?? [];
   }
 
+  public function setOneUser(TeamUser $user)
+  {
+    $this->users[] = $user;
+  }
+
   public function removeUser(int $id)
   {
     /** @var EquipesUsuario $colab */

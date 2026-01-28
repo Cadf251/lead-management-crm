@@ -104,7 +104,7 @@ class UsersController extends UsersBase
     /** @var OperationResult $result */
     $result = $action($user);
 
-    $result->setUpdate(".card--{$user->getId()}", $this->renderCard($user));
+    $result->setChange(".card--{$user->getId()}", $this->renderCard($user));
 
     echo json_encode($result->getForAjax());
     exit;

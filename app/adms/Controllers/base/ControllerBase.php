@@ -99,7 +99,7 @@ abstract class ControllerBase
     if ($result->hadSucceded()) {
       $object = $result->getInstance($instanceKey);
       $html = $this->renderCard($object);
-      $result->setUpdate(".card--{$object->getId()}", $html);
+      $result->setChange(".card--{$object->getId()}", $html);
       $result->closeOverlay();
     }
 

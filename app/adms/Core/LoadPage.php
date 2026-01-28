@@ -67,11 +67,13 @@ class LoadPage
   {
     // 1. Monta a chave de busca (ex: "usuarios/editar" ou "usuarios")
     $routeKey = $urlMethod ? "$urlController/$urlMethod" : $urlController;
-
+    
     // 2. Se não achou a combinação, tenta apenas o controller (fallback para index)
     if (!isset($this->admsRoutes[$routeKey])) {
       $routeKey = $urlController;
     }
+
+    GenerateLog::generateLog("info", "route-key", [$this->admsRoutes[$routeKey]]);
 
     if (!isset($this->admsRoutes[$routeKey])) {
       $this->failed();

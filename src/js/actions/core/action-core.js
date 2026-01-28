@@ -11,7 +11,7 @@ export const ActionHandler = {
 
     // Se precisar de confirmação
     if (dataset.confirm) {
-      setWarning(dataset.confirmTitle, dataset.confirmText, true, () => ActionHandler.execute(url, dataset));
+      setWarning(dataset.confirmTitle, dataset.confirmText, true, () => ActionHandler.execute(url, btn, dataset));
     } else {
       ActionHandler.execute(url, btn, dataset);
     }
@@ -21,7 +21,7 @@ export const ActionHandler = {
     const body = new URLSearchParams();
 
     // Deixa o card com efeito de carregando
-    if (dataset.target !== null) {
+    if (dataset.target) {
       setLoading(dataset.target);
     }
 

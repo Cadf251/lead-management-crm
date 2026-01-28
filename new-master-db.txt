@@ -1,0 +1,30 @@
+tenants // Empresas que tem um banco de dados próprio
+- id
+- name
+- plan_id // Qual plano ele contratou
+- host
+- database 
+
+api_tokens // para permissões de api
+- id
+- token
+- tenant_id
+
+users
+- id
+- email
+- password_hash
+- created
+
+user_businesses
+- user_id
+- business_id
+- role (admin, manager, sales)
+- status
+
+plans
+- id
+- name
+- price
+- billing_cycle   // monthly, yearly
+- status          // active, deprecated

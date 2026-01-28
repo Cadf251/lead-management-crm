@@ -2,6 +2,8 @@
 
 namespace App\adms\Core;
 
+use App\adms\Helpers\GenerateLog;
+
 /**
  * @complete V1
  */
@@ -12,12 +14,9 @@ class OperationResult
   private bool $reported = false;
   private ?string $redirect = null;
   private array $updates = [];
+  private array $customParams = [];
 
-  private ?string $target = null;
-  private ?string $append = null;
-  private ?string $html = null;
   private ?string $csrf_token = null;
-  private ?string $remove = null;
   private bool $close_overlay = false;
 
   private array $savedInstance = [];
@@ -123,6 +122,15 @@ class OperationResult
     $this->redirect = $to;
   }
 
+  public function setChange(string $target, string $html): void
+  {
+    $this->updates[] = [
+      "type" => "change",
+      "target" => $target,
+      "html" => $html
+    ];
+  }
+
   public function setUpdate(string $target, string $html): void
   {
     $this->updates[] = [
@@ -130,6 +138,11 @@ class OperationResult
       "target" => $target,
       "html" => $html
     ];
+  }
+
+  public function setCustomParam(string $key, $value): void
+  {
+    $this->customParams[$key] = $value;
   }
 
   /**
@@ -173,22 +186,6 @@ class OperationResult
   }
 
   /**
-   * Adiciona um HTML na resposta
-   */
-  public function setHtml(string $html): void
-  {
-    $this->html = $html;
-  }
-
-  /**
-   * Adiciona um card como target para ser manipulado pelo JS
-   */
-  public function setTarget(string $target)
-  {
-    $this->target = $target;
-  }
-
-  /**
    * Pega o alerta no formado para a session
    */
   public function getAlert(): array
@@ -221,6 +218,12 @@ class OperationResult
 
     if (!empty($this->updates)) {
       $response["updates"] = $this->updates;
+    }
+
+    if (!empty($this->customParams)) {
+      foreach ($this->customParams as $key => $value) {
+        $response[$key] = $value;
+      }
     }
 
     return $response;

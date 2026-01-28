@@ -30,7 +30,7 @@ class EquipePresenter
         "buttons" => self::buttons($equipe->getId(), $equipe->getName(), $equipe->getStatusId()),
         "proximos" => self::proximos($equipe),
         "fila" => self::fila($equipe),
-        "colaboradores" => self::colaboradores($equipe, TeamUserFunction::getSelectOptions()),
+        "colaboradores" => self::colaboradores($equipe),
       ];
     }
     
@@ -263,24 +263,29 @@ class EquipePresenter
     }
   }
 
-  public static function colaboradores(Team $equipe, $funcoes)
+  public static function colaboradores(Team $equipe)
   {
     if (empty($equipe->getUsers())) return [];
 
     $final = [];
     /** @var TeamUser $colaborador */
     foreach ($equipe->getUsers() as $colaborador) {
-      $final[] = [
-        "id" => $colaborador->getId() ?? "",
-        "usuario_id" => $colaborador->getUserId() ?? "",
-        "usuario_nome" => $colaborador->getUserName() ?? "",
-        "recebe_leads_switch" => self::recebeLeads($colaborador, $equipe->getId()),
-        "funcao_select" => self::funcao($colaborador, $funcoes),
-        "vez_buttons" => self::vez($colaborador, $equipe->getId()),
-        "remover_button" => self::remover($colaborador, $equipe->getId())
-      ];
+      $final[] = self::presentOneColaborador($equipe, $colaborador);
     }
     return $final;
+  }
+
+  public static function presentOneColaborador(Team $equipe, TeamUser $colaborador)
+  {
+    return [
+      "id" => $colaborador->getId() ?? "",
+      "usuario_id" => $colaborador->getUserId() ?? "",
+      "usuario_nome" => $colaborador->getUserName() ?? "",
+      "recebe_leads_switch" => self::recebeLeads($colaborador, $equipe->getId()),
+      "funcao_select" => self::funcao($colaborador, TeamUserFunction::getSelectOptions()),
+      "vez_buttons" => self::vez($colaborador, $equipe->getId()),
+      "remover_button" => self::remover($colaborador, $equipe->getId())
+    ];
   }
 
   private static function recebeLeads(TeamUser $colab, $equipeId)
@@ -297,9 +302,9 @@ class EquipePresenter
       ->switch()
       ->setSwitch($active)
       ->data([
-        "action" => "colaborador:recebimento",
-        "colaborador-id" => $colab->getId(),
-        "equipe-id" => $equipeId
+        "action" => "teamuser:receiving",
+        "url" => "colaboradores/alterar-recebimento/{$colab->getId()}",
+        "equipe-id" => $equipeId,
       ])
       ->tooltip("Alterar se recebe leads")
       ->render();
@@ -310,8 +315,8 @@ class EquipePresenter
     $button = Button::create("")
       ->color("blue")
       ->data([
-        "action" => "colaborador:alterar-funcao",
-        "colaborador-id" => $colab->getId(),
+        "action" => "teamuser:alter-function",
+        "url" => "colaboradores/alterar-funcao/{$colab->getId()}",
         "original-value" => $colab->getFunctionId()
       ])
       ->setDisabled()
@@ -339,18 +344,20 @@ class EquipePresenter
     $btn1 = Button::create()
       ->color("gray")
       ->data([
-        "action" => "colaborador:prejudicar",
-        "colaborador-id" => $colab->getId(),
+        "action" => "teamuser:changetime",
+        "url" => "colaboradores/alterar-vez/{$colab->getId()}",
         "equipe-id" => $equipeId,
+        "set" => "harm"
       ])
       ->withIcon("minus");
 
     $btn2 = Button::create()
       ->color("silver")
       ->data([
-        "action" => "colaborador:priorizar",
-        "colaborador-id" => $colab->getId(),
+        "action" => "teamuser:changetime",
+        "url" => "colaboradores/alterar-vez/{$colab->getId()}",
         "equipe-id" => $equipeId,
+        "set" => "prioritize"
       ])
       ->withIcon("plus");
 
@@ -367,9 +374,9 @@ class EquipePresenter
     return Button::create("")
       ->color("red")
       ->data([
-        "action" => "colaborador:remover",
-        "colaborador-id" => $colab->getId(),
+        "action" => "teamuser:remove",
         "equipe-id" => $equipeId,
+        "url" => "colaboradores/remover/{$colab->getId()}"
       ])
       ->withIcon("trash-can");
   }

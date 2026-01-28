@@ -83,7 +83,7 @@ class TeamsController extends TeamsBase
     /** @var OperationResult $result */
     $result = $action($team);
 
-    $result->setUpdate(".card--{$team->getId()}", $this->renderCard($team));
+    $result->setChange(".card--{$team->getId()}", $this->renderCard($team));
 
     echo json_encode($result->getForAjax());
     exit;

@@ -17,7 +17,7 @@ export default {
   "equipe:pausar": pausarEquipe,
   "equipe:ativar": ativarEquipe,
   "colaborador:novo": novoColaborador,
-  "colaborador:alterar-funcao": alterarFuncao,
+  // "colaborador:alterar-funcao": alterarFuncao,
   "colaborador:recebimento": alterarRecebimento,
   "colaborador:prejudicar": prejudicar,
   "colaborador:priorizar": priorizar,

@@ -155,10 +155,10 @@ class TeamUserRepository extends RepositoryBase
     }
   }
 
-  public function getLevelId(int $usuarioId): ?int
+  public function getUserInfo(int $usuarioId): ?array
   {
     $query = <<<SQL
-    SELECT nivel_acesso_id
+    SELECT nome, nivel_acesso_id
     FROM usuarios
     WHERE id = :usuario_id
     SQL;
@@ -175,6 +175,6 @@ class TeamUserRepository extends RepositoryBase
 
     if (empty($result)) return null;
 
-    return $result[0]["nivel_acesso_id"];
+    return $result[0];
   }
 }

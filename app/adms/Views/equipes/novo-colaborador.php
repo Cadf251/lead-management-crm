@@ -11,7 +11,7 @@ $csrf = CSRFHelper::generateCSRFToken("add_usuario");
 $usuariosOpt = "";
 foreach ($usuarios as $usuario) {
   $usuariosOpt .= <<<HTML
-  <option value="{$usuario['usuario_id']}, {$usuario['nivel_acesso_id']}">{$usuario['usuario_nome']}</option>
+  <option value="{$usuario['usuario_id']}">{$usuario['usuario_nome']}</option>
   HTML;
 }
 

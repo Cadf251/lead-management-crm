@@ -136,19 +136,17 @@ class TeamsService
       return $this->result;
     }
 
-    $partes = explode(",", $dados["usuario_id"]);
-
-    $usuarioId = (int)trim($partes[0]);
+    $usuarioId = (int)$dados["usuario_id"];
 
     try {
-      // Não confie no valor informado pelo usuário no form
-      // O remédio para um psicopata é um psicopata e meio
-      $nivelId = $this->userRepo->getLevelId((int)$usuarioId);
+      $data = $this->userRepo->getUserInfo((int)$usuarioId);
 
-      if ($nivelId === null) {
+      if ($data === null) {
         $this->result->failed("Algo ocorreu errado");
         return $this->result;
       }
+      $nivelId = $data["nivel_acesso_id"];
+      $userName = $data["nome"];
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR, ["post" => $dados]);
       $this->result->failed("Algo ocorreu errado");
@@ -166,10 +164,12 @@ class TeamsService
       $colaborador->setLevelId($nivelId);
 
       $colaborador->setFunction($funcaoId);
+      $colaborador->setUserName($userName);
       $colaborador->setTime($equipe->getMinTime());
 
       $this->userRepo->create($equipe, $colaborador);
-      $this->result->addMessage("Usuário adicionado com sucesso à equipe.");
+      $equipe->setOneUser($colaborador);
+      $this->result->saveInstance("user", $colaborador);
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR, ["post" => $dados]);
       $this->result->failed("A equipe não foi editada.");
@@ -211,7 +211,13 @@ class TeamsService
       }
 
       $this->userRepo->save($colaborador);
-      $this->result->addMessage("Sucesso silêncioso.");
+
+      // Reset updated user
+      $equipe->removeUser($colaborador->getId());
+      $equipe->setOneUser($colaborador);
+
+      // Save Instances
+      $this->result->saveInstance("team", $equipe);
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR, [
         "colaborador" => $colaborador,
@@ -223,11 +229,16 @@ class TeamsService
     return $this->result;
   }
 
-  public function harm(TeamUser $colaborador):OperationResult
+  public function harm(Team $team, TeamUser $colaborador):OperationResult
   {
     try {
       $colaborador->increaseTime();
       $this->userRepo->save($colaborador);
+
+      // Reset updated user
+      $team->removeUser($colaborador->getId());
+      $team->setOneUser($colaborador);
+      $this->result->saveInstance("team", $team);
     } catch (Exception $e){
       GenerateLog::log($e, GenerateLog::ERROR, [
         "colaborador" => $colaborador,
@@ -237,11 +248,16 @@ class TeamsService
     return $this->result;
   }
 
-  public function prioritize(TeamUser $colaborador):OperationResult
+  public function prioritize(Team $team, TeamUser $colaborador):OperationResult
   {
     try {
       $colaborador->dimishTime();
       $this->userRepo->save($colaborador);
+
+      // Reset updated user
+      $team->removeUser($colaborador->getId());
+      $team->setOneUser($colaborador);
+      $this->result->saveInstance("team", $team);
     } catch (Exception $e){
       GenerateLog::log($e, GenerateLog::ERROR, [
         "colaborador" => $colaborador,
@@ -251,11 +267,14 @@ class TeamsService
     return $this->result;
   }
 
-  public function deleteUser(TeamUser $colaborador):OperationResult
+  public function deleteUser(Team $team, TeamUser $colaborador):OperationResult
   {
     try {
       $this->userRepo->delete($colaborador);
-      $this->result->addMessage("");
+      
+      $team->removeUser($colaborador->getId());
+
+      $this->result->saveInstance("team", $team);
     } catch (Exception $e) {
       GenerateLog::log($e, GenerateLog::ERROR, [
         "colaborador" => $colaborador,

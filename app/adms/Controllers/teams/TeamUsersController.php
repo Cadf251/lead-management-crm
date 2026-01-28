@@ -4,11 +4,10 @@ namespace App\adms\Controllers\teams;
 
 use App\adms\Core\OperationResult;
 use App\adms\Helpers\CreateOptions;
-use App\adms\Helpers\GenerateLog;
 use App\adms\Models\teams\Team;
+use App\adms\Models\teams\TeamUser;
 use App\adms\Models\teams\TeamUserFunction;
 use App\adms\Presenters\EquipePresenter;
-use Exception;
 
 class TeamUsersController extends TeamsBase
 {
@@ -41,6 +40,12 @@ class TeamUsersController extends TeamsBase
       );
 
       $result->setUpdate(".js--infobox", $this->renderInfoBox($team));
+      $result->setUpdate(".js--number-badge", $team->countUsers());
+      $result->setAppend("tbody", $this->renderTeamUser(
+        $team,
+        $result->getInstance("user")
+      ));
+      $result->closeOverlay();
 
       echo json_encode($result->getForAjax());
       exit;
@@ -64,13 +69,80 @@ class TeamUsersController extends TeamsBase
     );
   }
 
-  public function remove(string $teamId): void {}
+  public function remove(string $teamUserId): void
+  {
+    $team = $this->identifyOrFailJson($_POST["equipe_id"]);
 
-  public function changeFunction(string $teamId): void {}
+    $teamUser = $this->identifyUserInTeamOrFailJson($team, $teamUserId);
 
-  public function changeReceiving(string $teamId): void {}
+    $result = $this->getService()->deleteUser($team, $teamUser);
 
-  public function changeTime(string $teamId): void {}
+    $this->addInfoBoxToResponse($result);
+
+    $this->addNumberBadgeToResponse($result);
+
+    echo json_encode($result->getForAjax());
+    exit;
+  }
+
+  public function changeFunction(string $teamUserId): void
+  {
+    $teamUser = $this->getUserRepository()->select((int)$teamUserId);
+
+    $set = (int)$_POST["funcao_id"];
+
+    $result = $this->getService()->changeFunction($teamUser, $set);
+
+    echo \json_encode($result->getForAjax());
+    exit;
+  }
+
+  public function changeReceiving(string $teamUserId): void
+  {
+    $team = $this->identifyOrFailJson($_POST["equipe_id"] ?? null);
+
+    $teamUser = $this->identifyUserInTeamOrFailJson($team, $teamUserId);
+
+    $set = $_POST["recebe_leads"];
+    if ($set === "true") $set = true;
+    else if ($set === "false") $set = false;
+    else {
+      $result = new OperationResult();
+      $result->failed("Algo deu errado.");
+      echo json_encode($result->getForAjax());
+      exit;
+    }
+
+    $result = $this->getService()->changeReceivingLeads($team, $teamUser, $set);
+
+    $this->addInfoBoxToResponse($result);
+
+    echo json_encode($result->getForAjax());
+    exit;
+  }
+
+  public function changeTime(string $teamUserId): void
+  {
+    $team = $this->identifyOrFailJson($_POST["equipe_id"]);
+
+    $teamUser = $this->identifyUserInTeamOrFailJson($team, $teamUserId);
+
+    $set = $_POST["set"];
+
+    if ($set === "harm") $result = $this->getService()->harm($team, $teamUser);
+    else if ($set === "prioritize") $result = $this->getService()->prioritize($team, $teamUser);
+    else {
+      $result = new OperationResult();
+      $result->failed("Algo deu errado");
+      echo json_encode($result->getForAjax());
+      exit;
+    }
+
+    $this->addInfoBoxToResponse($result);
+
+    echo json_encode($result->getForAjax());
+    exit;
+  }
 
   private function identifyOrRedirect(string $teamId): ?Team
   {
@@ -86,8 +158,77 @@ class TeamUsersController extends TeamsBase
     return $team;
   }
 
+  private function identifyOrFailJson(?string $teamId): ?Team
+  {
+    $result = new OperationResult();
+
+    if ($teamId === null || $teamId === "") {
+      $result->failed("Equipe inválida");
+      echo json_encode($result->getForAjax());
+      exit;
+    }
+
+    $team = $this->getService()->select((int)$teamId);
+    
+    if ($team === null) {
+      $result->failed("Equipe inválida");
+      echo json_encode($result->getForAjax());
+      exit;
+    }
+
+    return $team;
+  }
+
+  private function identifyUserInTeamOrFailJson(Team $team, string $teamUserId): ?TeamUser
+  {
+    $teamUser = $team->getUserById((int)$teamUserId);
+
+    if ($teamUser === null) {
+      $result = new OperationResult();
+      $result->failed("Usuário inválido");
+      echo json_encode($result->getForAjax());
+      exit;
+    }
+
+    return $teamUser;
+  }
+
+  private function addInfoBoxToResponse(OperationResult $result): void
+  {
+    $team = $result->getInstance("team");
+
+    $html = $this->renderInfoBox($team);
+
+    $result->setCustomParam("info_box_html", $html);
+  }
+
+  private function addNumberBadgeToResponse(OperationResult $result): void
+  {
+    /** @var Team $team */
+    $team = $result->getInstance("team");
+
+    $html = $team->countUsers();
+
+    $result->setCustomParam("number_badge_html", $html);
+  }
+
+  private function renderTeamUser(Team $team, TeamUser $teamUser)
+  {
+    $presented = EquipePresenter::presentOneColaborador($team, $teamUser);
+
+    return <<<HTML
+    <tr>
+      <td>{$presented["usuario_nome"]}</td>
+      <td>{$presented["funcao_select"]}</td>
+      <td class="cell-centered">{$presented["recebe_leads_switch"]}</td>
+      <td class="cell-centered">{$presented["vez_buttons"]}</td>
+      <td class="cell-centered">{$presented["remover_button"]}</td>
+    </tr>
+    HTML;
+  }
+
   private function renderInfoBox(Team $team)
   {
-    return EquipePresenter::fila($team)["infobox"];
+    return EquipePresenter::fila($team)["infobox"]->render();
   }
 }

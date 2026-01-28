@@ -1,9 +1,9 @@
 import { closeOverlay, openOverlay, overlayContent } from "../ui/overlay";
+import { setWarning } from "../ui/warning";
 import { hostBase } from "./host";
 
 export const processResponse = (response, btn = null) => {
-  console.log(response);
-  
+
   if (!response) return;
 
   // 1. Redirecionamento (Prioridade Total)
@@ -18,8 +18,11 @@ export const processResponse = (response, btn = null) => {
       const targetEl = instr.target ? document.querySelector(instr.target) : null;
 
       switch (instr.type) {
-        case 'update': // Substitui o elemento (outerHTML)
+        case 'change':
           if (targetEl) targetEl.outerHTML = instr.html;
+          break;
+        case 'update': // Substitui o elemento (outerHTML)
+          if (targetEl) targetEl.innerHTML = instr.html;
           break;
         case 'append':
           if (targetEl) targetEl.insertAdjacentHTML('beforeend', instr.html);

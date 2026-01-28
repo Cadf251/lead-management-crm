@@ -47,7 +47,7 @@ $tableHeader = <<<HTML
   <th>Usuários {$equipe["numero_badge"]}</th>
   <th class="cell-centered">Função</th>
   <th class="cell-centered">Recebe leads?</th>
-  <th class="cell-centered">Priorizar/prejudicar</th>
+  <th class="cell-centered">Prejudicar/priorizar</th>
   <th class="cell-centered">Remover da equipe</th>
 </tr>
 HTML;
