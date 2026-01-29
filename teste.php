@@ -5,6 +5,7 @@
 use App\adms\Core\AppContainer;
 use App\adms\Services\AuthUser;
 use App\adms\Services\TeamsService;
+use App\database\Infraestructure\MigrationRunner;
 
 require_once "vendor/autoload.php";
 
@@ -29,10 +30,5 @@ $auth = AuthUser::create();
 AppContainer::setAuthUser($auth);
 
 
-$array = [
-  "array_me" => "Alright"
-];
-
-extract($array);
-
-var_dump($array_me);
+$migrate = new MigrationRunner();
+$migrate->getMigrations("client");

@@ -2,11 +2,10 @@
 
 namespace App\database\Services;
 
-use App\adms\Core\AppContainer;
 use App\adms\Core\OperationResult;
-use App\adms\Database\DbConnectionClient;
-use App\adms\Database\DbConnectionGlobal;
+use App\adms\Database\GlobalConn;
 use App\adms\Helpers\GenerateLog;
+use App\database\Infraestructure\MigrationRunner;
 use App\database\Models\Database;
 use App\database\Models\Tenant;
 use App\database\Models\TenantStatus;
@@ -20,7 +19,7 @@ class TenantService
 
   public function __construct()
   {
-    $globalConn = AppContainer::getGlobalConn();
+    $globalConn = GlobalConn::get();
     $this->result = new OperationResult();
     $this->repository = new TenantRepository($globalConn);
   }
@@ -64,38 +63,7 @@ class TenantService
     Tenant $tenant
   )
   {
-    // Try to connect to database
-    $db = $tenant->getDatabase();
 
-    // If pass is not set, try to set it
-    try {
-      $this->setDbPass($db, $tenant->getId());
-    } catch (Exception $e) {
-      var_dump($e);
-    }
-
-    try {
-      $conn = new DbConnectionClient([
-        "host" => $db->getHost(),
-        "db_name" => $db->getName(),
-        "user" => $db->getUser(),
-        "pass" => $db->getPass()
-      ]);
-    } catch (Exception $e) {
-      var_dump($e);
-    }
-
-    // Get last SQL version available and install
-    $files = scandir(APP_ROOT."app/database/sql/client/install");
-    $count = count($files);
-    $last = $files[$count - 1];
-    $sql = file_get_contents(APP_ROOT."app/database/sql/client/install/$last");
-
-    $queries = explode(";", $sql);
-
-    if (empty($queries)) {
-      var_dump("No queries found in $last file");
-    }
   }
 
   /**

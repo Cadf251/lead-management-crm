@@ -1,5 +1,0 @@
-Implementação de recursos e traqueamento de emails
-
-Melhoria na tabela de clientes para facilitar o rastreamento
-
-Exclusão de campos inúteis na tabela atendimentos

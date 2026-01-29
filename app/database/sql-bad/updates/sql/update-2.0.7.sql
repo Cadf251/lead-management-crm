@@ -1,2 +1,0 @@
-ALTER TABLE `produtos`
-  ADD COLUMN `icone` VARCHAR(100) DEFAULT NULL AFTER `descricao`;

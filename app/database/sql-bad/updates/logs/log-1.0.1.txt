@@ -1,9 +1,0 @@
-MODIFICAÇÃO NA TABELA TOKENS
-- Retirado a obrigatóriedade do campo usuario_id
-- Retirado a obrigatóriedade do campo prazo
-- Incluído o campo atendimento_id (int, null)
-- Resolvido uma incoerência em alguns bancos de dados que não tinham o campo de prazo
-
-- Motivo: Flexibilizar o uso dos TOKENS para aplicar também a Atendimentos e Leads
-que precisam de TOKENS para validar sessões de uso do chat bot e envio de 
-formulários.

@@ -1,1 +1,0 @@
-Correção de FOREIGN KEYs na tabela propostas.

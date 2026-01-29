@@ -1,1 +1,0 @@
-ALTER TABLE `leads` CHANGE `lead_status_id` `lead_status_id` INT(11) NULL DEFAULT NULL;

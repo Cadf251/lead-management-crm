@@ -1,5 +1,3 @@
-DROP TABLE IF EXISTS schema_migrations;
-
 CREATE TABLE schema_migrations (
   id INT AUTO_INCREMENT PRIMARY KEY,
   migration VARCHAR(100) NOT NULL,

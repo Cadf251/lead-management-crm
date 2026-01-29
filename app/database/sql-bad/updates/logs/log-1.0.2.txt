@@ -1,3 +1,0 @@
-MODIFICAÇÃO NA TABELA DE LEADS
-  - Exclusão dos campos de HASH
-  - Permissão de NULL no email e celular

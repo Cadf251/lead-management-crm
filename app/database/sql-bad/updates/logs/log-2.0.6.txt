@@ -1,1 +1,0 @@
-Adicionado a campo "termo" para utm_term no lead_utm

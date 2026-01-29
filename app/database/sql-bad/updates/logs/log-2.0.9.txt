@@ -1,1 +1,0 @@
-Simplificação dos níveis de acesso e permissão, cuja regra de negócio foi vastamente transferida aos Models.

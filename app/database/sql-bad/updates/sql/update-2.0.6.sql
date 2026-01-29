@@ -1,2 +1,0 @@
-ALTER TABLE `lead_utm`
-  ADD COLUMN `termo` VARCHAR(50) DEFAULT NULL AFTER `conteudo`;

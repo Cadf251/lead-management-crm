@@ -1,5 +1,0 @@
-MODIFICAÇÃO EM ATENDIMENTOS
-  - Inserção de CONVERTION_TIME
-  - Inserção de MODIFIED
-
-Para facilitar o rastreamento de mudanças em LEADS e ATENDIMENTOS, e subir a informação da hora de conversão para o Google ADS
