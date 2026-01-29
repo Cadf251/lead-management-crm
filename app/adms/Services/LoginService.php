@@ -5,7 +5,7 @@ namespace App\adms\Services;
 use App\adms\Core\AppContainer;
 use App\adms\Core\OperationResult;
 use App\adms\Database\DbConnectionClient;
-use App\adms\Database\DbConnectionGlobal;
+use App\adms\Database\GlobalConn;
 use App\adms\Helpers\GenerateLog;
 use App\adms\Models\Token;
 use App\adms\Models\users\User;
@@ -26,10 +26,10 @@ class LoginService
   private array $credentials;
   private User $user;
 
-  public function __construct(DbConnectionGlobal $conn)
+  public function __construct()
   {
     $this->result = new OperationResult();
-    $this->globalConn = $conn->conexao;
+    $this->globalConn = GlobalConn::get();
     $this->repo = new LoginRepository($this->globalConn);
   }
 

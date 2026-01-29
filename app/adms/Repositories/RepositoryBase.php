@@ -2,7 +2,7 @@
 
 namespace App\adms\Repositories;
 
-use App\adms\Database\DbOperationsRefactored as DbOperations;
+use App\adms\Database\DbOperations;
 use PDO;
 
 abstract class RepositoryBase

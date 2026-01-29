@@ -17,19 +17,12 @@ abstract class LoginBase extends ControllerBase
   protected string $defaultView = "login";
   protected string $redirectPath = "login";
 
-  private ?DbConnectionGlobal $globalConn = null;
   private ?DbConnectionClient $clientConn = null;
   private LoginService $service;
 
   public function __construct()
   {
-    $this->globalConn = new DbConnectionGlobal();
-    $this->service = new LoginService($this->globalConn);
-  }
-
-  public function getGlobalConn(): DbConnectionGlobal
-  {
-    return $this->globalConn;
+    $this->service = new LoginService();
   }
 
   public function getClientConn(): ?DbConnectionClient

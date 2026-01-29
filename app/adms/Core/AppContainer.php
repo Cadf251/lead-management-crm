@@ -3,6 +3,7 @@
 namespace App\adms\Core;
 
 use App\adms\Database\DbConnectionClient;
+use App\adms\Database\GloabalConn;
 use App\adms\Services\AuthUser;
 use PDO;
 

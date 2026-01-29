@@ -9,6 +9,7 @@ class LoadPage
   private string $urlController = "";
   private string $urlMethod = "";
   private string $urlParameter = "";
+  private string $package = "";
 
   /** @var array $routes Transforma uma URL amigável em class */
   private array $admsRoutes = [
@@ -43,9 +44,14 @@ class LoadPage
     "colaboradores/alterar-funcao"      => ["teams\TeamUsersController", "changeFunction", self::ACCESS_PRIVATE, self::AJAX_ONLY],
     "colaboradores/alterar-recebimento" => ["teams\TeamUsersController", "changeReceiving", self::ACCESS_PRIVATE, self::AJAX_ONLY],
     "colaboradores/alterar-vez"         => ["teams\TeamUsersController", "changeTime", self::ACCESS_PRIVATE, self::AJAX_ONLY],
-    
+
     "ofertas"   => ["Offer", self::ACCESS_PRIVATE],
-    "produtos"  => ["Products", self::ACCESS_PRIVATE]
+    "produtos"  => ["Products", self::ACCESS_PRIVATE],
+  ];
+
+  private array $masterRoutes = [
+    "master"                => ["master\TenantsController", "index", self::ACCESS_DEV],
+    "master/criar-servidor" => ["master\TenantsController", "create", self::ACCESS_DEV]
   ];
 
   private const ACCESS_PUBLIC = "public";
@@ -68,32 +74,55 @@ class LoadPage
     // 1. Monta a chave de busca (ex: "usuarios/editar" ou "usuarios")
     $routeKey = $urlMethod ? "$urlController/$urlMethod" : $urlController;
     
-    // 2. Se não achou a combinação, tenta apenas o controller (fallback para index)
-    if (!isset($this->admsRoutes[$routeKey])) {
-      $routeKey = $urlController;
+    $routes = [
+      "adms" => $this->admsRoutes,
+      "database" => $this->masterRoutes
+    ];
+
+    $arrayInfo = false;
+
+    // Foreach package:
+    foreach ($routes as $name => $array) {
+      // Ver se está setado
+      if (isset($array[$routeKey])) {
+        $arrayInfo = $array[$routeKey];
+        $this->package = $name;
+        break;
+      }
+
+      // Tentar fallback para index
+      if (isset($array[$urlController])) {
+        $arrayInfo = $array[$urlController];
+        $this->package = $name;
+        break;
+      }
     }
 
-    GenerateLog::generateLog("info", "route-key", [$this->admsRoutes[$routeKey]]);
-
-    if (!isset($this->admsRoutes[$routeKey])) {
+    if ($arrayInfo === false) {
       $this->failed();
     }
 
-    $routerInfo = $this->admsRoutes[$routeKey];
-    $this->urlController = $routerInfo[0];
-    $this->urlMethod     = $routerInfo[1];
-    $accessLevel         = $routerInfo[2];
+    $this->urlController = $arrayInfo[0];
+    $this->urlMethod     = $arrayInfo[1];
+    $accessLevel         = $arrayInfo[2];
+    $isAjax              = $arrayInfo[3] ?? false;
 
     // 2. Controller existe?
-    if (!$this->controllerExists("adms")) {
+    if (!$this->controllerExists($this->package)) {
       $this->failed();
     }
 
     // 3. Verificação de Segurança
     $this->checkSecurity($accessLevel);
 
-    $this->urlParameter = $urlParameter ?? $urlMethod;
+    // 4. Verificação de método
+    if ($isAjax) {
+      if (($_SERVER['REQUEST_METHOD'] !== "POST") || ($_SERVER['REQUEST_METHOD'] !== "GET")) {
+        $this->failed();
+      }
+    }
 
+    $this->urlParameter = $urlParameter ?? $urlMethod;
     $this->loadMethod();
   }
 
@@ -133,7 +162,6 @@ class LoadPage
 
   private function failed(): void
   {
-    GenerateLog::generateLog("debug", "failed for some reason", null);
     header("Location: {$_ENV['HOST_BASE']}erro/404");
     exit;
   }

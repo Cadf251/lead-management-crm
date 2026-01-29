@@ -27,7 +27,6 @@ if($_SERVER["HTTP_HOST"] === "crm.local"){
 
 // Instancia o AuthUser
 $auth = AuthUser::create();
-
 AppContainer::setAuthUser($auth);
 
 // Observa erros fatais

@@ -90,14 +90,14 @@ class Dashboard
       "tempo_query" => $this->data["tempo_query"]
     ];
 
-    $repository = new DashboardRepository($data, $this->conexao);
+    // $repository = new DashboardRepository($data, $this->conexao);
 
     // Adiciona no data os valores do repositório
-    $arrayTotal = $repository->leadsTotal();
-    $this->data["por_qualificacao"] = $this->arrangeLeadsArray($arrayTotal);
-    $arrayPeriodo = $repository->leadPeriodo();
-    $this->data["por_periodo"] = $this->arrangeLeadsPorPeriodo($arrayPeriodo);
-    $arrayEquipes = $repository->equipes();
+    // $arrayTotal = $repository->leadsTotal();
+    // $this->data["por_qualificacao"] = $this->arrangeLeadsArray($arrayTotal);
+    // $arrayPeriodo = $repository->leadPeriodo();
+    // $this->data["por_periodo"] = $this->arrangeLeadsPorPeriodo($arrayPeriodo);
+    // $arrayEquipes = $repository->equipes();
 
     // Visível apenas para adms
     // if (in_array(3, $_SESSION["permissoes"]) || (in_array(4, $_SESSION["permissoes"]))){

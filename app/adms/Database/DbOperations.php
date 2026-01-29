@@ -3,57 +3,70 @@
 namespace App\adms\Database;
 
 use App\adms\Helpers\GenerateLog;
+use DateTime;
+use Exception;
 use PDO;
 use PDOException;
 
 /**
  * Faz operações no banco de dados usando a conxão recebida
- * Classe abstrata, serve apenas para ser herdada.
- * 
- * @deprecated
  * 
  * @param $conexao Recebe uma coneão com o banco de dados
  */
-abstract class DbOperations
+class DbOperations
 {
   /**
-   * Recebe uma conexão com o PDO
+   * @param PDO $conexao
    */
-  public function __construct(private $conexao){}
+  public function __construct(private PDO $conexao) {}
 
   /**
-   * Única função responsável por executar o SQL.
-   * Nunca executar o SQL em outro ambiente, sempre use está função para centralização.
+   * Única função responsável por executar o SQL. Nunca executar o SQL em outro ambiente, sempre use está função para centralização.
    * 
    * @param string $query A query SQL
    * @param array $params Os parametros a serem injetados na query por bindParam
    * @param bool $toArray Se true, retorna um array com os fetchAll
    * 
-   * @return array|bool Os dados do fetchAll, ou se falhou ou obteve sucesso.
+   * @throws Exception
+   * 
+   * @return ?array Os dados do fetchAll ou null
    */
-  public function executeSQL(string $query, array $params = [], bool $toArray = true) : array|bool
+  public function execute(string $query, array $params = [], bool $toArray = true): ?array
   {
-    $prepare = $this->conexao->prepare($query);
+    try {
+      $prepare = $this->conexao->prepare($query);
+    } catch (PDOException $e) {
+      throw new Exception($e->getMessage(), 0, $e);
+    }
 
-    foreach ($params as $key => $valor){
+    foreach ($params as $key => $valor) {
+      if ($valor instanceof DateTime) {
+        $valor = $valor->format($_ENV["DATE_FORMAT"] ?? "Y-m-d H:i:s");
+      }
+
       $tipo = $this->tratarTipo($valor);
 
-      if (strpos($query, $key) !== false){
+      if (strpos($query, $key) !== false) {
+        // Verifica se a chave já tem o placeholder :
+        if (strpos($key, ":") !== 0) {
+          $key = ":$key";
+        }
+
         $prepare->bindValue($key, $valor, $tipo);
       }
     }
 
     try {
       $prepare->execute();
-    } catch (PDOException $e){
-      GenerateLog::generateLog("error", "A execução do SQL falhou", ["query" => $query, "params" => $params, "erro" => $e->getMessage()]);
-      return false;
+    } catch (PDOException $e) {
+      throw new Exception($e->getMessage(), 0, $e);
     }
 
-    if ($toArray)
+    if ($toArray) {
       return $prepare->fetchAll(PDO::FETCH_ASSOC);
-    else
-      return true;
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -64,7 +77,7 @@ abstract class DbOperations
    * 
    * @return PDO::PARAM_TIPO
    */
-  private function tratarTipo($valor) : int
+  private function tratarTipo($valor): int
   {
     if (is_int($valor))
       return PDO::PARAM_INT;
@@ -72,26 +85,97 @@ abstract class DbOperations
       return PDO::PARAM_NULL;
     else if (is_bool($valor))
       return PDO::PARAM_BOOL;
-    else 
+    else
       return PDO::PARAM_STR;
   }
 
-  /**
-   * Seleciona as opções de uma tabela para usar em select>options em formulários
-   * 
-   * @param string $tabela A tabela que será feita a consulta
-   * @param int|null $id A linha que virá como selecionada
-   * 
-   * @return array|bool HTML
-   */
-  public function selecionarOpcoes(string $tabela) :array|bool
+  private function buildSet(array $params): string
   {
-    $query = <<<SQL
-      SELECT id,nome
-      FROM $tabela
-    SQL;
+    $set = [];
 
-    return $this->executeSQL($query);
+    foreach ($params as $key => $_) {
+      if (strpos($key, ":") === 0) {
+        $field = str_replace(":", "", $key);
+        $set[] = "$field = $key";
+      } else {
+        $field = $key;
+        $set[] = "$field = :$key";
+      }
+    }
+
+    return implode(",\n", $set);
+  }
+
+  private function buildWhere(array $filters): string
+  {
+    if (empty($filters)) {
+      throw new Exception("WHERE mal formado");
+    }
+
+    $conditions = [];
+
+    foreach ($filters as $filter) {
+      // Ex: ['status', '=', 'ativo'] ou ['nome', 'LIKE']
+      $field = $filter[0];
+      $operator = $filter[1] ?? '=';
+      $value = $filter[2] ?? $field;
+
+      if (strpos($value, ":") !== 0) {
+        $value = ":$value";
+      }
+
+      $conditions[] = "($field $operator $value)";
+    }
+
+    return implode(" AND ", $conditions);
+  }
+
+  /**
+   * Faz o fluxo padrão do select
+   */
+  public function selectOne(
+    string $query,
+    callable $hydrator,
+    array $params = [],
+  ) :?object {
+    try {
+      $result = $this->execute($query, $params);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
+
+    if (empty($result)) {
+      return null;
+    }
+
+    return $hydrator($result[0]);
+  }
+
+  /**
+   * Faz o fluxo padrão do select
+   */
+  public function selectMultiple(
+    string $query,
+    callable $hydrator,
+    array $params = [],
+  ) :?array {
+    try {
+      $result = $this->execute($query, $params);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
+
+    if (empty($result)) {
+      return null;
+    }
+
+    $final = [];
+
+    foreach ($result as $row) {
+      $final[] = $hydrator($row);
+    }
+
+    return $final;
   }
 
   /**
@@ -102,30 +186,68 @@ abstract class DbOperations
    * @param string $table A tabela a ser inserido
    * @param array $params Os parâmetros a serem inseridos. O formato deve ser: [[":nome_campo" => "valor"], [...]]. O nome do campo deve ser literalmente o do campo do banco de dados.
    * 
-   * @return int|false O ID do campo registrado ou false se falhar
+   * @throws Exception
+   * 
+   * @return int
    */
-  function insertSQL(string $table, array $params):int|false
+  public function insert(string $table, array $params): int
   {
-    $placeholders = array_keys($params);
+    $placeholders = [];
     $fields = [];
-    
-    foreach ($params as $key => $_){
-      $fields[] = str_replace(":", "", $key);
+
+    foreach ($params as $key => $_) {
+      if (strpos($key, ":") === 0) {
+        $placeholders[] = $key;
+        $fields[] = str_replace(":", "", $key);
+      } else {
+        $placeholders[] = ":$key";
+        $fields[] = $key;
+      }
     }
 
     $implodedFields = implode(", ", $fields);
     $implodedPlaceholders = implode(", ", $placeholders);
 
     $query = <<<SQL
-      INSERT INTO $table ({$implodedFields})
+      INSERT INTO `{$table}` ({$implodedFields})
       VALUES ({$implodedPlaceholders})
     SQL;
 
-    $result = $this->executeSQL($query, $params, false);
-    if ($result)
-      return $this->conexao->lastInsertId();
-    else
-      return false;
+    try {
+      $this->execute($query, $params, false);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
+
+    return $this->conexao->lastInsertId();
+  }
+
+  /**
+   * Faz um UPDATE no banco de dados em um registro com o WHERE personalizado
+   * 
+   * Monta os SETs dinâmicamente usando o $params.
+   * 
+   * @param string $tabela A tabela a ser atualizada
+   * @param array $params Os parâmetros da operação, com campos literais.
+   * @param array $where O where
+   * 
+   * @return void
+   */
+  public function update(string $tabela, array $params, array $where): void
+  {
+    try {
+      $query = <<<SQL
+        UPDATE $tabela
+        SET
+          {$this->buildSet($params)}
+        WHERE
+          {$this->buildWhere($where)}
+      SQL;
+
+      $this->execute($query, $params, false);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
   }
 
   /**
@@ -137,29 +259,25 @@ abstract class DbOperations
    * @param array $params Os parâmetros da operação, com campos literais.
    * @param int $id O id que será atualizado
    * 
-   * @return bool
+   * @return void
    */
-  function updateSQL(string $tabela, array $params, int $id):bool
+  public function updateById(string $tabela, array $params, int $id): void
   {
-    $set = [];
-    foreach ($params as $key => $_){
-      $field = str_replace(":", "", $key);
-      $set[] = "$field = $key";
-    }
-
-    $implodedSet = implode(",\n", $set);
-
     $query = <<<SQL
       UPDATE $tabela
       SET
-        $implodedSet
+        {$this->buildSet($params)}
       WHERE
         id = :id
     SQL;
 
-    $params[":id"] = $id;
-    GenerateLog::generateLog("info", "query", [$query]);
-    return $this->executeSQL($query, $params, false);
+    $params["id"] = $id;
+
+    try {
+      $this->execute($query, $params, false);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
   }
 
   /**
@@ -171,15 +289,16 @@ abstract class DbOperations
    * 
    * @return bool
    */
-  public function deleteSQL(string $tabela, array $where, array $params):bool
+  public function delete(string $tabela, array $where, array $params): void
   {
     $whereSQL = implode("\n  AND", $where);
     $query = <<<SQL
     DELETE FROM {$tabela}
-    WHERE {$where}
+    WHERE
+      {$this->buildWhere($where)}
     SQL;
 
-    return $this->executeSQL($query, $params, false);
+    $this->execute($query, $params, false);
   }
 
   /**
@@ -188,9 +307,11 @@ abstract class DbOperations
    * @param string $tabela A tabela alvo
    * @param int $id O ID que deve ser excluído
    * 
-   * @return bool
+   * @throws Exception
+   * 
+   * @return void
    */
-  public function deleteByIdSQL(string $tabela, int $id):bool
+  public function deleteById(string $tabela, int $id): void
   {
     $query = <<<SQL
     DELETE FROM {$tabela}
@@ -198,38 +319,74 @@ abstract class DbOperations
     SQL;
 
     $params = [
-      ":this_id" => $id
+      "this_id" => $id
     ];
 
-    return $this->executeSQL($query, $params, false);
+    try {
+      $this->execute($query, $params, false);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
   }
 
   /**
    * Verifica se um registro existe
    * 
    * @param string $tabela A tabela a ser procurada
-   * @param string $where A condição da busca em SQL
+   * @param array $where A condição da busca em SQL
    * @param array $params Os parâmetros do Where para evitar injection
    * @param bool $returnId Manipula o return. Se for true, retorna o ID do registro caso ele exista
    * 
+   * @throws Exception
+   * 
    * @return bool|int true|int se existir, false se não existir.
    */
-  public function existe(string $tabela, string $where, array $params = [], bool $returnId = false){
+  public function existe(string $tabela, array $where, array $params = [], bool $returnId = false)
+  {
     $query = <<<SQL
       SELECT id
       FROM {$tabela}
       WHERE
-        {$where}
+        {$this->buildWhere($where)}
       LIMIT 1
     SQL;
 
-    $result = $this->executeSQL($query, $params);
+    try {
+      $result = $this->execute($query, $params);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
 
-    if (empty($result))
+    if (empty($result)) {
       return false;
-    else if ($returnId)
+    } else if ($returnId) {
       return $result[0]["id"];
-    else
+    } else {
       return true;
+    }
+  }
+
+  /**
+   * Seleciona as opções de uma tabela para usar em select>options em formulários
+   * 
+   * @param string $tabela A tabela que será feita a consulta
+   * @param int|null $id A linha que virá como selecionada
+   * 
+   * @throws Exception
+   * 
+   * @return array
+   */
+  public function selecionarOpcoes(string $tabela): array
+  {
+    $query = <<<SQL
+      SELECT id,nome
+      FROM $tabela
+    SQL;
+
+    try {
+      return $this->execute($query);
+    } catch (Exception $e) {
+      throw new Exception($e->getMessage(), $e->getCode(), $e);
+    }
   }
 }

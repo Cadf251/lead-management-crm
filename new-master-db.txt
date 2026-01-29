@@ -1,9 +1,10 @@
 tenants // Empresas que tem um banco de dados próprio
 - id
 - name
-- plan_id // Qual plano ele contratou
 - host
-- database 
+- database
+- contact_email
+- plan_id // Qual plano ele contratou
 
 api_tokens // para permissões de api
 - id
@@ -19,7 +20,7 @@ users
 user_businesses
 - user_id
 - business_id
-- role (admin, manager, sales)
+- role
 - status
 
 plans

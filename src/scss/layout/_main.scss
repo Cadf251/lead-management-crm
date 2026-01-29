@@ -34,6 +34,12 @@ main{
     display: flex;
     align-items: center;
   }
+
+  &--master {
+    width: 60%;
+    align-self: center;
+    justify-self: center;
+  }
 }
 
 body.congelado {

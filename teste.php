@@ -26,12 +26,13 @@ if ($_SERVER["HTTP_HOST"] === "crm.local") {
 
 // Instancia o AuthUser
 $auth = AuthUser::create();
-
 AppContainer::setAuthUser($auth);
 
-$service = new TeamsService();
 
-/** @var Team $gay */
-foreach ($service->list() as $gay) {
-  var_dump($gay->getUsers());
-}
+$array = [
+  "array_me" => "Alright"
+];
+
+extract($array);
+
+var_dump($array_me);

@@ -44,9 +44,6 @@ class PageController
   public function loadPage(): void
   {
     $loadPage = new LoadPage();
-
-    // Agora passamos os 3 argumentos para o LoadPage
-    // Se o seu LoadPage ainda recebe apenas 2, precisaremos ajustar a assinatura dele também!
     $loadPage->loadPage($this->urlController, $this->urlMethod, $this->urlParameter);
   }
 }

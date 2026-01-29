@@ -1,7 +1,7 @@
 <?php
 include_once "app/database/Views/partials/head.php";
 ?>
-<main class="main">
+<main class="main main--master">
 <?php
 include_once $this->view;
 ?>
